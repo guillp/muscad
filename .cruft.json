@@ -1,0 +1,20 @@
+{
+  "template": "https://github.com/cjolowicz/cookiecutter-hypermodern-python",
+  "commit": "66fdf7cb4a0167eebc98bee820a85b52d3b5c3bf",
+  "checkout": "2021.7.15",
+  "context": {
+    "cookiecutter": {
+      "project_name": "muscad",
+      "package_name": "muscad",
+      "friendly_name": "MuSCAD",
+      "author": "Guillaume Pujol",
+      "email": "guill.p.linux@gmail.com",
+      "github_user": "guillp",
+      "version": "0.10.0",
+      "license": "MIT",
+      "development_status": "Development Status :: 4 - Beta",
+      "_template": "https://github.com/cjolowicz/cookiecutter-hypermodern-python"
+    }
+  },
+  "directory": null
+}
