@@ -1,51 +1,79 @@
 repos:
-  - repo: local
+-   repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.1
     hooks:
-      - id: black
-        name: black
-        entry: black
-        language: system
-        types: [python]
-        require_serial: true
-      - id: check-added-large-files
-        name: Check for added large files
-        entry: check-added-large-files
-        language: system
-      - id: check-toml
-        name: Check Toml
-        entry: check-toml
-        language: system
-        types: [toml]
-      - id: check-yaml
-        name: Check Yaml
-        entry: check-yaml
-        language: system
-        types: [yaml]
-      - id: end-of-file-fixer
-        name: Fix End of Files
-        entry: end-of-file-fixer
-        language: system
-        types: [text]
-        stages: [commit, push, manual]
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        require_serial: true
-      - id: reorder-python-imports
-        name: Reorder python imports
-        entry: reorder-python-imports
-        language: system
-        types: [python]
-        args: [--application-directories=src]
-      - id: trailing-whitespace
-        name: Trim Trailing Whitespace
-        entry: trailing-whitespace-fixer
-        language: system
-        types: [text]
-        stages: [commit, push, manual]
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.5.1
+    -   id: forbid-crlf
+    -   id: remove-crlf
+    -   id: forbid-tabs
+    -   id: remove-tabs
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
     hooks:
-      - id: prettier
+    - id: debug-statements
+    - id: mixed-line-ending
+    - id: name-tests-test
+      args: [--pytest-test-first]
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-merge-conflict
+    - id: check-yaml
+      args: [--unsafe]
+- repo: https://github.com/pre-commit/pygrep-hooks
+  rev: v1.10.0
+  hooks:
+  - id: python-check-blanket-noqa
+  - id: python-check-blanket-type-ignore
+  - id: python-no-eval
+  - id: python-use-type-annotations
+  - id: text-unicode-replacement-char
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.16
+  hooks:
+  - id: mdformat
+    args:
+      - --number
+    additional_dependencies:
+    - mdformat-black
+- repo: https://github.com/myint/docformatter
+  rev: v1.7.3
+  hooks:
+    - id: docformatter
+      args:
+      - --in-place
+      - --wrap-summaries=100
+      - --wrap-descriptions=100
+-   repo: https://github.com/hadialqattan/pycln
+    rev: v2.1.5
+    hooks:
+    -   id: pycln
+        args: [--config=pyproject.toml]
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+    - id: isort
+-   repo: https://github.com/ambv/black
+    rev: 23.3.0
+    hooks:
+    -   id: black
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+        additional_dependencies: [flake8-typing-imports==1.14.0]
+-   repo: https://github.com/asottile/blacken-docs
+    rev: 1.14.0
+    hooks:
+        - id: blacken-docs
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.4.0
+    hooks:
+    -   id: mypy
+        args:
+        - --strict
+        - --implicit-reexport
+        - --show-error-codes
+        - --show-error-context
+        - --show-column-numbers
+        - --disable-error-code=attr-defined
+        additional_dependencies:
+            - pytest-mypy

@@ -1,43 +1,45 @@
 import sys
+from typing import Literal
 
-from muscad import Chamfer
-from muscad import Circle
-from muscad import Cylinder
-from muscad import E
-from muscad import EE
-from muscad import Fillet
-from muscad import Hull
-from muscad import middle_of
-from muscad import MirroredPart
-from muscad import Object
-from muscad import Part
-from muscad import Sphere
-from muscad import Surface
-from muscad import T
-from muscad import TT
-from muscad import TTT
-from muscad import Volume
+from muscad import (
+    EE,
+    TT,
+    TTT,
+    Chamfer,
+    Circle,
+    Cylinder,
+    E,
+    Fillet,
+    Hull,
+    MirroredPart,
+    Object,
+    Part,
+    Sphere,
+    Surface,
+    T,
+    Union,
+    Volume,
+    middle_of,
+)
 from muscad.utils.tube import Tube
-from muscad.vitamins.bearings import BushingLinearBearing
-from muscad.vitamins.bearings import LinearBearing
-from muscad.vitamins.bearings import RotationBearing
+from muscad.vitamins.bearings import (
+    BushingLinearBearing,
+    LinearBearing,
+    RotationBearing,
+)
 from muscad.vitamins.belts import Belt
 from muscad.vitamins.boards import Board
-from muscad.vitamins.bolts import Bolt
-from muscad.vitamins.bolts import Nut
+from muscad.vitamins.bolts import Bolt, Nut
 from muscad.vitamins.brackets import CastBracket
-from muscad.vitamins.endstops import BLTouchClassic
-from muscad.vitamins.endstops import InductionSensor
-from muscad.vitamins.endstops import MechanicalEndstopOnPCB
+from muscad.vitamins.endstops import (
+    InductionSensor,
+    MechanicalEndstopOnPCB,
+)
 from muscad.vitamins.extruders import E3Dv6Extruder
-from muscad.vitamins.extrusions import Extrusion
-from muscad.vitamins.extrusions import Extrusion3030Insert
-from muscad.vitamins.fans import Blower
-from muscad.vitamins.fans import Fan
+from muscad.vitamins.extrusions import Extrusion, Extrusion3030Insert
+from muscad.vitamins.fans import Blower, Fan
 from muscad.vitamins.pulleys import Pulley
-from muscad.vitamins.rods import BrassNut
-from muscad.vitamins.rods import Rod
-from muscad.vitamins.rods import ThreadedRod
+from muscad.vitamins.rods import BrassNut, Rod, ThreadedRod
 from muscad.vitamins.steppers import StepperMotor
 
 # heating bed size, adjust to your own bed
@@ -162,13 +164,13 @@ class GlassPlateCorner(Part):
         right=glass_plate.left + 10,
         front=bed.front,
         back=glass_plate.front - 10,
-        bottom=glass_plate.bottom+TT,
+        bottom=glass_plate.bottom + TT,
         top=glass_plate.top - TT,
     ).fillet_height(2)
     pin = Tube(
         diameter=3 - TT,
-        center_x=bed.left + 5-TT,
-        center_y=bed.front - 5+TT,
+        center_x=bed.left + 5 - TT,
+        center_y=bed.front - 5 + TT,
         height=3,
         top=corner.bottom,
     )
@@ -193,7 +195,7 @@ class GlassPlateFrontFix(Part):
     pin = Tube(
         diameter=3 - TT,
         center_x=bed.center_x,
-        center_y=bed.back + 5-TT,
+        center_y=bed.back + 5 - TT,
         height=3,
         top=body.bottom,
     )
@@ -396,7 +398,7 @@ class Extrusion3030Endcap(Part):
         .align(center_x=base.center_x, back=base.back, bottom=base.top)
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.upside_down()
 
 
@@ -507,8 +509,8 @@ class ThumbWheel(Part):
         top=nut.top + 2,
     )
 
-    def init(self):
-        self.wheel_holes = ~sum(
+    def init(self) -> None:  # type: ignore[override]
+        self.wheel_holes = ~Union(
             Tube(
                 diameter=3,
                 height=self.wheel.height + EE,
@@ -585,25 +587,24 @@ class XCarriage(Part):
     x_bearing_top_right = ~gantry.x_bearing_top_right
     x_bearing_bottom = ~gantry.x_bearing_bottom
 
-    body = (
-        Volume(
-            left=x_bearing_top_left.left + E,
-            right=x_bearing_top_right.right - E,
-            front=x_bearing_bottom.back - E,
-            depth=8,
-            bottom=gantry.x_bearing_bottom.top + 1,
-            top=x_bearing_top_left.top - E,
-        ).fillet_depth()
-        + Volume(
-            left=x_bearing_bottom.left,
-            right=x_bearing_bottom.right,
-            front=x_bearing_bottom.back - E,
-            depth=8,
-            bottom=x_bearing_bottom.bottom + E,
-            top=x_bearing_bottom.top + 1,
-        )
-        .fillet_depth(bottom=True, left=True)
-        .reverse_fillet_top(left=True, right=True)
+    body = Volume(
+        left=x_bearing_top_left.left + E,
+        right=x_bearing_top_right.right - E,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=gantry.x_bearing_bottom.top + 1,
+        top=x_bearing_top_left.top - E,
+    ).fillet_depth() + Volume(
+        left=x_bearing_bottom.left,
+        right=x_bearing_bottom.right,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=x_bearing_bottom.bottom + E,
+        top=x_bearing_bottom.top + 1,
+    ).fillet_depth(
+        bottom=True, left=True
+    ).reverse_fillet_top(
+        left=True, right=True
     )
 
     center_pulleys_bolt = (
@@ -762,7 +763,7 @@ class XCarriage(Part):
         ).fillet_width(0.5, front=True)
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.back_to_top()
 
 
@@ -865,7 +866,7 @@ class XAxisPulleys(Part):
         .x_mirror(center=center_pulleys_bolt.center_x, keep=True)
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.bottom_to_back()
 
 
@@ -884,7 +885,7 @@ class CableClampBack(Part):
         bottom=x_axis_pulleys.bottom_bearing.top,
     ).fillet_depth(2)
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.back_to_bottom()
 
 
@@ -935,26 +936,24 @@ class ExtruderClamp(Part):
         ).fillet_depth(4),
     )
 
-    cable_guide = (
-        Volume(
-            left=clamp.right,
-            width=3,
-            front=clamp.front,
-            back=clamp.back,
-            bottom=clamp.bottom,
-            height=6,
-        )
-        .fillet_depth(1, right=True)
-        .reverse_fillet_left(top=True)
-        .reverse_fillet_bottom(left=True)
-        - Volume(
-            left=clamp.right,
-            width=4,
-            front=clamp.front + E,
-            back=clamp.back - E,
-            center_z=clamp.bottom + 3,
-            height=3,
-        ).fillet_depth(1, left=True)
+    cable_guide = Volume(
+        left=clamp.right,
+        width=3,
+        front=clamp.front,
+        back=clamp.back,
+        bottom=clamp.bottom,
+        height=6,
+    ).fillet_depth(1, right=True).reverse_fillet_left(top=True).reverse_fillet_bottom(
+        left=True
+    ) - Volume(
+        left=clamp.right,
+        width=4,
+        front=clamp.front + E,
+        back=clamp.back - E,
+        center_z=clamp.bottom + 3,
+        height=3,
+    ).fillet_depth(
+        1, left=True
     )
 
     sensor_holder_up = (
@@ -990,7 +989,7 @@ class ExtruderClamp(Part):
 
     sensor_arm_down = sensor_arm_up.z_mirror(center=clamp.center_z)
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.back_to_bottom()
 
 
@@ -1002,23 +1001,22 @@ class Tunnel(Part):
 
     _center_x = x_carriage.extruder_holder.center_x
 
-    tunnel = (
-        Volume(
-            left=x_carriage.blower.blower.left + T,
-            right=x_carriage.blower.blower.right - T,
-            front=x_carriage.body.back - T,
-            back=x_carriage.blower.blower.back + T,
-            top=x_carriage.extruder_holder.center_z,
-            bottom=x_carriage.bottom,
-        ).fillet_height(NOZZLE_SIZE * 3)
-        - Volume(
-            left=x_carriage.blower.blower.left + NOZZLE_SIZE * 3.1 + T,
-            right=x_carriage.blower.blower.right - NOZZLE_SIZE * 3.1 - T,
-            front=x_carriage.body.back - NOZZLE_SIZE * 3.1 - T,
-            back=x_carriage.blower.blower.back + NOZZLE_SIZE * 3.1 + T,
-            top=x_carriage.extruder_holder.center_z + E,
-            bottom=x_carriage.bottom - E,
-        ).fillet_height(NOZZLE_SIZE * 2)
+    tunnel = Volume(
+        left=x_carriage.blower.blower.left + T,
+        right=x_carriage.blower.blower.right - T,
+        front=x_carriage.body.back - T,
+        back=x_carriage.blower.blower.back + T,
+        top=x_carriage.extruder_holder.center_z,
+        bottom=x_carriage.bottom,
+    ).fillet_height(NOZZLE_SIZE * 3) - Volume(
+        left=x_carriage.blower.blower.left + NOZZLE_SIZE * 3.1 + T,
+        right=x_carriage.blower.blower.right - NOZZLE_SIZE * 3.1 - T,
+        front=x_carriage.body.back - NOZZLE_SIZE * 3.1 - T,
+        back=x_carriage.blower.blower.back + NOZZLE_SIZE * 3.1 + T,
+        top=x_carriage.extruder_holder.center_z + E,
+        bottom=x_carriage.bottom - E,
+    ).fillet_height(
+        NOZZLE_SIZE * 2
     )
 
     blower = Hull(
@@ -1234,7 +1232,7 @@ class CableChainFrameAttachement(Part):
         bottom=body.bottom,
     ).fillet_height(left=True)
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.right_to_bottom()
 
 
@@ -1407,25 +1405,24 @@ class XYStepperMountRight(XYStepperMount):
         .debug()
     )
 
-    pulleys_box = (
-        Volume(
-            left=XYStepperMount.z_extrusion.right,
-            right=XYStepperMount.base.right,
-            back=XYStepperMount.inner_y_pulley.back,
-            front=XYStepperMount.base.front,
-            bottom=XYStepperMount.base.top - E,
-            top=gantry.x_rod_top.top,
-        ).fillet_height(5, right=True)
-        - Volume(
-            left=XYStepperMount.inner_y_pulley.left - 1,
-            center_x=shaft.center_x,
-            back=XYStepperMount.inner_y_pulley.back - E,
-            front=XYStepperMount.base.front + E,
-            bottom=XYStepperMount.base.top,
-            top=XYStepperMount.inner_y_pulley.top + 0.3,
-        )
-        .reverse_fillet_front(left=True, right=True)
-        .reverse_fillet_back(left=True, right=True)
+    pulleys_box = Volume(
+        left=XYStepperMount.z_extrusion.right,
+        right=XYStepperMount.base.right,
+        back=XYStepperMount.inner_y_pulley.back,
+        front=XYStepperMount.base.front,
+        bottom=XYStepperMount.base.top - E,
+        top=gantry.x_rod_top.top,
+    ).fillet_height(5, right=True) - Volume(
+        left=XYStepperMount.inner_y_pulley.left - 1,
+        center_x=shaft.center_x,
+        back=XYStepperMount.inner_y_pulley.back - E,
+        front=XYStepperMount.base.front + E,
+        bottom=XYStepperMount.base.top,
+        top=XYStepperMount.inner_y_pulley.top + 0.3,
+    ).reverse_fillet_front(
+        left=True, right=True
+    ).reverse_fillet_back(
+        left=True, right=True
     )
 
     y_pulley_support = Volume(
@@ -1541,7 +1538,7 @@ class XYIdler(Part):
         center_z=(back_bottom_bolt.center_z + y_rod.center_z) / 2 + 2
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.back_to_bottom()
 
 
@@ -1772,7 +1769,7 @@ class YCarriage(Part):
         bottom=y_bearing.center_z + Y_PULLEYS_Z_OFFSET,
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.back_to_bottom()
 
 
@@ -1830,7 +1827,7 @@ class YBeltFixLeft(Part):
         .fillet_width(1, back=True)
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.upside_down()
 
 
@@ -1886,7 +1883,7 @@ class YCarriageRight(YCarriage):
         top=YCarriage.front_x_pulley.top,
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.front_to_bottom()
 
 
@@ -1930,7 +1927,7 @@ class YBeltFixFront(Part):
         top=body.top,
     ).fillet_depth(1, right=True)
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.upside_down()
 
 
@@ -1970,7 +1967,7 @@ class YBeltFixBack(Part):
         top=body.top,
     ).fillet_depth(1, right=True)
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.upside_down()
 
 
@@ -1995,7 +1992,7 @@ class YClamp(Part):
         back=y_carriage_left.back,
     ).fillet_width()
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.left_to_bottom()
 
 
@@ -2055,7 +2052,7 @@ class YEndstopAttachmentBack(Part):
         .reverse_fillet_top(right=True)
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.left_to_bottom()
 
 
@@ -2495,21 +2492,20 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         height=7,
     )
 
-    rings = (
-        Volume(
-            left=base.left,
-            center_x=t8.center_x,
-            back=t8.back,
-            front=z_rod.center_y,
-            top=arm.bottom,
-            height=7,
+    rings = Volume(
+        left=base.left,
+        center_x=t8.center_x,
+        back=t8.back,
+        front=z_rod.center_y,
+        top=arm.bottom,
+        height=7,
+    ) & Union(
+        Tube(diameter=8 * i, center_x=0, center_y=0, bottom=0, height=7).tunnel(
+            8 * i - 4
         )
-        & sum(
-            Tube(diameter=8 * i, center_x=0, center_y=0, bottom=0, height=7).tunnel(
-                8 * i - 4
-            )
-            for i in range(3, 15)
-        ).align(center_x=t8.center_x, center_y=t8.center_y, top=arm.bottom)
+        for i in range(3, 15)
+    ).align(
+        center_x=t8.center_x, center_y=t8.center_y, top=arm.bottom
     )
 
     brass_nut_base = Tube(
@@ -2711,7 +2707,7 @@ class ZBracketTop(Part):
         )
     )
 
-    def __stl__(self):
+    def __stl__(self) -> Object:
         return self.upside_down()
 
 
@@ -2885,7 +2881,12 @@ z_bottom_endstop = ZBottomEndStop()
 class BoardMountSide(Part):
     z_extrusion = ~frame.z_extrusion_left_back
 
-    def init(self, board, side="left", bolt_spacing=15):
+    def init(  # type: ignore[override]
+        self,
+        board: Board,
+        side: Literal["left", "right"] = "left",
+        bolt_spacing: float = 15,
+    ) -> None:
         if side == "left":
             self.board = (
                 ~board.top_to_right()
@@ -3009,13 +3010,13 @@ class BoardMountCorner(Part):
     z_extrusion = ~frame.z_extrusion_right_back
     y_extrusion = ~frame.y_extrusion_right_bottom
 
-    def init(
+    def init(  # type: ignore[override]
         self,
         board: Object,
-        hollow_offset_bottom=10,
-        hollow_offset_side=10,
-        brand: str = None,
-    ):
+        hollow_offset_bottom: float = 10,
+        hollow_offset_side: float = 10,
+        brand: str | None = None,
+    ) -> None:
         self.board = (
             ~board.bottom_to_left()
             .align(
@@ -3094,7 +3095,7 @@ class BoardMountCorner(Part):
 
 
 class PowerSupplyMount(BoardMountCorner):
-    def init(self):
+    def init(self) -> None:  # type: ignore[override]
         power_supply = Board.smps300rs(Bolt.M3(20).add_nut(-1).upside_down())
         return super().init(power_supply, hollow_offset_bottom=20)
 
@@ -3111,7 +3112,7 @@ power_supply_mount = (
 
 
 class ScreenMount(BoardMountSide):
-    def init(self):
+    def init(self) -> None:  # type: ignore[override]
         screen = Board.lcd12864(Bolt.M3(25).add_nut(-1).upside_down().down(7.5))
         return super().init(screen, side="right")
 
@@ -3128,7 +3129,7 @@ screen_mount = (
 
 
 class MainboardMount(BoardMountCorner):
-    def init(self):
+    def init(self) -> None:  # type: ignore[override]
         mainboard = Board.mks_sbase(Bolt.M3(20).add_nut(-1).upside_down())
         return super().init(mainboard, hollow_offset_side=20)
 
@@ -3145,7 +3146,7 @@ mainboard_mount = (
 
 
 class RaspberryMount(BoardMountSide):
-    def init(self):
+    def init(self) -> None:  # type: ignore[override]
         mainboard = Board.raspberry_pi_3b(
             Bolt.M3(26).add_nut(-E, inline_clearance_size=10).upside_down()
         )

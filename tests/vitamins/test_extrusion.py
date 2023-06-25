@@ -1,10 +1,11 @@
 """Tests for Extrusions."""
+from muscad import Object
 from muscad.vitamins.extrusions import Extrusion
 
 
 def test_extrusion() -> None:
     """Bounding box checks."""
-    extrusion = Extrusion.e2020(30, T=0)
+    extrusion: Object = Extrusion.e2020(30, T=0)
     assert extrusion.bottom == -15
     assert extrusion.top == 15
     assert extrusion.left == -10

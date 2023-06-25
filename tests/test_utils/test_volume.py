@@ -1,7 +1,5 @@
 """Tests for the Volume class."""
-from muscad import E
-from muscad import Text
-from muscad import Volume
+from muscad import E, Object, Text, Volume
 
 
 def test_volume() -> None:
@@ -188,7 +186,7 @@ def test_volume() -> None:
 
 def test_reverse_fillet() -> None:
     """Test for a chamfered Cube."""
-    cube = (
+    cube: Object = (
         Volume(width=50, depth=50, height=50)
         .reverse_fillet_left()
         .reverse_fillet_right()

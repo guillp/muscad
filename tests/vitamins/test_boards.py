@@ -1,9 +1,10 @@
-from ..conftest import compare_str
 from muscad.vitamins.boards import Board
 from muscad.vitamins.bolts import Bolt
 
+from ..conftest import compare_str
 
-def test_raspberry_pi_3b():
+
+def test_raspberry_pi_3b() -> None:
     compare_str(
         Board.raspberry_pi_3b(bolt=Bolt.M3(10)),
         """union() {

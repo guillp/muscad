@@ -1,19 +1,14 @@
 from __future__ import annotations
 
-from typing import Dict
-from typing import Optional
+from typing import Dict, Optional
 
-from muscad import Cylinder
-from muscad import EE
-from muscad import Object
-from muscad import Part
-from muscad import Union
+from muscad import EE, Cylinder, Object, Part, Union
 from muscad.utils.volume import Volume
 from muscad.vitamins.bolts import Bolt
 
 
 class LinearBearing(Part):
-    def init(
+    def init(  # type: ignore[override]
         self, inner_diam: float, outer_diam: float, length: float, hollow: bool = True
     ) -> None:
         self._outer_diam = outer_diam
@@ -60,7 +55,7 @@ class LinearBearing(Part):
 
 
 class BushingLinearBearing(Part):
-    def init(
+    def init(  # type: ignore[override]
         self, *, rod_diameter: float, width: float, depth: float, height: float
     ) -> None:
         self.rod_diameter = rod_diameter
@@ -149,7 +144,7 @@ class BushingLinearBearing(Part):
 
 
 class RotationBearing(Part):
-    def init(
+    def init(  # type: ignore[override]
         self, inner_diam: float, outer_diam: float, height: float, hole: bool = True
     ) -> None:
         self._outer_diameter = outer_diam

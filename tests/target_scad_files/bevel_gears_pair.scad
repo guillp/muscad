@@ -1,7 +1,6 @@
-rotate(a=[0, 0, 90])
-translate(v=[0, 0, 64.4444])
-{
-  translate(v=[0, 0, -44.4444])
+union() {
+  rotate(a=[0, 0, 90])
+  translate(v=[0, 0, 20])
   difference() {
     // base
     intersection() {
@@ -431,6 +430,8 @@ translate(v=[0, 0, 64.4444])
     translate(v=[0, 0, -123.6979])
     cylinder(h=336.2847, d=5, $fn=8, center=true);
   }
+  rotate(a=[0, 0, 90])
+  translate(v=[0, 0, 64.4444])
   rotate(a=[0, 270.0, 0])
   translate(v=[0, 0, -113.8889])
   difference() {

@@ -1,8 +1,6 @@
 """Tests for `muscad.vitamins.gears`."""
+from muscad.vitamins.gears import BevelGear, Gear
 from tests.conftest import compare_file
-
-from muscad.vitamins.gears import BevelGear
-from muscad.vitamins.gears import Gear
 
 
 def test_gear() -> None:
@@ -19,5 +17,5 @@ def test_gear() -> None:
 
 def test_bevel_gear() -> None:
     """Creates a Bevel Gear Pair."""
-    bevel_gears_pair = BevelGear.pair()
-    compare_file(bevel_gears_pair, "bevel_gears_pair.scad")
+    gear1, gear2 = BevelGear.pair()
+    compare_file(gear1 + gear2, "bevel_gears_pair.scad")

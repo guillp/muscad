@@ -2,18 +2,12 @@ from __future__ import annotations
 
 from typing import Optional
 
-from muscad import calc
-from muscad import Cube
-from muscad import E
-from muscad import EE
-from muscad import Object
-from muscad import Part
-from muscad.utils.fillet import Chamfer
-from muscad.utils.fillet import Fillet
+from muscad import EE, Cube, E, Object, Part, calc
+from muscad.utils.fillet import Chamfer, Fillet
 
 
 class Volume(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
         *,
         left: Optional[float] = None,
@@ -199,7 +193,7 @@ class Volume(Part):
         right: bool = False,
         top: bool = False,
         bottom: bool = False,
-    ):
+    ) -> Volume:
         chamfer = Chamfer(r).linear_extrude(self.depth + EE).x_rotate(90)
         self._cut_depth_edges(chamfer, left=left, right=right, top=top, bottom=bottom)
         return self

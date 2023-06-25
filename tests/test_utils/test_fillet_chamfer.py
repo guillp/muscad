@@ -1,7 +1,6 @@
 """Tests for Fillet and Chamfer."""
-from tests.conftest import compare_str
-
 from muscad import Chamfer
+from tests.conftest import compare_str
 
 
 def test_chamfer_default_angle() -> None:

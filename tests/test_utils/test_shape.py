@@ -1,7 +1,6 @@
 """Tests for the Shape helper class."""
-from tests.conftest import compare_str
-
 from muscad import Shape
+from tests.conftest import compare_str
 
 
 def test_pipe() -> None:

@@ -1,8 +1,9 @@
-from ..conftest import compare_str
 from muscad.vitamins.pulleys import Pulley
 
+from ..conftest import compare_str
 
-def test_pulley():
+
+def test_pulley() -> None:
     compare_str(
         Pulley.GT2(16),
         """union() {

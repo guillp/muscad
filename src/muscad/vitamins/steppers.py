@@ -1,11 +1,13 @@
-from muscad import Cylinder
-from muscad import E
-from muscad import Part
+from typing import Iterable
+
+from typing_extensions import Self
+
+from muscad import Cylinder, E, Object, Part, Union
 from muscad.utils.volume import Volume
 
 
 class StepperMotor(Part):
-    def init(self, width, height, chamfer=4):
+    def init(self, width: float, height: float, chamfer: float = 4) -> None:  # type: ignore[override]
         self.body = Volume(
             center_x=0,
             width=width,
@@ -15,26 +17,31 @@ class StepperMotor(Part):
             height=height,
         ).chamfer_height(chamfer)
 
-    def add_bolts(self, bolt, spacing, depth=3, holes=(0, 1, 2, 3)):
-        """
-        Add up to 4 bolts in the stepper fixing holes (as miscellaneous items)
-        :param bolt: the bolt to add (must be head up)
-        :param spacing: edge distance between 2 bolt centers
-        :param depth: depth of the fixing holes inside the stepper
-        :param holes: index of the bolts to add. Modify it if you only want 2 or 3 bolts.
+    def add_bolts(
+        self,
+        bolt: Object,
+        spacing: float,
+        depth: float = 3,
+        holes: Iterable[int] = (0, 1, 2, 3),
+    ) -> Self:
+        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items) :param bolt: the
+        bolt to add (must be head up) :param spacing: edge distance between 2 bolt centers :param
+        depth: depth of the fixing holes inside the stepper :param holes: index of the bolts to add.
+
+        Modify it if you only want 2 or 3 bolts.
         :return: the stepper object, with bolts added
         """
-        radius = ((spacing ** 2) * 2) ** 0.5 / 2
+        radius = ((spacing**2) * 2) ** 0.5 / 2
         self.bolts = (
-            sum(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes)
+            Union(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes)
             .align(bottom=self.body.top - depth)
             .misc()
         )
         return self
 
-    def add_central_bulge(self, d, h):
-        """
-        Adds the cylindric bulge on the shaft side of the stepper.
+    def add_central_bulge(self, d: float, h: float) -> Self:
+        """Adds the cylindric bulge on the shaft side of the stepper.
+
         :param d: diameter of the bulge
         :param h: height of the bulge
         :return: the stepper object, with bulge added
@@ -47,13 +54,16 @@ class StepperMotor(Part):
         return self
 
     def add_gearbox(
-        self, d, h, bolt=None, bolt_spacing=None, holes=(0, 1, 2, 3), depth=5
-    ):
-        """
-        Adds the gearbox on the shaft side of the stepper
-        :param d: diameter of the gearbox
-        :param h: height of the gearbox
-        :return: the stepper object, with gearbox added
+        self,
+        d: float,
+        h: float,
+        bolt: Object | None = None,
+        bolt_spacing: float | None = None,
+        holes: Iterable[int] = (0, 1, 2, 3),
+        depth: float = 5,
+    ) -> Self:
+        """Adds the gearbox on the shaft side of the stepper :param d: diameter of the gearbox
+        :param h: height of the gearbox :return: the stepper object, with gearbox added.
         """
         self.gearbox = Cylinder(d=d, h=h + E).align(
             center_x=self.body.center_x,
@@ -62,18 +72,18 @@ class StepperMotor(Part):
         )
 
         if bolt and bolt_spacing:
-            radius = ((bolt_spacing ** 2) * 2) ** 0.5 / 2
+            radius = ((bolt_spacing**2) * 2) ** 0.5 / 2
             self.bolts = (
-                sum(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes)
+                Union(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes)
                 .align(bottom=self.gearbox.top - depth)
                 .misc()
             )
 
         return self
 
-    def add_shaft(self, d, length):
-        """
-        Adds a shaft.
+    def add_shaft(self, d: float, length: float) -> Self:
+        """Adds a shaft.
+
         :param d: diameter of the shaft
         :param length: lenght of the shaft
         :return: the stepper object, with shaft added
@@ -88,17 +98,17 @@ class StepperMotor(Part):
     @classmethod
     def nema17(
         cls,
-        height=42,
-        gearbox_height=0,
-        bulge_height=3,
-        shaft_diameter=5,
-        shaft_height=25,
-        bolt=None,
-        holes=(0, 1, 2, 3),
-        T=0.2,
-    ):
-        """
-        Makes a Nema17 stepper.
+        height: float = 42,
+        gearbox_height: float = 0,
+        bulge_height: float = 3,
+        shaft_diameter: float = 5,
+        shaft_height: float = 25,
+        bolt: Object | None = None,
+        holes: Iterable[int] = (0, 1, 2, 3),
+        T: float = 0.2,
+    ) -> Self:
+        """Makes a Nema17 stepper.
+
         :param height: height of the stepper
         :param bulge_height: height of the central bulge. Use it to make a gearbox.
         :param shaft_height: lenght of the shaft
@@ -126,9 +136,9 @@ class StepperMotor(Part):
         return nema
 
     @property
-    def center_x(self):
+    def center_x(self) -> float:
         return 0
 
     @property
-    def center_y(self):
+    def center_y(self) -> float:
         return 0

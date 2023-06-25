@@ -1,10 +1,9 @@
-"""Tests for muscad.vitamins.cable_chain"""
+"""Tests for muscad.vitamins.cable_chain."""
+from muscad.vitamins.cable_chain import CableChain
 from tests.conftest import compare_str
 
-from muscad.vitamins.cable_chain import CableChain
 
-
-def test_cable_chain():
+def test_cable_chain() -> None:
     female, male = CableChain.couple(16, 6)
     assert compare_str(
         female,

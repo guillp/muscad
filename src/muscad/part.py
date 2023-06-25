@@ -1,25 +1,27 @@
 from __future__ import annotations
 
-import typing
 from itertools import chain
+from typing import Any, Iterable, Iterator, Literal, Type
 
-from muscad import back
-from muscad import bottom
-from muscad import Composite
-from muscad import EE
-from muscad import front
-from muscad import Hole
-from muscad import left
-from muscad import List
-from muscad import Misc
-from muscad import Object
-from muscad import render_comment
-from muscad import right
-from muscad import top
-from muscad import Union
+from muscad import (
+    EE,
+    Composite,
+    Hole,
+    List,
+    Misc,
+    Object,
+    Union,
+    back,
+    bottom,
+    front,
+    left,
+    render_comment,
+    right,
+    top,
+)
 
 
-def walk_mro_until(cls, supercls):
+def walk_mro_until(cls: Type[Any], supercls: Type[Any]) -> Iterator[Type[Any]]:
     for c in cls.mro():
         if c == supercls:
             break
@@ -27,8 +29,8 @@ def walk_mro_until(cls, supercls):
 
 
 class Part(Composite):
-    """
-    Helper class to build complex objects.
+    """Helper class to build complex objects.
+
     A Part is made of 3 kind of objects:
     - instances of Object, which will form the "main" structure of this Part
     - instances of Misc, which are miscellaneous items that will not be taken into account when evaluating this Part dimensions
@@ -38,23 +40,26 @@ class Part(Composite):
     All class attributes that are instances of Object, Misc or Hole will be added to all instances of this Part.
     """
 
-    def __init_subclass__(cls, **kwargs: typing.Any) -> None:
-        """
-        When creating an inherited class, sort all class-level attributes and make lists of all Objects, Misc and Holes
-        """
+    class_parts: list[Object]
+    class_misc: list[Object]
+    class_holes: list[Object]
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """When creating an inherited class, sort all class-level attributes and make lists of all
+        Objects, Misc and Holes."""
         super().__init_subclass__(**kwargs)
-        cls.class_parts: List[Object] = []
-        cls.class_misc: List[Object] = []
-        cls.class_holes: List[Object] = []
+        cls.class_parts = []
+        cls.class_misc = []
+        cls.class_holes = []
         for class_ in walk_mro_until(cls, Part):
             for name, obj in class_.__dict__.items():
                 if isinstance(obj, (Misc, Hole, Object)) and not name.startswith("_"):
                     cls._init_element(name, obj)
 
     @classmethod
-    def _init_element(cls, name: str, obj: typing.Union[Misc, Hole, Object]):
-        """
-        Given a class level attribute, add it to the class level lists of misc/holes/parts.
+    def _init_element(cls, name: str, obj: Misc | Hole | Object) -> None:
+        """Given a class level attribute, add it to the class level lists of misc/holes/parts.
+
         :param name: the attribute name
         :param obj: the attribute value
         :return:
@@ -76,11 +81,11 @@ class Part(Composite):
 
     def __init__(
         self,
-        *args: typing.Union[float, bool, Misc, Hole, Object],
-        **kwargs: typing.Union[float, bool, Misc, Hole, Object],
+        *args: float | bool | Misc | Hole | Object,
+        **kwargs: float | bool | Misc | Hole | Object,
     ):
-        """
-        When instanciating a Part, add the class level misc/holes/parts to the instance.
+        """When instanciating a Part, add the class level misc/holes/parts to the instance.
+
         :param args:
         :param kwargs:
         """
@@ -94,12 +99,11 @@ class Part(Composite):
 
     def init(
         self,
-        *args: typing.Union[float, bool, Misc, Hole, Object],
-        **kwargs: typing.Union[float, bool, Misc, Hole, Object],
+        *args: float | bool | Misc | Hole | Object,
+        **kwargs: float | bool | Misc | Hole | Object,
     ) -> None:
-        """
-        Override this to add parametric children to this Part
-        :param args:
+        """Override this to add parametric children to this Part :param args:
+
         :param kwargs:
         :return:
         """
@@ -118,13 +122,15 @@ class Part(Composite):
             elif isinstance(o, Object):
                 self.add_child(o, comment)
 
-    def add_child(self, obj: Object, comment: str = None) -> Object:
-        if comment:
+    def add_child(
+        self, obj: Object | Iterable[Object] | Literal[0], comment: str | None = None
+    ) -> Object:
+        if comment and isinstance(obj, Object):
             obj.comment = comment
         super().add_child(obj)
         return self
 
-    def add_hole(self, obj: typing.Union[Object, Hole], comment: str = None) -> Object:
+    def add_hole(self, obj: Object | Hole, comment: str | None = None) -> Object:
         if isinstance(obj, Hole):
             obj = obj.object
         if comment:
@@ -132,25 +138,25 @@ class Part(Composite):
         self.holes.append(obj)
         return self
 
-    def add_misc(
-        self, obj: typing.Union[Object, Misc, Hole], comment: str = None
-    ) -> Object:
-        if isinstance(obj, Misc):
+    def add_misc(self, obj: Object | Misc | Hole, comment: str | None = None) -> Object:
+        if isinstance(obj, (Misc, Hole)):
             obj = obj.object
         if comment:
             obj.comment = comment
         self.miscellaneous.append(obj)
         return self
 
-    def revert(self):
-        """
-        Turns all holes to children, and all children to holes.
-        Note that misc items are untouched, so it probably makes no sense to revert a part containing misc items.
+    def revert(self) -> Part:
+        """Turns all holes to children, and all children to holes.
+
+        Note that misc items are untouched, so it probably makes no sense to revert a part
+        containing misc items.
         :return: the same part, with holes and children reverted
         """
         self.children, self.holes = self.holes, self.children
+        return self
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         previous = getattr(self, key, None)
         super().__setattr__(key, value)
         if key.startswith("_"):
@@ -175,14 +181,14 @@ class Part(Composite):
             self.add_child(value)
 
     @render_comment
-    def render(self, postprocess=True):
+    def render(self, postprocess: bool = True) -> str:
         if not self.children and not self.miscellaneous:
             if self.holes:
                 self.children, self.holes = self.holes, self.children
             else:
                 raise RuntimeError("This part has no children")
         # renders children and misc
-        renderable = sum(chain(self.children, self.miscellaneous))
+        renderable: Object = Union(chain(self.children, self.miscellaneous))
         # if this part has holes, render a diff of all children with all holes
         if self.holes:
             renderable -= self.holes
@@ -192,59 +198,67 @@ class Part(Composite):
         # applies the modifier
         return renderable.set_modifier(self.modifier).render()
 
-    def postprocess(self, renderable: Object):
-        """
-        Applies some postprocessing transformation to the part, at render time.
-        Postprocessing will not be taken into account when calculating this part dimension or position.
-        You use it for example to position the Part to make printing easier.
-        Postprocessing can be disabled by passing `postprocess=False` to ` render()`.
-        This method can be overridden in subclasses. By default, it does nothing.
+    def postprocess(self, renderable: Object) -> Object:
+        """Applies some postprocessing transformation to the part, at render time.
+
+        Postprocessing will not be taken into account when calculating this part dimension or
+        position. You use it for example to position the Part to make printing easier.
+        Postprocessing can be disabled by passing `postprocess=False` to ` render()`. This method
+        can be overridden in subclasses. By default, it does nothing.
         :param renderable: the part to postprocess for rendering
         :return: the postprocessed renderable
         """
         return renderable
 
-    def walk(self):
+    def walk(self) -> Iterable[Object]:
         yield from super().walk()
         for misc in self.miscellaneous:
             yield from misc.walk()
 
     @property
-    def left(self):
+    def left(self) -> float:
         return left(self.children)
 
     @property
-    def right(self):
+    def right(self) -> float:
         return right(self.children)
 
     @property
-    def back(self):
+    def back(self) -> float:
         return back(self.children)
 
     @property
-    def front(self):
+    def front(self) -> float:
         return front(self.children)
 
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return bottom(self.children)
 
     @property
-    def top(self):
+    def top(self) -> float:
         return top(self.children)
 
-    def debug(self, include_misc: bool = False) -> Part:
-        """
-        Turn all children to debug, not the misc (Unless include_misc is set to True).
-        """
+    def debug(self, include_misc: bool = False) -> Object:
+        """Turn all children to debug, not the misc (Unless include_misc is set to True)."""
         if include_misc:
-            return super().debug(self)
+            return super().debug()
 
         self.children = [child.debug() for child in self.children]
         return self
 
 
 class MirroredPart(Part):
+    mirror_x: bool
+    mirror_y: bool
+    mirror_z: bool
+    _center_x: float
+    _center_y: float
+    _center_z: float
+    keep_x: bool
+    keep_y: bool
+    keep_z: bool
+
     def __init_subclass__(
         cls,
         x: bool = False,
@@ -256,7 +270,7 @@ class MirroredPart(Part):
         keep_x: bool = False,
         keep_y: bool = False,
         keep_z: bool = False,
-        **kwargs: typing.Dict[str, typing.Any],
+        **kwargs: Any,
     ):
         super().__init_subclass__(**kwargs)
         cls.mirror_x = x
@@ -337,15 +351,16 @@ from muscad.primitives import Square
 
 
 class RotationalExtrudedPart(Part):
-    """
-    A part that will be transformed with a RotationalExtrusion as postprocessing.
-    You must build your part flat along the Y axis and have the shape defined on the positive X axis.
+    """A part that will be transformed with a RotationalExtrusion as postprocessing.
+
+    You must build your part flat along the Y axis and have the shape defined on the positive X
+    axis.
     """
 
-    def init(
+    def init(  # type: ignore[override]
         self,
-        *args: typing.Union[Misc, Hole, Object],
-        **kwargs: typing.Union[Misc, Hole, Object],
+        *args: Misc | Hole | Object,
+        **kwargs: Misc | Hole | Object,
     ) -> None:
         # mask will hide the shape on negative X axis.
         mask = Square(width=self.width + EE, depth=self.depth + EE).align(

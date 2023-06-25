@@ -1,14 +1,9 @@
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, Optional, Tuple
 
-from .base import Object
-from .base import Transformation
-from .base import Union
-from .point import Point3D
 from muscad.helpers import normalize_angle
+
+from .base import Object, Transformation, Union
+from .point import Point3D
 
 
 class Translation(Transformation, name="translate"):
@@ -18,7 +13,7 @@ class Translation(Transformation, name="translate"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
@@ -30,7 +25,7 @@ class Translation(Transformation, name="translate"):
             return self
         return super().combine(other)  # pragma: no cover
 
-    def copy(self) -> Object:
+    def copy(self) -> Transformation:
         return self.__class__(x=self.x, y=self.y, z=self.z)
 
     @property
@@ -59,9 +54,7 @@ class Translation(Transformation, name="translate"):
 
 
 class Rotation(Transformation, name="rotate"):
-    """
-    OpenSCAD rotate().
-    """
+    """OpenSCAD rotate()."""
 
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
         super().__init__()
@@ -69,7 +62,7 @@ class Rotation(Transformation, name="rotate"):
         self.y = normalize_angle(y)
         self.z = normalize_angle(z)
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"a": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
@@ -86,7 +79,7 @@ class Rotation(Transformation, name="rotate"):
                 return self
         return super().combine(other)
 
-    def copy(self) -> Object:
+    def copy(self) -> Transformation:
         return self.__class__(x=self.x, y=self.y, z=self.z)
 
     # TODO: make it work for all cases
@@ -340,13 +333,13 @@ class Rotation(Transformation, name="rotate"):
 
 
 class Scaling(Transformation, name="scale"):
-    def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
+    def __init__(self, *, x: float = 0, y: float = 0, z: float = 0) -> None:
         super().__init__()
         self.x = x
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -381,7 +374,7 @@ class Mirroring(Transformation, name="mirror"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -444,7 +437,7 @@ class Mirroring(Transformation, name="mirror"):
             )  # pragma: no cover
         return self.child.bottom
 
-    def copy(self) -> Object:
+    def copy(self) -> Transformation:
         return self.__class__(x=self.x, y=self.y, z=self.z)
 
 
@@ -460,20 +453,20 @@ class Multmatrix(Transformation):
         super().__init__()
         self.matrix = matrix
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"m": self.matrix}
 
 
 class Color(Transformation):
-    def __init__(self, colorname: str, alpha: Optional[float] = None):
+    def __init__(self, colorname: str, alpha: float | None = None) -> None:
         super().__init__()
         self.colorname = colorname
         self.alpha = alpha
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {None: self.colorname, "alpha": self.alpha}
 
-    def copy(self) -> Object:
+    def copy(self) -> Transformation:
         return self.__class__(self.colorname, self.alpha)
 
 
@@ -493,12 +486,34 @@ class Offset(Transformation):
         self.delta = delta
         self.chamfer = chamfer
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"r": self.radius, "delta": self.delta, "chamfer": self.chamfer}
 
 
 class Minkowski(Transformation):
-    pass
+    @property
+    def left(self) -> float:
+        return sum(o.left for o in self.child.children)
+
+    @property
+    def right(self) -> float:
+        return sum(o.right for o in self.child.children)
+
+    @property
+    def back(self) -> float:
+        return sum(o.back for o in self.child.children)
+
+    @property
+    def front(self) -> float:
+        return sum(o.front for o in self.child.children)
+
+    @property
+    def bottom(self) -> float:
+        return sum(o.bottom for o in self.child.children)
+
+    @property
+    def top(self) -> float:
+        return sum(o.top for o in self.child.children)
 
 
 class Hull(Transformation):
@@ -506,11 +521,11 @@ class Hull(Transformation):
 
 
 class Projection(Transformation):
-    def __init__(self, cut: bool = False):
+    def __init__(self, cut: bool = False) -> None:
         super().__init__()
         self.cut = cut
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"cut": self.cut}
 
     @property
@@ -523,11 +538,11 @@ class Projection(Transformation):
 
 
 class Render(Transformation):
-    def __init__(self, convexity: int = 2):
+    def __init__(self, convexity: int = 2) -> None:
         super().__init__()
         self._convexity = convexity
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"convexity": self._convexity}
 
 
@@ -538,10 +553,10 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
         center: bool = False,
         convexity: int = 10,
         twist: float = 0,
-        slices: Optional[int] = None,
+        slices: int | None = None,
         scale: float = 1.0,
-        segments: Optional[int] = None,
-    ):
+        segments: int | None = None,
+    ) -> None:
         super().__init__()
         self._height = height
         self._center = center
@@ -553,7 +568,7 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
             segments = int(twist * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "height": self._height,
             "center": self._center,
@@ -610,7 +625,7 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
             segments = int(angle / 3.14 * 0.4)
         self.segments = segments
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "angle": self.angle,
             "convexity": self.convexity,
@@ -651,11 +666,11 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
 
 
 class Slide(Transformation):
-    """
-    Custom transformation that translate an object then Hulls the result to itself.
-    If the object is a Composite, each part component is hulled to its translated self.
-    This is useful for parts that must be slided into their final position, such as screws.
-    Bounding box of the original object is untouched..
+    """Custom transformation that translate an object then Hulls the result to itself.
+
+    If the object is a Composite, each part component is hulled to its translated self. This is
+    useful for parts that must be slided into their final position, such as screws. Bounding box of
+    the original object is untouched..
     """
 
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):

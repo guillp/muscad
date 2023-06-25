@@ -1,14 +1,10 @@
-from muscad import Circle
-from muscad import Hull
-from muscad import Part
-from muscad import Square
-from muscad import Surface
-from muscad import TT
-from muscad import Volume
+from typing_extensions import Self
+
+from muscad import TT, Circle, Hull, Part, Square, Surface, Volume
 
 
 class Extrusion(Part):
-    def init(self, side, length, rounding=2):
+    def init(self, side: float, length: float, rounding: float = 2) -> None:  # type: ignore[override]
         self.profile = Hull(
             Circle(d=rounding * 2).align(left=-side / 2, back=-side / 2),
             Circle(d=rounding * 2).align(left=-side / 2, front=side / 2),
@@ -17,16 +13,16 @@ class Extrusion(Part):
         ).z_linear_extrude(length)
 
     @classmethod
-    def e3030(cls, length, rounding=2, T=0.1):
+    def e3030(cls, length: float, rounding: float = 2, T: float = 0.1) -> Self:
         return cls(30 + 2 * T, length, rounding)
 
     @classmethod
-    def e2020(cls, length, rounding=2, T=0.1):
+    def e2020(cls, length: float, rounding: float = 2, T: float = 0.1) -> Self:
         return cls(20 + 2 * T, length, rounding)
 
 
 class Extrusion3030Insert(Part):
-    def init(self, length=50):
+    def init(self, length: float = 50) -> None:  # type: ignore[override]
         self.body = Volume(width=8 - TT, depth=length, height=6).fillet_depth(
             0.5, bottom=True
         )

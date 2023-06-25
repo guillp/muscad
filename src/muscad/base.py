@@ -5,46 +5,39 @@ import os
 import subprocess
 import typing
 from functools import wraps
-from typing import Any
-from typing import Callable
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Literal
-from typing import Optional
-from typing import Protocol
-from typing import Tuple
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    Tuple,
+)
 
-from muscad.helpers import camel_to_snake
-from muscad.helpers import normalize_angle
+from muscad.helpers import camel_to_snake, normalize_angle
 
 
 class MuSCAD:
-    """
-    Base class for all MuSCAD objects
-    """
+    """Base class for all MuSCAD objects."""
 
     def render(self) -> str:
-        """
-        Returns the SCAD code to render this object
-        :return: (str) the SCAD code for this object
-        """
+        """Returns the SCAD code to render this object :return: (str) the SCAD code for this
+        object."""
         raise NotImplementedError()  # pragma: no cover
 
     def __str__(self) -> str:
         return self.render()
 
     def _repr_pretty_(self, p: Any, cycle: bool) -> None:
-        """
-        Helper method for Jupyter Notebook to show the rendered code instead of __repr__
-        """
+        """Helper method for Jupyter Notebook to show the rendered code instead of __repr__"""
         p.text(str(self))  # pragma: no cover
 
 
 class MuSCADError(Exception):
-    """
-    Base class for all MuSCAD exceptions
-    """
+    """Base class for all MuSCAD exceptions."""
 
 
 def indent(s: str, token: str = "  ") -> str:
@@ -81,15 +74,16 @@ O = typing.TypeVar("O", contravariant=True)
 
 
 class Object(MuSCAD):
-    """
-    Base class for all OpenSCAD geometry objects. Do not instantiate this class directly.
+    """Base class for all OpenSCAD geometry objects.
+
+    Do not instantiate this class directly.
     """
 
     object_name: str
 
     def __init_subclass__(cls, name: Optional[str] = None):
-        """
-        Derive a name from the subclass name, if not explicitly declared.
+        """Derive a name from the subclass name, if not explicitly declared.
+
         :param name: a string (if explicitly declared)
         :param kwargs: remaining attributes (unused)
         :return: a subclass with a `name` attribute
@@ -101,16 +95,16 @@ class Object(MuSCAD):
             cls.object_name = name
 
     def __init__(self) -> None:
-        """
-        Base constructor for Objects.
+        """Base constructor for Objects.
+
         :param children:
         """
         self.modifier: str = ""
         self.comment: Optional[str] = None
 
     def set_modifier(self, m: Optional[str]) -> Object:
-        """
-        Set or remove a modifier for this object.
+        """Set or remove a modifier for this object.
+
         :param m: one of OpenSCAD's modifiers, as a single char str, or None to remove the modifier.
         :return: the same object, with modifier applied
         """
@@ -121,46 +115,31 @@ class Object(MuSCAD):
         return self
 
     def disable(self) -> Object:
-        """
-        Disables the object (modifer *)
-        :return: the same object, disabled
-        """
+        """Disables the object (modifer *) :return: the same object, disabled."""
         return self.set_modifier("*")
 
     def debug(self) -> Object:
-        """
-        Enables debug for the object (modifier #)
-        :return: the same object, in debug mode
-        """
+        """Enables debug for the object (modifier #) :return: the same object, in debug mode."""
         return self.set_modifier("#")
 
     def background(self) -> Object:
-        """
-        Sets the object as background (modifier %)
-        :return: the same object, as background
-        """
+        """Sets the object as background (modifier %) :return: the same object, as background."""
         return self.set_modifier("%")
 
     def root(self) -> Object:
-        """
-        Sets the object as root (modifier !)
-        :return: the same object, as root
-        """
+        """Sets the object as root (modifier !) :return: the same object, as root."""
         return self.set_modifier("!")
 
     def remove_modifier(self) -> Object:
-        """
-        Remove any previously applied modifier.
+        """Remove any previously applied modifier.
+
         :return: the same object, with any modifier removed
         """
         return self.set_modifier(None)
 
-    def __add__(self, other: Object) -> Object:
-        """
-        Adding two objects together creates a Union of those objects
-        :param other: another object
-        :return: a Union of both objects
-        """
+    def __add__(self, other: Object | Iterable[Object]) -> Object:
+        """Adding two objects together creates a Union of those objects :param other: another object
+        :return: a Union of both objects."""
         return Union(self, other)
 
     def __radd__(self, other: Literal[0]) -> Object:
@@ -172,25 +151,22 @@ class Object(MuSCAD):
         assert other == 0
         return self
 
-    def __sub__(self, other: typing.Union[Object, Hole, Misc]) -> Object:
-        """
-        Substracting an object from another creates a Difference of those objects
+    def __sub__(self, other: Object | Hole | Misc | Iterable[Object]) -> Object:
+        """Substracting an object from another creates a Difference of those objects.
+
         :param other: another object
         :return: a Difference of self - other
         """
         return Difference(self, other)
 
     def __and__(self, other: Object) -> Object:
-        """
-        Logical and between two objects creates an Intersection between those objects
-        :param other: another object
-        :return: an Intersection of self and other
-        """
+        """Logical and between two objects creates an Intersection between those objects :param
+        other: another object :return: an Intersection of self and other."""
         return Intersection(self, other)
 
     def translate(self, *, x: float = 0, y: float = 0, z: float = 0) -> Object:
-        """
-        Applies a `Translation` to this object.
+        """Applies a `Translation` to this object.
+
         :param x: x axis translation
         :param y: y axis translation
         :param z: z axis translation
@@ -267,8 +243,8 @@ class Object(MuSCAD):
         center_y: float = 0,
         center_z: float = 0,
     ) -> Object:
-        """
-        Applies a rotation to this object.
+        """Applies a rotation to this object.
+
         :param x: x angle
         :param y: y angle
         :param z: z angle
@@ -318,215 +294,129 @@ class Object(MuSCAD):
         return self.rotate(z=angle, center_x=center_x, center_y=center_y)
 
     def left_to_right(self) -> Object:
-        """
-        Alias for self.z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(180) :return: a rotated Object."""
         return self.z_rotate(180)
 
     def left_to_bottom(self) -> Object:
-        """
-        Alias for self.y_rotate(-90).z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.y_rotate(-90).z_rotate(90) :return: a rotated Object."""
         return self.y_rotate(-90).z_rotate(90)
 
     def left_to_top(self) -> Object:
-        """
-        Alias for self.y_rotate(90).z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.y_rotate(90).z_rotate(90) :return: a rotated Object."""
         return self.y_rotate(90).z_rotate(90)
 
     def left_to_front(self) -> Object:
-        """
-        Alias for self.z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(-90) :return: a rotated Object."""
         return self.z_rotate(-90)
 
     def left_to_back(self) -> Object:
-        """
-        Alias for self.z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(90) :return: a rotated Object."""
         return self.z_rotate(90)
 
     def right_to_bottom(self) -> Object:
-        """
-        Alias for self.y_rotate(90).z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.y_rotate(90).z_rotate(-90) :return: a rotated Object."""
         return self.y_rotate(90).z_rotate(-90)
 
     def right_to_top(self) -> Object:
-        """
-        Alias for self.y_rotate(-90).z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.y_rotate(-90).z_rotate(90) :return: a rotated Object."""
         return self.y_rotate(-90).z_rotate(90)
 
     def right_to_front(self) -> Object:
-        """
-        Alias for self.z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(90) :return: a rotated Object."""
         return self.z_rotate(90)
 
     def right_to_back(self) -> Object:
-        """
-        Alias for self.z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(-90) :return: a rotated Object."""
         return self.z_rotate(-90)
 
     def right_to_left(self) -> Object:
-        """
-        Alias for self.z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(180) :return: a rotated Object."""
         return self.z_rotate(180)
 
     def front_to_left(self) -> Object:
-        """
-        Alias for self.z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(90) :return: a rotated Object."""
         return self.z_rotate(90)
 
     def front_to_right(self) -> Object:
-        """
-        Alias for self.z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(-90) :return: a rotated Object."""
         return self.z_rotate(-90)
 
     def front_to_top(self) -> Object:
-        """
-        Alias for self.x_rotate(90).z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(90).z_rotate(180) :return: a rotated Object."""
         return self.x_rotate(90).z_rotate(180)
 
     def front_to_bottom(self) -> Object:
-        """
-        Alias for self.x_rotate(-90).z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90).z_rotate(180) :return: a rotated Object."""
         return self.x_rotate(-90).z_rotate(180)
 
     def front_to_back(self) -> Object:
-        """
-        Alias for self.z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(180) :return: a rotated Object."""
         return self.z_rotate(180)
 
     def back_to_left(self) -> Object:
-        """
-        Alias for self.z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(-90) :return: a rotated Object."""
         return self.z_rotate(-90)
 
     def back_to_right(self) -> Object:
-        """
-        Alias for self.z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.z_rotate(90) :return: a rotated Object."""
         return self.z_rotate(90)
 
     def back_to_front(self) -> Object:
         return self.z_rotate(180)
 
     def back_to_top(self) -> Object:
-        """
-        Alias for self.x_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90) :return: a rotated Object."""
         return self.x_rotate(-90)
 
     def back_to_bottom(self) -> Object:
-        """
-        Alias for self.x_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(90) :return: a rotated Object."""
         return self.x_rotate(90)
 
     def bottom_to_left(self) -> Object:
-        """
-        Alias for self.x_rotate(-90).z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90).z_rotate(-90) :return: a rotated Object."""
         return self.x_rotate(-90).z_rotate(-90)
 
     def bottom_to_right(self) -> Object:
-        """
-        Alias for self.x_rotate(-90).z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90).z_rotate(90) :return: a rotated Object."""
         return self.x_rotate(-90).z_rotate(90)
 
     def bottom_to_front(self) -> Object:
-        """
-        Alias for self.x_rotate(-90).z_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90).z_rotate(180) :return: a rotated Object."""
         return self.x_rotate(-90).z_rotate(180)
 
     def bottom_to_back(self) -> Object:
-        """
-        Alias for self.x_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90) :return: a rotated Object."""
         return self.x_rotate(-90)
 
     def bottom_to_top(self) -> Object:
-        """
-        Alias for self.x_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(180) :return: a rotated Object."""
         return self.x_rotate(180)
 
     def top_to_left(self) -> Object:
-        """
-        Alias for self.x_rotate(90).z_rotate(-90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(90).z_rotate(-90) :return: a rotated Object."""
         return self.x_rotate(90).z_rotate(-90)
 
     def top_to_right(self) -> Object:
-        """
-        Alias for self.x_rotate(90).z_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(90).z_rotate(90) :return: a rotated Object."""
         return self.x_rotate(90).z_rotate(90)
 
     def top_to_back(self) -> Object:
-        """
-        Alias for self.x_rotate(90)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(90) :return: a rotated Object."""
         return self.x_rotate(90)
 
     def top_to_front(self) -> Object:
-        """
-        Alias for self.x_rotate(-90).y_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(-90).y_rotate(180) :return: a rotated Object."""
         return self.x_rotate(-90).y_rotate(180)
 
     def top_to_bottom(self) -> Object:
-        """
-        Alias for self.x_rotate(180)
-        :return: a rotated Object
-        """
+        """Alias for self.x_rotate(180) :return: a rotated Object."""
         return self.x_rotate(180)
 
     def upside_down(self, x_axis: bool = False) -> Object:
-        """
-        Turns the object upside down on its y axis. Equivalent to self.y_rotate(180).
-        If x_axis is True, rotate on x axis instead (like top_to_bottom()).
+        """Turns the object upside down on its y axis.
+
+        Equivalent to self.y_rotate(180). If x_axis is True, rotate on x axis instead (like
+        top_to_bottom()).
         :return: an object rotated 180° on X or Y axis
         """
         if x_axis:
@@ -535,8 +425,8 @@ class Object(MuSCAD):
             return self.y_rotate(180)
 
     def scale(self, *, x: float = 1.0, y: float = 1.0, z: float = 1.0) -> Object:
-        """
-        Applies a scaling transformation to this object.
+        """Applies a scaling transformation to this object.
+
         :param x: x ratio
         :param y: y ratio
         :param z: z ratio
@@ -545,8 +435,8 @@ class Object(MuSCAD):
         return Scaling(x=x, y=y, z=z)(self)
 
     def mirror(self, *, x: float = 0, y: float = 0, z: float = 0) -> Object:
-        """
-        Applies a mirror transformation to this object.
+        """Applies a mirror transformation to this object.
+
         :param x: x mirror factor
         :param y: y mirror factor
         :param z: z mirror factor
@@ -555,8 +445,8 @@ class Object(MuSCAD):
         return Mirroring(x=x, y=y, z=z)(self)
 
     def x_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
-        """
-        Helper method to mirror this object on the X axis or a parallel.
+        """Helper method to mirror this object on the X axis or a parallel.
+
         :param center: the X coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
@@ -566,8 +456,8 @@ class Object(MuSCAD):
         return self.leftward(center).mirror(x=1).rightward(center)
 
     def y_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
-        """
-        Helper method to mirror this object on the Y axis or a parallel.
+        """Helper method to mirror this object on the Y axis or a parallel.
+
         :param center: the Y coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
@@ -577,8 +467,8 @@ class Object(MuSCAD):
         return self.backward(center).mirror(y=1).forward(center)
 
     def z_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
-        """
-        Helper method to mirror this object on the Z axis or a parallel.
+        """Helper method to mirror this object on the Z axis or a parallel.
+
         :param center: the Y coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
@@ -588,9 +478,7 @@ class Object(MuSCAD):
         return self.down(center).mirror(z=1).up(center)
 
     def project(self, cut: bool = False) -> Object:
-        """
-        Transform this object into a 2D shape by projecting it to the (x,y) plane.
-        """
+        """Transform this object into a 2D shape by projecting it to the (x,y) plane."""
         return Projection(cut=cut)(self)
 
     def linear_extrude(
@@ -603,16 +491,16 @@ class Object(MuSCAD):
         scale: float = 1.0,
         segments: Optional[int] = None,
     ) -> Object:
-        """
-        Applies a linear extrusion transformation to this object.
+        """Applies a linear extrusion transformation to this object.
+
         :param height: height of the extrusion
         :param center: if true, center the extrusion
         :param convexity:
         :param twist:
         :param slices:
         :param scale:
-        :param segments: number of segments. If None, automatically
-        determines the number of segments to get a good-looking round result.
+        :param segments: number of segments. If None, automatically determines the number of
+            segments to get a good-looking round result.
         """
         return LinearExtrusion(
             height=height,
@@ -711,12 +599,12 @@ class Object(MuSCAD):
         convexity: Optional[int] = None,
         segments: Optional[int] = None,
     ) -> Object:
-        """
-        Applies a rotational extrusion to this object.
+        """Applies a rotational extrusion to this object.
+
         :param angle:
         :param convexity:
-        :param segments: number of segments. If None, automatically
-        determines the number of segments to get a good-looking round result.
+        :param segments: number of segments. If None, automatically determines the number of
+            segments to get a good-looking round result.
         :return:
         """
         return RotationalExtrusion(
@@ -761,9 +649,23 @@ class Object(MuSCAD):
     def hull(self) -> Hull:
         return Hull(self)
 
+    def offset(
+        self,
+        r: float,
+        delta: float | None = None,
+        chamfer: bool = False,
+        invert: bool = False,
+    ) -> Object:
+        if invert:
+            if r < 0:
+                return self - self.offset(r, delta, chamfer)
+            else:
+                return self.offset(r, delta, chamfer) - self
+        return Offset(r=r, delta=delta, chamfer=chamfer)(self)
+
     def color(self, name: str, alpha: Optional[float] = None) -> Object:
-        """
-        Applies a color to this object.
+        """Applies a color to this object.
+
         :param name:
         :param alpha:
         :return:
@@ -771,22 +673,22 @@ class Object(MuSCAD):
         return Color(name, alpha=alpha)(self)
 
     def hole(self) -> Hole:
-        """
-        Turns this object into a Hole.
+        """Turns this object into a Hole.
+
         :return: a Hole
         """
         return Hole(self)
 
     def misc(self) -> Misc:
-        """
-        Turns this object into a Misc item.
+        """Turns this object into a Misc item.
+
         :return: a Misc
         """
         return Misc(self)
 
     def __invert__(self) -> Hole:
-        """
-        Operator alternative to .hole().
+        """Operator alternative to .hole().
+
         :return: a Hole based on this object
         """
         return self.hole()
@@ -910,19 +812,19 @@ class Object(MuSCAD):
 
 
 class Primitive(Object):
-    """
-    Base class for simple objects with no children.
-    Those are the primitive types such as Cube, Sphere, etc.
-    Do not instantiate this class directly.
+    """Base class for simple objects with no children.
+
+    Those are the primitive types such as Cube, Sphere, etc. Do not instantiate this class directly.
     """
 
     def __init__(self, **kwargs: Any):
         super().__init__()
         self.arguments = kwargs
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
-        """
-        Get a argument dict for this object. This must be implemented by subclasses
+    def _arguments(self) -> Dict[str | None, Any]:
+        """Get an argument dict for this object.
+
+        This must be implemented by subclasses
         :return: a dict of arguments as {"param_name": arg_value}
         """
         return self.arguments  # type: ignore[return-value]
@@ -930,8 +832,8 @@ class Primitive(Object):
     def _iter_arguments(
         self,
     ) -> Iterable[Tuple[Optional[str], typing.Union[str, float]]]:
-        """
-        Iterates over arguments.
+        """Iterates over arguments.
+
         :return: a iterator of (key, val) tuples
         """
         for key, val in self._arguments().items():
@@ -955,16 +857,17 @@ class Primitive(Object):
 
     @classmethod
     def _render_arguments(cls, params: Iterable[Tuple[Optional[str], Any]]) -> str:
-        """
-        Render the parameters for this object as OpenSCAD code. (anything between the parenthesis)
+        """Render the parameters for this object as OpenSCAD code.
+
+        (anything between the parenthesis)
         :return: a str
         """
         return ", ".join(f"{key}={val}" if key else f"{val}" for key, val in params)
 
     @render_comment
     def render(self) -> str:
-        """
-        Render this object as OpenSCAD code.
+        """Render this object as OpenSCAD code.
+
         :return: a str of OpenSCAD code
         """
         return f"{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())});"
@@ -974,22 +877,17 @@ class Primitive(Object):
 
 
 class Composite(Object):
-    """
-    Base class for Boolean operations (Union, Difference, Intersection)
-    """
+    """Base class for Boolean operations (Union, Difference, Intersection)"""
 
-    def __init__(self, *children: typing.Union[Object, Iterable[Object]]):
+    def __init__(self, *children: Object | Iterable[Object]):
         super().__init__()
         self.children: List[Object] = []
         if children:
             self.apply(*children)
 
-    def add_child(
-        self, child: typing.Union[Object, Iterable[Object], Literal[0]]
-    ) -> Object:
-        """
-        Add a children object to this Composite
-        :param child:
+    def add_child(self, child: Object | Iterable[Object] | Literal[0]) -> Object:
+        """Add a children object to this Composite :param child:
+
         :return:
         """
         if child == 0:  # for sum(*Objects)
@@ -1006,10 +904,7 @@ class Composite(Object):
         return self
 
     def _iter_children(self) -> Iterable[Object]:
-        """
-        Iterate over children
-        :return: an iterable
-        """
+        """Iterate over children :return: an iterable."""
         children = self.children
 
         # If the only children is a Union, return that union children directly
@@ -1025,8 +920,8 @@ class Composite(Object):
 
     @classmethod
     def _render_children(cls, children: Iterable[Object]) -> str:
-        """
-        Renders the children of this object as OpenSCAD code (anything between the brackets).
+        """Renders the children of this object as OpenSCAD code (anything between the brackets).
+
         :return: a str
         """
         return (
@@ -1035,8 +930,8 @@ class Composite(Object):
 
     @render_comment
     def render(self) -> str:
-        """
-        Render this composite as valid OpenSCAD code.
+        """Render this composite as valid OpenSCAD code.
+
         :return: a str
         """
         return (
@@ -1074,16 +969,11 @@ def top(children: Iterable[Object]) -> float:
 
 
 class Union(Composite):
-    """
-    OpenSCAD union()
-    """
+    """OpenSCAD union()"""
 
-    def __add__(self, other: Object) -> Object:
-        """
-        Adding to an Union adds a children instead of creating a new Union
-        :param other: a children object
-        :return: the same union with children appended
-        """
+    def __add__(self, other: Object | Iterable[Object]) -> Object:
+        """Adding to a Union adds a children instead of creating a new Union :param other: a
+        children object :return: the same union with children appended."""
         return self.add_child(other)
 
     @property
@@ -1111,10 +1001,7 @@ class Union(Composite):
         return top(self.children)
 
     def render(self) -> str:
-        """
-        If the union has a single child, render it redirectly
-        :return: a str
-        """
+        """If the union has a single child, render it redirectly :return: a str."""
         if len(self.children) == 1:
             return add_comment(self.children[0].render(), self.comment)
         return super().render()
@@ -1126,15 +1013,11 @@ class ImplicitUnion(Union):
 
 
 class Difference(Composite):
-    """
-    OpenSCAD difference()
-    """
+    """OpenSCAD difference()"""
 
-    def __sub__(self, other: typing.Union[Object, Misc, Hole]) -> Object:
-        """
-        Substracting from a Difference adds a children instead of creating a new Difference
-        :param other: a children object
-        :return: the same difference with children appended
+    def __sub__(self, other: Object | Misc | Hole | Iterable[Object]) -> Object:
+        """Substracting from a Difference adds a children instead of creating a new Difference
+        :param other: a children object :return: the same difference with children appended.
         """
         return self.add_child(other)
 
@@ -1164,15 +1047,11 @@ class Difference(Composite):
 
 
 class Intersection(Composite):
-    """
-    OpenSCAD intersection()
-    """
+    """OpenSCAD intersection()"""
 
     def __and__(self, other: Object) -> Object:
-        """
-        Intersecting with an Intersection adds a children instead of creating a new Intersection
-        :param other: a children object
-        :return: the same intersection with children appended
+        """Intersecting with an Intersection adds a children instead of creating a new Intersection
+        :param other: a children object :return: the same intersection with children appended.
         """
         return self.add_child(other)
 
@@ -1202,8 +1081,8 @@ class Intersection(Composite):
 
 
 class Transformation(Primitive):
-    """
-    Base class for transformations.
+    """Base class for transformations.
+
     MuSCAD Transformations can have 1 single child (which can be a Union of multiple children)
     """
 
@@ -1219,10 +1098,10 @@ class Transformation(Primitive):
         return self._child
 
     @child.setter
-    def child(self, value: Object):
+    def child(self, value: Object) -> None:
         self._child = value
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {}
 
     def apply(self, *children: Object) -> Object:
@@ -1244,15 +1123,15 @@ class Transformation(Primitive):
 
     @render_comment
     def render(self) -> str:
-        return f"{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())}) \n{self._render_child()}"
+        return f"{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())})\n{self._render_child()}"
 
     def childattr(self, item: str) -> Any:
-        """
-        Makes properties from the transformed object accessible through the Transformation
-        :param item:
+        """Makes properties from the transformed object accessible through the Transformation :param
+        item:
+
         :return:
         """
-        return self.copy()(getattr(self.child, item, None))
+        return self.copy()(getattr(self.child, item))
 
     def __getattr__(self, item: str) -> Any:
         return self.childattr(item)
@@ -1265,11 +1144,8 @@ class Transformation(Primitive):
         return self.child.file_name
 
     def combine(self, child: Transformation) -> Transformation:
-        """
-        When applying multiple transformations of the same type, those may be combined
-        :param child: another Primitive
-        :return: an object combining all transformations
-        """
+        """When applying multiple transformations of the same type, those may be combined :param
+        child: another Primitive :return: an object combining all transformations."""
         self.child = child
         return self
 
@@ -1329,20 +1205,22 @@ class Transformation(Primitive):
             yield self.copy()(child)
 
 
+from .primitives import Cube
+
 # import basic transformations to make sure all helpers work
 from .transformations import (
-    Translation,
-    Rotation,
-    Scaling,
-    Mirroring,
     Color,
-    LinearExtrusion,
-    RotationalExtrusion,
-    Slide,
     Hull,
+    LinearExtrusion,
+    Mirroring,
+    Offset,
     Projection,
+    Rotation,
+    RotationalExtrusion,
+    Scaling,
+    Slide,
+    Translation,
 )
-from .primitives import Cube
 
 
 class Hole(MuSCAD):
@@ -1390,14 +1268,12 @@ class Misc(MuSCAD):
         self.object.comment = value
 
     def hole(self) -> Hole:
-        """
-        Turns this Misc into a Hole
-        """
+        """Turns this Misc into a Hole."""
         return self.object.hole()
 
     def __invert__(self) -> Hole:
-        """
-        Operator alternative to .hole().
+        """Operator alternative to .hole().
+
         :return: a Hole based on this object
         """
         return self.object.hole()
@@ -1486,8 +1362,8 @@ def calc(
     to: Optional[float] = None,
     distance: Optional[float] = None,
 ) -> Tuple[float, float, float, float]:
-    """
-    Given at least 2 of from_, center, and distance, returns all 4.
+    """Given at least 2 of from_, center, and distance, returns all 4.
+
     If only distance is given, default to center = 0
     """
     if distance is not None and from_ is None and to is None and center is None:

@@ -3,18 +3,11 @@ from __future__ import annotations
 import typing
 from typing import Optional
 
-from muscad import calc
-from muscad import Cylinder
-from muscad import E
-from muscad import Hole
-from muscad import Misc
-from muscad import Object
-from muscad import Part
-from muscad import Volume
+from muscad import Cylinder, E, Hole, Misc, Object, Part, Volume, calc
 
 
 class Tube(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
         *args: typing.Union[Misc, Hole, Object],
         diameter: Optional[float] = None,
@@ -52,9 +45,7 @@ class Tube(Part):
     def tunnel(
         self, diameter: Optional[float] = None, radius: Optional[float] = None
     ) -> Tube:
-        """
-        Hollows the center of this tube, making it a tunnel
-        """
+        """Hollows the center of this tube, making it a tunnel."""
         if diameter is None and radius is None:
             raise ValueError("at least one of diameter or radius must be specified")
         if diameter is None and radius is not None:
@@ -76,9 +67,7 @@ class Tube(Part):
         bottom_distance: float = 0,
         top_distance: float = 0,
     ) -> Tube:
-        """
-        Turns a quarter of this tube into a cube
-        """
+        """Turns a quarter of this tube into a cube."""
         self.add_misc(
             Volume(
                 left=self.center_x,
@@ -92,9 +81,7 @@ class Tube(Part):
         return self
 
     def cut_corner(self, angle: float = 0) -> Tube:
-        """
-        Removes a quarter of this tube
-        """
+        """Removes a quarter of this tube."""
         self.add_hole(
             Volume(
                 left=self.center_x,
@@ -108,9 +95,7 @@ class Tube(Part):
         return self
 
     def add_side(self, angle: float = 0, distance: float = 0) -> Tube:
-        """
-        Turns a quarter of this tube into a cube
-        """
+        """Turns a quarter of this tube into a cube."""
         self.add_misc(
             Volume(
                 left=self.center_x,

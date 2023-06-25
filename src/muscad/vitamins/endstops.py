@@ -1,15 +1,6 @@
-from muscad import Circle
-from muscad import Cube
-from muscad import Cylinder
-from muscad import EE
-from muscad import EEE
-from muscad import Hull
-from muscad import MirroredPart
-from muscad import Object
-from muscad import Part
-from muscad import Square
-from muscad import Union
-from muscad import Volume
+from typing_extensions import Self
+
+from muscad import Circle, Cube, Cylinder, Hull, Object, Part, Volume
 from muscad.utils.surface import Surface
 from muscad.utils.tube import Tube
 from muscad.vitamins.bolts import Bolt
@@ -100,7 +91,7 @@ class OpticalEndstop(Part):
         )
     )
 
-    def add_bolts(self, bolt):
+    def add_bolts(self, bolt: Object) -> Self:
         self.left_bolt = (
             bolt.bottom_to_front()
             .align(
@@ -162,11 +153,11 @@ class MechanicalSwitchEndstop(Part):
 
 
 class InductionSensor(Part):
-    def init(self, diameter, length):
+    def init(self, diameter: float, length: float) -> None:  # type: ignore[override]
         self.sensor = Cylinder(d=diameter, h=length)
 
     @classmethod
-    def LJ12A3(cls, T=0.2):
+    def LJ12A3(cls, T: float = 0.2) -> Self:
         return cls(12 + 2 * T, 60)
 
 
@@ -206,7 +197,7 @@ class MechanicalEndstopOnPCB(Part):
         .misc()
     )
 
-    def init(self, bolt: Object = Bolt.M3(10).add_nut(-3), z_offset: float = -3):
+    def init(self, bolt: Object = Bolt.M3(10).add_nut(-3), z_offset: float = -3) -> None:  # type: ignore[override]
         if bolt:
             self.bolts = (
                 bolt.bottom_to_top()
@@ -236,7 +227,9 @@ class BLTouchClassic(Part):
     )
     pin = Tube(diameter=2, top=body.bottom, height=11)
 
-    def init(self, bolt=Bolt.M3(20).add_nut(-4, inline_clearance_size=10)):
+    def init(  # type: ignore[override]
+        self, bolt: Object = Bolt.M3(20).add_nut(-4, inline_clearance_size=10)
+    ) -> None:
         self.bolts = (
             bolt.align(center_x=9, bottom=self.attachment.bottom - 3)
             .x_mirror(0, True)

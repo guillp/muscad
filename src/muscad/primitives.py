@@ -1,17 +1,10 @@
 """This modules contains 2D & 3D Primitives classes that match OpenSCAD primitives."""
 import os
 import sys
-import typing
-from typing import Any
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from muscad.base import Primitive
-from muscad.point import Point2D
-from muscad.point import Point3D
+from muscad.base import Object, Primitive
+from muscad.point import Point2D, Point3D
 
 
 class Cube(Primitive):
@@ -59,7 +52,7 @@ class Cube(Primitive):
     def top(self) -> float:
         return self.height / 2
 
-    def _arguments(self) -> Dict[str, Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "size": Point3D(self._width, self._depth, self._height),
             "center": True,
@@ -82,7 +75,7 @@ class Cylinder(Primitive):
             segments = int(d * 3.14 / 0.4)
         self.segments = segments
 
-    def _arguments(self):
+    def _arguments(self) -> Dict[str | None, Any]:
         if self.top_diameter is None:
             return {
                 "h": self._height,
@@ -99,105 +92,110 @@ class Cylinder(Primitive):
         }
 
     @property
-    def width(self):
+    def width(self) -> float:
         return max(self.diameter, self.top_diameter or 0)
 
     @property
-    def depth(self):
+    def depth(self) -> float:
         return self.width
 
     @property
-    def height(self):
+    def height(self) -> float:
         return self._height
 
     @property
-    def left(self):
+    def left(self) -> float:
         return -self.width / 2
 
     @property
-    def right(self):
+    def right(self) -> float:
         return self.width / 2
 
     @property
-    def back(self):
+    def back(self) -> float:
         return -self.width / 2
 
     @property
-    def front(self):
+    def front(self) -> float:
         return self.width / 2
 
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return -self.height / 2
 
     @property
-    def top(self):
+    def top(self) -> float:
         return self.height / 2
 
-    def half_down(self):
+    def half_down(self) -> Object:
         return self.down(self.height / 2)
 
-    def half_up(self):
+    def half_up(self) -> Object:
         return self.up(self.height / 2)
 
 
 class Sphere(Primitive):
-    def __init__(self, d, segments=None):
+    def __init__(self, d: float, segments: int | None = None) -> None:
         super().__init__()
         self._diameter = d
         if segments is None:
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self):
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
-    def width(self):
+    def width(self) -> float:
         return self._diameter
 
     @property
-    def depth(self):
+    def depth(self) -> float:
         return self._diameter
 
     @property
-    def height(self):
+    def height(self) -> float:
         return self._diameter
 
     @property
-    def left(self):
+    def left(self) -> float:
         return -self._diameter / 2
 
     @property
-    def right(self):
+    def right(self) -> float:
         return self._diameter / 2
 
     @property
-    def back(self):
+    def back(self) -> float:
         return -self._diameter / 2
 
     @property
-    def front(self):
+    def front(self) -> float:
         return self._diameter / 2
 
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return -self._diameter / 2
 
     @property
-    def top(self):
+    def top(self) -> float:
         return self._diameter / 2
 
 
 class Polyhedron(Primitive):
-    def __init__(self, points, faces, convexity=1):
+    def __init__(
+        self,
+        points: Iterable[Point3D | Sequence[float]],
+        faces: Iterable[Iterable[int]],
+        convexity: int = 1,
+    ) -> None:
         super().__init__()
         self.points = list(self.unpack_points(points))
         self.faces = [list(face) for face in faces]
         self.convexity = convexity
 
     @staticmethod
-    def unpack_points(points):
+    def unpack_points(points: Iterable[Point3D | Sequence[float]]) -> Iterable[Point3D]:
         for point in points:
             if isinstance(point, Point3D):
                 yield point
@@ -210,7 +208,7 @@ class Polyhedron(Primitive):
                     point,
                 )
 
-    def _arguments(self):
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "points": self.points,
             "faces": self.faces,
@@ -221,53 +219,53 @@ class Polyhedron(Primitive):
 # 2D Primitives
 class Primitive2D(Primitive):
     @property
-    def bottom(self):
+    def bottom(self) -> float:
         return 0
 
     @property
-    def top(self):
+    def top(self) -> float:
         return 0
 
     @property
-    def height(self):
+    def height(self) -> float:
         return 0
 
 
 class Circle(Primitive2D):
-    def __init__(self, d, segments=None):
+    def __init__(self, d: float, segments: int | None = None) -> None:
         super().__init__()
         self._diameter = d
         if segments is None:
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self):
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
-    def left(self):
+    def left(self) -> float:
         return -self._diameter / 2
 
     @property
-    def right(self):
+    def right(self) -> float:
         return self._diameter / 2
 
     @property
-    def back(self):
+    def back(self) -> float:
         return -self._diameter / 2
 
     @property
-    def front(self):
+    def front(self) -> float:
         return self._diameter / 2
 
 
 class Square(Primitive2D):
-    def __init__(self, width: float, depth: float):
+    def __init__(self, width: float, depth: float) -> None:
         super().__init__()
         self._width = width
         self._depth = depth
 
-    def _arguments(self) -> Dict[Optional[str], Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {"size": Point2D(self._width, self._depth), "center": True}
 
     @property
@@ -300,15 +298,15 @@ class Text(Primitive2D):
         self,
         text: str,
         size: int = 10,
-        font: str = None,
-        halign: str = None,
-        valign: str = None,
-        spacing: int = None,
-        direction: str = None,
-        language: str = None,
-        script: str = None,
-        segments: int = None,
-    ):
+        font: str | None = None,
+        halign: str | None = None,
+        valign: str | None = None,
+        spacing: int | None = None,
+        direction: str | None = None,
+        language: str | None = None,
+        script: str | None = None,
+        segments: int | None = None,
+    ) -> None:
         super().__init__()
         self.text = text
         self.size = size
@@ -321,7 +319,7 @@ class Text(Primitive2D):
         self.script = script
         self.segments = segments
 
-    def _arguments(self) -> Dict[str, Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "text": self.text,
             "size": self.size,
@@ -371,11 +369,11 @@ class Text(Primitive2D):
 class Polygon(Primitive2D):
     def __init__(
         self,
-        *points: typing.Union[Point2D, Tuple[float, float]],
-        path: Iterable[int] = None,
-        hole_paths: Iterable[Iterable[int]] = None,
-        convexity: int = None
-    ):
+        *points: Point2D | Tuple[float, float],
+        path: Iterable[int] | None = None,
+        hole_paths: Iterable[Iterable[int]] | None = None,
+        convexity: int | None = None
+    ) -> None:
         super().__init__()
         self.points = list(self.unpack_points(points))
         if hole_paths:
@@ -389,7 +387,7 @@ class Polygon(Primitive2D):
 
     @staticmethod
     def unpack_points(
-        points: Iterable[typing.Union[Point2D, Tuple[float, float]]]
+        points: Iterable[Point2D | Tuple[float, float]]
     ) -> Iterable[Point2D]:
         for point in points:
             if isinstance(point, Point2D):
@@ -403,7 +401,7 @@ class Polygon(Primitive2D):
                     point,
                 )
 
-    def _arguments(self) -> Dict[str, Any]:
+    def _arguments(self) -> Dict[str | None, Any]:
         return {
             "points": self.points,
             "paths": self.paths,
@@ -428,7 +426,9 @@ class Polygon(Primitive2D):
 
 
 class Import(Primitive):
-    def __init__(self, file, convexity=None, layer=None):
+    def __init__(
+        self, file: str, convexity: int | None = None, layer: str | None = None
+    ) -> None:
         if not os.path.isabs(file):
             file = os.path.join(os.path.dirname(sys.argv[0]), file)
         super().__init__(file=file, convexity=convexity, layer=layer)

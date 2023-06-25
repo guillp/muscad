@@ -1,8 +1,9 @@
-from ..conftest import compare_str
 from muscad.vitamins.brackets import CastBracket
 
+from ..conftest import compare_str
 
-def test_castbracket3030():
+
+def test_castbracket3030() -> None:
     compare_str(
         CastBracket.bracket3030(),
         """difference() {

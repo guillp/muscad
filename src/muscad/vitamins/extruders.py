@@ -1,6 +1,4 @@
-from muscad import Cylinder
-from muscad import Part
-from muscad import T
+from muscad import Cylinder, Part, T
 from muscad.utils.stack import stack
 from muscad.utils.volume import Volume
 

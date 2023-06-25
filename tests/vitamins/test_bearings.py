@@ -1,10 +1,9 @@
-"""Tests for muscad.vitamins.bearings"""
+"""Tests for muscad.vitamins.bearings."""
+from muscad.vitamins.bearings import BushingLinearBearing
 from tests.conftest import compare_str
 
-from muscad.vitamins.bearings import BushingLinearBearing
 
-
-def test_bushing():
+def test_bushing() -> None:
     BushingLinearBearing.SC8UU()
 
     test = BushingLinearBearing.SC8UU()

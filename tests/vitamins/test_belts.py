@@ -1,8 +1,9 @@
-from ..conftest import compare_str
 from muscad.vitamins.belts import Belt
 
+from ..conftest import compare_str
 
-def test_gt2():
+
+def test_gt2() -> None:
     assert compare_str(
         Belt.GT2(50),
         """union() {

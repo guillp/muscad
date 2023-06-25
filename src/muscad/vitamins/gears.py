@@ -1,51 +1,49 @@
 """A port of https://www.thingiverse.com/thing:3575 in MuSCAD."""
-from muscad import Circle
-from muscad import Cube
-from muscad import Cylinder
-from muscad import E
-from muscad import EE
-from muscad import Part
-from muscad import Polygon
-from muscad import Polyhedron
-from muscad.helpers import asin
-from muscad.helpers import atan
-from muscad.helpers import catheti
-from muscad.helpers import cos
-from muscad.helpers import degrees
-from muscad.helpers import hypotenuse
-from muscad.helpers import pi
-from muscad.helpers import sin
-from muscad.helpers import tan
-from muscad.point import Point2D
-from muscad.point import Point3D
+from typing import Iterable, Literal
+
+from muscad import (
+    EE,
+    Circle,
+    Cube,
+    Cylinder,
+    E,
+    Object,
+    Part,
+    Polygon,
+    Polyhedron,
+    Union,
+)
+from muscad.helpers import asin, atan, catheti, cos, degrees, hypotenuse, pi, sin, tan
+from muscad.point import Point2D, Point3D
 
 
 class Gear(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
-        nb_teeth=15,
-        circular_pitch=None,
-        diametral_pitch=None,
-        pressure_angle=28,
-        clearance=0.2,
-        gear_thickness=5,
-        rim_thickness=8,
-        rim_width=5,
-        hub_thickness=10,
-        hub_diameter=15,
-        bore_diameter=5,
-        nb_holes=0,
-        backlash=0,
-        twist=0,
-        involute_facets="auto",
-    ):
-        if not circular_pitch and not diametral_pitch:
+        nb_teeth: int = 15,
+        circular_pitch: float | None = None,
+        diametral_pitch: float | None = None,
+        pressure_angle: float = 28,
+        clearance: float = 0.2,
+        gear_thickness: float = 5,
+        rim_thickness: float = 8,
+        rim_width: float = 5,
+        hub_thickness: float = 10,
+        hub_diameter: float = 15,
+        bore_diameter: float = 5,
+        nb_holes: int = 0,
+        backlash: float = 0,
+        twist: float = 0,
+        involute_facets: int | Literal["auto"] = "auto",
+    ) -> None:
+        if diametral_pitch and not circular_pitch:
+            circular_pitch = 180 / diametral_pitch
+
+        if not circular_pitch:
             raise ValueError(
                 "gear module needs either a diametral_pitch or circular_pitch"
             )
 
-        # Convert diametrial pitch to our native circular pitch
-        circular_pitch = circular_pitch if circular_pitch else 180 / diametral_pitch
         # Pitch diameter: Diameter of pitch circle
         pitch_diameter = nb_teeth * circular_pitch / 180
         pitch_radius = pitch_diameter / 2
@@ -122,15 +120,15 @@ class Gear(Part):
     @classmethod
     def gear_shape(
         cls,
-        nb_teeth,
-        pitch_radius,
-        root_radius,
-        base_radius,
-        outer_radius,
-        half_thick_angle,
-        involute_facets,
-    ):
-        return Circle(segments=nb_teeth * 2, d=root_radius * 2) + sum(
+        nb_teeth: int,
+        pitch_radius: float,
+        root_radius: float,
+        base_radius: float,
+        outer_radius: float,
+        half_thick_angle: float,
+        involute_facets: int | Literal["auto"] = "auto",
+    ) -> Object:
+        return Circle(segments=nb_teeth * 2, d=root_radius * 2) + Union(
             cls.involute_gear_tooth(
                 pitch_radius=pitch_radius,
                 root_radius=root_radius,
@@ -144,14 +142,13 @@ class Gear(Part):
 
     @staticmethod
     def involute_gear_tooth(
-        pitch_radius,
-        root_radius,
-        base_radius,
-        outer_radius,
-        half_thick_angle,
-        involute_facets="auto",
-    ):
-
+        pitch_radius: float,
+        root_radius: float,
+        base_radius: float,
+        outer_radius: float,
+        half_thick_angle: float,
+        involute_facets: int | Literal["auto"] = "auto",
+    ) -> Object:
         min_radius = max(base_radius, root_radius)
         pitch_angle = Point2D.involute(
             base_radius, involute_intersect_angle(base_radius, pitch_radius)
@@ -164,7 +161,7 @@ class Gear(Part):
         if involute_facets == "auto":
             involute_facets = int(base_radius * pi / 200) or 5
 
-        def iter_facets(involute_facets):
+        def iter_facets(involute_facets: int) -> Iterable[Polygon]:
             for i in range(1, involute_facets + 1):
                 point1 = Point2D.involute(
                     base_radius,
@@ -183,25 +180,25 @@ class Gear(Part):
                     point1.y_mirror(),
                 )
 
-        return sum(iter_facets(involute_facets))
+        return Union(iter_facets(involute_facets))
 
 
 class BevelGear(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
-        nb_teeth=11,
-        cone_distance=100,
-        face_width=20,
-        outside_circular_pitch=1000,
-        pressure_angle=30,
-        clearance=0.2,
-        bore_diameter=5,
-        gear_thickness=15,
-        backlash=0,
-        involute_facets="auto",
-        finish=None,
-        nb_holes=0,
-    ):
+        nb_teeth: int = 11,
+        cone_distance: float = 100,
+        face_width: float = 20,
+        outside_circular_pitch: float = 1000,
+        pressure_angle: float = 30,
+        clearance: float = 0.2,
+        bore_diameter: float = 5,
+        gear_thickness: float = 15,
+        backlash: float = 0,
+        involute_facets: int | Literal["auto"] = "auto",
+        finish: Literal["bevel_gear_flat", "bevel_gear_back_cone"] | None = None,
+        nb_holes: int = 0,
+    ) -> None:
         outside_pitch_diameter = nb_teeth * outside_circular_pitch / 180
         outside_pitch_radius = outside_pitch_diameter / 2
         pitch_apex = catheti(cone_distance, outside_pitch_radius)
@@ -267,7 +264,7 @@ class BevelGear(Part):
             d2=0,
             h=apex_to_apex,
             segments=nb_teeth * 2,
-        ).align(bottom=pitch_apex - apex_to_apex).z_rotate(half_thick_angle) + sum(
+        ).align(bottom=pitch_apex - apex_to_apex).z_rotate(half_thick_angle) + Union(
             self.involute_bevel_gear_tooth(
                 back_cone_radius=back_cone_radius,
                 root_radius=root_radius,
@@ -343,13 +340,13 @@ class BevelGear(Part):
     @classmethod
     def pair(
         cls,
-        nb_tooth1=41,
-        nb_tooth2=16,
-        axis_angle=90,
-        outside_circular_pitch=1000,
-        nb_holes1=0,
-        nb_holes2=0,
-    ):
+        nb_tooth1: int = 41,
+        nb_tooth2: int = 16,
+        axis_angle: float = 90,
+        outside_circular_pitch: float = 1000,
+        nb_holes1: int = 0,
+        nb_holes2: int = 0,
+    ) -> tuple[Object, Object]:
         outside_pitch_radius1 = nb_tooth1 * outside_circular_pitch / 360
         outside_pitch_radius2 = nb_tooth2 * outside_circular_pitch / 360
 
@@ -363,39 +360,39 @@ class BevelGear(Part):
         pitch_angle2 = asin(outside_pitch_radius2 / cone_distance)
 
         return (
-            (
-                cls(
-                    nb_teeth=nb_tooth1,
-                    cone_distance=cone_distance,
-                    pressure_angle=30,
-                    outside_circular_pitch=outside_circular_pitch,
-                    nb_holes=nb_holes1,
-                ).down(pitch_apex1)
-                + cls(
-                    nb_teeth=nb_tooth2,
-                    cone_distance=cone_distance,
-                    pressure_angle=30,
-                    outside_circular_pitch=outside_circular_pitch,
-                    nb_holes=nb_holes2,
-                )
-                .down(pitch_apex2)
-                .y_rotate(-pitch_angle1 - pitch_angle2)
+            cls(
+                nb_teeth=nb_tooth1,
+                cone_distance=cone_distance,
+                pressure_angle=30,
+                outside_circular_pitch=outside_circular_pitch,
+                nb_holes=nb_holes1,
             )
+            .up(20)
+            .z_rotate(90),
+            cls(
+                nb_teeth=nb_tooth2,
+                cone_distance=cone_distance,
+                pressure_angle=30,
+                outside_circular_pitch=outside_circular_pitch,
+                nb_holes=nb_holes2,
+            )
+            .down(pitch_apex2)
+            .y_rotate(-pitch_angle1 - pitch_angle2)
             .up(pitch_apex1 + 20)
-            .z_rotate(90)
+            .z_rotate(90),
         )
 
     @staticmethod
     def involute_bevel_gear_tooth(
-        back_cone_radius,
-        root_radius,
-        base_radius,
-        outer_radius,
-        pitch_apex,
-        cone_distance,
-        half_thick_angle,
-        involute_facets="auto",
-    ):
+        back_cone_radius: float,
+        root_radius: float,
+        base_radius: float,
+        outer_radius: float,
+        pitch_apex: float,
+        cone_distance: float,
+        half_thick_angle: float,
+        involute_facets: int | Literal["auto"] = "auto",
+    ) -> Object:
         min_radius = max(base_radius * 2, root_radius * 2)
         pitch_angle = Point2D.involute(
             base_radius * 2,
@@ -408,7 +405,7 @@ class BevelGear(Part):
         if involute_facets == "auto":
             involute_facets = int(base_radius * 3.14 / 200) or 5
 
-        def iter_facets(involute_facets):
+        def iter_facets(involute_facets: int) -> Iterable[Polyhedron]:
             for i in range(1, involute_facets + 1):
                 point1 = Point2D.involute(
                     base_radius * 2,
@@ -441,14 +438,14 @@ class BevelGear(Part):
                 )
 
         return (
-            sum(iter_facets(involute_facets))
+            Union(iter_facets(involute_facets))
             .translate(x=-back_cone_radius * 2, z=-cone_distance * 2)
             .y_rotate(-atan(back_cone_radius / cone_distance))
             .up(pitch_apex)
         )
 
 
-def involute_intersect_angle(base_radius, radius):
+def involute_intersect_angle(base_radius: float, radius: float) -> float:
     return degrees(catheti(radius / base_radius, 1))
 
 
@@ -460,6 +457,5 @@ if __name__ == "__main__":
         hub_thickness=17,
         nb_holes=8,
     ).render_to_file()
-    BevelGear.pair(
-        nb_tooth1=40, nb_tooth2=40, nb_holes1=6, nb_holes2=4
-    ).render_to_file()
+    gear1, gear2 = BevelGear.pair(nb_tooth1=40, nb_tooth2=40, nb_holes1=6, nb_holes2=4)
+    (gear1 + gear2).render_to_file("gear_pair")

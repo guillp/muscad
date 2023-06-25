@@ -1,14 +1,17 @@
-from ..conftest import compare_str
 from muscad.vitamins.bolts import Bolt
-from muscad.vitamins.endstops import BIQUEndstop
-from muscad.vitamins.endstops import InductionSensor
-from muscad.vitamins.endstops import MechanicalEndstopOnPCB
-from muscad.vitamins.endstops import MechanicalSwitchEndstop
-from muscad.vitamins.endstops import OpticalEndstop
-from muscad.vitamins.endstops import OptoSwitch
+from muscad.vitamins.endstops import (
+    BIQUEndstop,
+    InductionSensor,
+    MechanicalEndstopOnPCB,
+    MechanicalSwitchEndstop,
+    OpticalEndstop,
+    OptoSwitch,
+)
+
+from ..conftest import compare_str
 
 
-def test_optoswitch():
+def test_optoswitch() -> None:
     compare_str(
         OptoSwitch(),
         """difference() {
@@ -37,7 +40,7 @@ def test_optoswitch():
     )
 
 
-def test_optical_endstop():
+def test_optical_endstop() -> None:
     compare_str(
         OpticalEndstop(),
         """difference() {
@@ -95,7 +98,7 @@ def test_optical_endstop():
     )
 
 
-def test_biqu_endstop():
+def test_biqu_endstop() -> None:
     compare_str(
         BIQUEndstop(),
         """union() {
@@ -116,7 +119,7 @@ def test_biqu_endstop():
     )
 
 
-def test_mechanical_switch_endstop():
+def test_mechanical_switch_endstop() -> None:
     compare_str(
         MechanicalSwitchEndstop(),
         """union() {
@@ -149,7 +152,7 @@ def test_mechanical_switch_endstop():
     )
 
 
-def test_induction_sensor():
+def test_induction_sensor() -> None:
     compare_str(
         InductionSensor.LJ12A3(),
         """// sensor
@@ -157,7 +160,7 @@ cylinder(h=60, d=12.4, $fn=97, center=true);""",
     )
 
 
-def test_mechanical_endstop_on_pcb():
+def test_mechanical_endstop_on_pcb() -> None:
     compare_str(
         MechanicalEndstopOnPCB(Bolt.M3(10)),
         """union() {

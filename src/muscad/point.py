@@ -1,7 +1,4 @@
-from muscad.helpers import atan2
-from muscad.helpers import cos
-from muscad.helpers import radians
-from muscad.helpers import sin
+from muscad.helpers import atan2, cos, radians, sin
 
 
 class Vector:
@@ -53,7 +50,7 @@ class Point2D(Vector):
         )
 
     def to_3d(self, z: float = 0) -> "Point3D":
-        """Turns this Point2D into a Point3D"""
+        """Turns this Point2D into a Point3D."""
         return Point3D(self.x, self.y, z)
 
 

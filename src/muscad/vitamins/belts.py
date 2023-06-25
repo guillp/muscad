@@ -1,10 +1,7 @@
 """This contains commonly used belts profiles."""
 from __future__ import annotations
 
-from muscad import E
-from muscad import Part
-from muscad import Polygon
-from muscad import Union
+from muscad import E, Part, Polygon, Union
 from muscad.utils.volume import Volume
 
 GT2_2mm_profile = Polygon(
@@ -39,7 +36,7 @@ GT2_2mm_profile = Polygon(
 
 
 class Belt(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
         profile: Polygon,
         length: float,

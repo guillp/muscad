@@ -1,37 +1,37 @@
+"""A Nut and Bolts library.
+
+Some measurements are taken from the MCAD library at
+https://github.com/SolidCode/MCAD/blob/master/nuts_and_bolts.scad
 """
-A Nut and Bolts library.
-Some measurements are taken from the MCAD library at https://github.com/SolidCode/MCAD/blob/master/nuts_and_bolts.scad
-"""
-from muscad import Cube
-from muscad import Cylinder
-from muscad import E
-from muscad import Hull
+from typing_extensions import Self
+
+from muscad import Cube, Cylinder, E, Hull
 from muscad.part import Part
 
 
 class Nut(Part):
-    def init(self, width, thickness, segments=6):
+    def init(self, width: float, thickness: float, segments: int = 6) -> None:  # type: ignore[override]
         self._width = width
         self._thickness = thickness
         self.nut = Cylinder(d=width, h=thickness, segments=segments)
 
     @classmethod
-    def M3(cls, T=0.2):
+    def M3(cls, T: float = 0.2) -> Self:
         return cls(6.4 + 2 * T, 2.4 + 2 * T)
 
 
 class Bolt(Part):
-    def init(
+    def init(  # type: ignore[override]
         self,
-        diameter,
-        length,
-        head_height,
-        head_diameter,
-        nut_diameter,
-        head_clearance=0,
-        head=True,
-        thread_clearance=0,
-    ):
+        diameter: float,
+        length: float,
+        head_height: float,
+        head_diameter: float,
+        nut_diameter: float,
+        head_clearance: float = 0,
+        head: bool = True,
+        thread_clearance: float = 0,
+    ) -> None:
         self.thread = Cylinder(d=diameter, h=length)
         if thread_clearance:
             self.tread_clearance = (
@@ -58,12 +58,12 @@ class Bolt(Part):
 
     def add_nut(
         self,
-        placement=0,
-        inline_clearance_size=0,
-        side_clearance_size=0,
-        angle=0,
-        T=0.2,
-    ):
+        placement: float = 0,
+        inline_clearance_size: float = 0,
+        side_clearance_size: float = 0,
+        angle: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         nut_width = self.nut_diameter
         nut_thickness = self.head_height
         if placement < 0:
@@ -77,12 +77,14 @@ class Bolt(Part):
         )
         self.add_misc(nut)
         if inline_clearance_size > 0:
-            self.inline_nut_clearance = Hull(nut, nut.up(inline_clearance_size)).misc()
+            self.inline_nut_clearance = Hull(
+                nut.object, nut.up(inline_clearance_size)
+            ).misc()
         if side_clearance_size > 0:
             self.nut_clearance = (
                 Cube(
                     side_clearance_size,
-                    nut_width / 2 * 3 ** 0.5 + T,
+                    nut_width / 2 * 3**0.5 + T,
                     nut_thickness,
                 )
                 .align(
@@ -97,7 +99,15 @@ class Bolt(Part):
         return self
 
     @classmethod
-    def M2(cls, length, *, head=True, head_clearance=0, thread_clearance=0, T=0.2):
+    def M2(
+        cls,
+        length: float,
+        *,
+        head: bool = True,
+        head_clearance: float = 0,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=1.98 + 2 * T,
             length=length,
@@ -112,14 +122,14 @@ class Bolt(Part):
     @classmethod
     def M3(
         cls,
-        length,
+        length: float,
         *,
-        head=True,
-        head_clearance=0,
-        head_height=2.4,
-        thread_clearance=0,
-        T=0.2,
-    ):
+        head: bool = True,
+        head_clearance: float = 0,
+        head_height: float = 2.4,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=2.98 + 2 * T,
             length=length,
@@ -141,7 +151,7 @@ class Bolt(Part):
         head_clearance: float = 0,
         thread_clearance: float = 0,
         T: float = 0.2,
-    ):
+    ) -> Self:
         return cls(
             diameter=3.978 + 2 * T,
             length=length,
@@ -154,7 +164,14 @@ class Bolt(Part):
         )
 
     @classmethod
-    def M5(cls, length, *, head=True, head_clearance=0, T=0.2):
+    def M5(
+        cls,
+        length: float,
+        *,
+        head: bool = True,
+        head_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=4.976 + 2 * T,
             length=length,
@@ -168,14 +185,14 @@ class Bolt(Part):
     @classmethod
     def M6(
         cls,
-        length,
+        length: float,
         *,
-        head=True,
-        head_clearance=0,
-        head_height=6,
-        thread_clearance=0,
-        T=0.2,
-    ):
+        head: bool = True,
+        head_clearance: float = 0,
+        head_height: float = 6,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=5.974 + 2 * T,
             length=length,
@@ -190,13 +207,13 @@ class Bolt(Part):
     @classmethod
     def M8(
         cls,
-        length,
+        length: float,
         *,
-        head=True,
-        head_clearance=100,
-        thread_clearance=0,
-        T=0.2,
-    ):
+        head: bool = True,
+        head_clearance: float = 100,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=7.972 + 2 * T,
             length=length,
@@ -211,13 +228,13 @@ class Bolt(Part):
     @classmethod
     def M10(
         cls,
-        length,
+        length: float,
         *,
-        head=True,
-        head_clearance=100,
-        thread_clearance=0,
-        T=0.2,
-    ):
+        head: bool = True,
+        head_clearance: float = 100,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=9.968 + 2 * T,
             length=length,
@@ -232,13 +249,13 @@ class Bolt(Part):
     @classmethod
     def M12(
         cls,
-        length,
+        length: float,
         *,
-        head=True,
-        head_clearance=100,
-        thread_clearance=0,
-        T=0.2,
-    ):
+        head: bool = True,
+        head_clearance: float = 100,
+        thread_clearance: float = 0,
+        T: float = 0.2,
+    ) -> Self:
         return cls(
             diameter=11.966 + 2 * T,
             length=length,

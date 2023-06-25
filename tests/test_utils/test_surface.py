@@ -1,10 +1,6 @@
 """Tests for the Surface helper class."""
+from muscad import Circle, Square, Surface, Union
 from tests.conftest import compare_str
-
-from muscad import Circle
-from muscad import Square
-from muscad import Surface
-from muscad import Union
 
 
 def test_heart_z() -> None:

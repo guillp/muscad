@@ -1,9 +1,9 @@
+from muscad.vitamins.fans import Blower, Fan
+
 from ..conftest import compare_str
-from muscad.vitamins.fans import Blower
-from muscad.vitamins.fans import Fan
 
 
-def test_blower():
+def test_blower() -> None:
     compare_str(
         Blower.blower50x50x15(),
         """union() {
@@ -69,7 +69,7 @@ def test_blower():
     )
 
 
-def test_fan():
+def test_fan() -> None:
     compare_str(
         Fan.fan40x40x20().add_tunnel(40, 60),
         """union() {

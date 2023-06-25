@@ -1,13 +1,13 @@
-from muscad import Cylinder
-from muscad import E
-from muscad import Part
-from muscad import TT
-from muscad import Union
+from typing_extensions import Self
+
+from muscad import TT, Cylinder, E, Object, Part, Union
 from muscad.utils.volume import Volume
 
 
 class Board(Part):
-    def init(self, width, depth, height=2, misc_height=20):
+    def init(  # type: ignore[override]
+        self, width: float, depth: float, height: float = 2, misc_height: float = 20
+    ) -> None:
         self.board = Volume(
             center_x=0,
             width=width,
@@ -26,7 +26,7 @@ class Board(Part):
         )
         self.bolts = Union().misc()
 
-    def add_bolt(self, bolt, x, y):
+    def add_bolt(self, bolt: Object, x: float, y: float) -> Self:
         if x < 0:
             x = self.board.right + x
         else:
@@ -40,7 +40,7 @@ class Board(Part):
         return self
 
     @classmethod
-    def mks_sbase(cls, bolt=None):
+    def mks_sbase(cls, bolt: Object | None = None) -> Self:
         board = cls(146.5, 95)
         if bolt:
             board.add_bolt(bolt, 4, 4)
@@ -50,7 +50,7 @@ class Board(Part):
         return board
 
     @classmethod
-    def smps300rs(cls, bolt=None):
+    def smps300rs(cls, bolt: Object | None = None) -> Self:
         board = cls(100, 100)
         if bolt:
             board.add_bolt(bolt, 4, 4)
@@ -60,7 +60,7 @@ class Board(Part):
         return board
 
     @classmethod
-    def lcd12864(cls, bolt=None):
+    def lcd12864(cls, bolt: Object | None = None) -> Self:
         lcd = cls(93, 70, height=1.5, misc_height=0)
         if bolt:
             lcd.add_bolt(bolt, 2.6, 2.6)
@@ -142,7 +142,7 @@ class Board(Part):
         return lcd
 
     @classmethod
-    def raspberry_pi_3b(cls, bolt=None):
+    def raspberry_pi_3b(cls, bolt: Object | None = None) -> Self:
         board = cls(85, 56)
         if bolt:
             board.add_bolt(bolt, 3.5, 3.5)

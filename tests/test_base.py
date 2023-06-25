@@ -1,19 +1,11 @@
 """Tests for all MuSCAD primitives."""
 import pytest
+
+from muscad import Circle, Cube, E, Echo, Object, Sphere, Square, Text, Union, calc
 from tests.conftest import compare_str
 
-from muscad import calc
-from muscad import Circle
-from muscad import Cube
-from muscad import E
-from muscad import Echo
-from muscad import Sphere
-from muscad import Square
-from muscad import Text
-from muscad import Union
 
-
-def test_calc():
+def test_calc() -> None:
     # calc() returns (from, center, to, distance)
     assert calc(from_=0, to=10) == (0, 5, 10, 10)
     assert calc(from_=0, center=5) == (0, 5, 10, 10)
@@ -31,12 +23,67 @@ def test_calc():
     with pytest.raises(ValueError):
         calc()
 
-    calc(from_=0, center=4, to=10, distance=10)
+    with pytest.raises(ValueError):
+        calc(from_=0, center=4, to=10, distance=10)
+
+    from_, center, to, distance = calc(from_=0, center=5, to=10, distance=10)
+    assert from_ == 0
+    assert center == 5
+    assert to == 10
+    assert distance == 10
+
+    from_, center, to, distance = calc(from_=0, center=5)
+    assert from_ == 0
+    assert center == 5
+    assert to == 10
+    assert distance == 10
+
+    from_, center, to, distance = calc(from_=5, center=0)
+    assert from_ == -5
+    assert center == 0
+    assert to == 5
+    assert distance == 10
+
+    from_, center, to, distance = calc(from_=5, distance=10)
+    assert from_ == 5
+    assert center == 10
+    assert to == 15
+    assert distance == 10
+
+    from_, center, to, distance = calc(center=5, to=10)
+    assert from_ == 0
+    assert center == 5
+    assert to == 10
+    assert distance == 10
+
+    from_, center, to, distance = calc(center=10, to=5)
+    assert from_ == 5
+    assert center == 10
+    assert to == 15
+    assert distance == 10
+
+    from_, center, to, distance = calc(from_=10, distance=-10)
+    assert from_ == 0
+    assert center == 5
+    assert to == 10
+    assert distance == 10
+
+    from_, center, to, distance = calc(from_=10, to=-10)
+    assert from_ == -10
+    assert center == 0
+    assert to == 10
+    assert distance == 20
+
+    with pytest.raises(ValueError):
+        calc(from_=5, center=0, to=-8)
+
+    with pytest.raises(ValueError):
+        calc(from_=0, center=4, to=10, distance=10)
 
 
 def test_cube() -> None:
     """Test for Cube."""
-    cube = Cube(50, 50, 50)
+    cube: Object = Cube(50, 50, 50)
     cube -= Text("top", halign="center", valign="center").z_linear_extrude(
         1, top=cube.top + E
     )
@@ -101,7 +148,7 @@ def test_modifiers() -> None:
 def test_sum() -> None:
     """Test for sum() that creates Unions."""
     assert compare_str(
-        sum(Cube(1, 1, x) for x in range(2)),
+        Union(Cube(1, 1, x) for x in range(2)),
         """union() {
   cube(size=[1, 1, 0], center=true);
   cube(size=[1, 1, 1], center=true);
@@ -213,63 +260,6 @@ def test_intersection() -> None:
     assert intersect.bottom == -3
     assert intersect.top == 3
     assert intersect.center_z == 0
-
-
-def test_calc() -> None:
-    """Test for the calc() function."""
-    from_, center, to, distance = calc(from_=0, center=5, to=10, distance=10)
-    assert from_ == 0
-    assert center == 5
-    assert to == 10
-    assert distance == 10
-
-    from_, center, to, distance = calc(from_=0, center=5)
-    assert from_ == 0
-    assert center == 5
-    assert to == 10
-    assert distance == 10
-
-    from_, center, to, distance = calc(from_=5, center=0)
-    assert from_ == -5
-    assert center == 0
-    assert to == 5
-    assert distance == 10
-
-    from_, center, to, distance = calc(from_=5, distance=10)
-    assert from_ == 5
-    assert center == 10
-    assert to == 15
-    assert distance == 10
-
-    from_, center, to, distance = calc(center=5, to=10)
-    assert from_ == 0
-    assert center == 5
-    assert to == 10
-    assert distance == 10
-
-    from_, center, to, distance = calc(center=10, to=5)
-    assert from_ == 5
-    assert center == 10
-    assert to == 15
-    assert distance == 10
-
-    from_, center, to, distance = calc(from_=10, distance=-10)
-    assert from_ == 0
-    assert center == 5
-    assert to == 10
-    assert distance == 10
-
-    from_, center, to, distance = calc(from_=10, to=-10)
-    assert from_ == -10
-    assert center == 0
-    assert to == 10
-    assert distance == 20
-
-    with pytest.raises(ValueError):
-        calc(from_=5, center=0, to=-8)
-
-    with pytest.raises(ValueError):
-        calc(from_=0, center=4, to=10, distance=10)
 
 
 def test_color() -> None:

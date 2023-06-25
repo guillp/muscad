@@ -1,9 +1,6 @@
 """Tests for the Part class."""
+from muscad import Cube, MirroredPart, Part
 from tests.conftest import compare_str
-
-from muscad import Cube
-from muscad import MirroredPart
-from muscad import Part
 
 
 def test_part() -> None:

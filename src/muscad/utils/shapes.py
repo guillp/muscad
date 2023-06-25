@@ -1,7 +1,5 @@
 """The Shape class, which contains helpers for commonly used 3D Shapes."""
-from muscad import Cylinder
-from muscad import EE
-from muscad import Object
+from muscad import EE, Cylinder, Object
 
 
 class Shape:
