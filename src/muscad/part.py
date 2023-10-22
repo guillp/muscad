@@ -38,6 +38,7 @@ class Part(Composite):
 
     Those objects can be added to that Part using add_child(), add_misc() or add_hole().
     All class attributes that are instances of Object, Misc or Hole will be added to all instances of this Part.
+
     """
 
     class_parts: list[Object]
@@ -63,6 +64,7 @@ class Part(Composite):
         :param name: the attribute name
         :param obj: the attribute value
         :return:
+
         """
         if isinstance(obj, Misc):
             obj = obj.object
@@ -88,6 +90,7 @@ class Part(Composite):
 
         :param args:
         :param kwargs:
+
         """
         super().__init__()
         self.children = self.class_parts.copy() if hasattr(self, "class_parts") else []
@@ -106,6 +109,7 @@ class Part(Composite):
 
         :param kwargs:
         :return:
+
         """
         for o in args:
             if isinstance(o, Misc):
@@ -152,6 +156,7 @@ class Part(Composite):
         Note that misc items are untouched, so it probably makes no sense to revert a part
         containing misc items.
         :return: the same part, with holes and children reverted
+
         """
         self.children, self.holes = self.holes, self.children
         return self
@@ -207,6 +212,7 @@ class Part(Composite):
         can be overridden in subclasses. By default, it does nothing.
         :param renderable: the part to postprocess for rendering
         :return: the postprocessed renderable
+
         """
         return renderable
 
@@ -355,6 +361,7 @@ class RotationalExtrudedPart(Part):
 
     You must build your part flat along the Y axis and have the shape defined on the positive X
     axis.
+
     """
 
     def init(  # type: ignore[override]

@@ -88,6 +88,7 @@ class Surface:
         """Makes a square surface with rounded corners.
 
         Each corner can have a different radius
+
         """
         return cls.custom_corners(
             fl=Circle(fl) if fl > 0 else Square(1, 1),
@@ -122,6 +123,7 @@ class Surface:
         :param d:
         :param kwargs:
         :return:
+
         """
         return cls.rounded_corners(
             d,
@@ -151,6 +153,7 @@ class Surface:
         :param x3: third point X coordinate
         :param y3: third point Y coordiante
         :return: a Surface that is a Circle touching the 3 points
+
         """
         temp = x2**2 + y2**2
         bc = (x1**2 + y1**2 - temp) / 2
@@ -176,11 +179,12 @@ class Surface:
         """Returns the largest regular Polygon with `nb_sides` sides contained in a circle of
         `radius`.
 
-        Difference compared to a simple Circle(segments=nb_sides) is that the object dimensions
-        are those of the Polygon, not the circle.
+        Difference compared to a simple Circle(segments=nb_sides) is that the object dimensions are
+        those of the Polygon, not the circle.
         :param nb_sides:
         :param radius:
         :return: a 2D Polygon
+
         """
         if nb_sides <= 2:
             return Square(radius, 0)

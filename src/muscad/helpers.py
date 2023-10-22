@@ -11,6 +11,7 @@ def normalize_angle(angle: float) -> float:
 
     :param angle: an angle value, in degrees
     :return: an angle between 0 included and 360 excluded
+
     """
     while angle < 0:
         angle = angle + 360
@@ -77,6 +78,7 @@ def camel_to_snake(name: str) -> str:
 
     :param name: a name in CamelCase
     :return: a name in snake_case
+
     """
     name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()

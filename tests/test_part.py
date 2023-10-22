@@ -7,6 +7,7 @@ def test_part() -> None:
     """Basic tests for a Part.
 
     Checks that a Part contain a single child has the same bounding box as this child.
+
     """
     cube = Cube(8, 10, 12)
     part = Part()

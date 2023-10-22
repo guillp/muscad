@@ -41,12 +41,12 @@ class MuSCADError(Exception):
 
 
 def indent(s: str, token: str = "  ") -> str:
-    """
-    Indents a given string, with characters from ``token``
-    Each line will be prefixed by token.
+    """Indents a given string, with characters from ``token`` Each line will be prefixed by token.
+
     :param s: the string to indent (may contain multiple lines, separated by '\n'
     :param token: the string to use as indentation
     :return: the indented string
+
     """
     return token + s.replace("\n", f"\n{token}")
 
@@ -77,6 +77,7 @@ class Object(MuSCAD):
     """Base class for all OpenSCAD geometry objects.
 
     Do not instantiate this class directly.
+
     """
 
     object_name: str
@@ -87,6 +88,7 @@ class Object(MuSCAD):
         :param name: a string (if explicitly declared)
         :param kwargs: remaining attributes (unused)
         :return: a subclass with a `name` attribute
+
         """
         super().__init_subclass__()
         if name is None:
@@ -98,6 +100,7 @@ class Object(MuSCAD):
         """Base constructor for Objects.
 
         :param children:
+
         """
         self.modifier: str = ""
         self.comment: Optional[str] = None
@@ -107,6 +110,7 @@ class Object(MuSCAD):
 
         :param m: one of OpenSCAD's modifiers, as a single char str, or None to remove the modifier.
         :return: the same object, with modifier applied
+
         """
         if not m:
             self.modifier = ""
@@ -134,6 +138,7 @@ class Object(MuSCAD):
         """Remove any previously applied modifier.
 
         :return: the same object, with any modifier removed
+
         """
         return self.set_modifier(None)
 
@@ -143,11 +148,8 @@ class Object(MuSCAD):
         return Union(self, other)
 
     def __radd__(self, other: Literal[0]) -> Object:
-        """
-        Makes sure sum(*[object, ...]) works
-        :param other: another object, or 0
-        :return: a Union of both objects
-        """
+        """Makes sure sum(*[object, ...]) works :param other: another object, or 0 :return: a Union
+        of both objects."""
         assert other == 0
         return self
 
@@ -156,6 +158,7 @@ class Object(MuSCAD):
 
         :param other: another object
         :return: a Difference of self - other
+
         """
         return Difference(self, other)
 
@@ -171,6 +174,7 @@ class Object(MuSCAD):
         :param y: y axis translation
         :param z: z axis translation
         :return: a translated object
+
         """
         if x == y == z == 0:
             return self
@@ -186,51 +190,40 @@ class Object(MuSCAD):
         return self.translate(z=z)
 
     def rightward(self, dist: float) -> Object:
-        """
-        Helper method to apply a Translation to the right on X axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated to the right by `dist` mm
+        """Helper method to apply a Translation to the right on X axis on the current object :param
+        dist: distance in mm :return: an object, translated to the right by `dist` mm.
         """
         return self.x_translate(dist)
 
     def leftward(self, dist: float) -> Object:
-        """
-        Helper method to apply a Translation to the left on X axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated to the left by `dist` mm
-        """
+        """Helper method to apply a Translation to the left on X axis on the current object :param
+        dist: distance in mm :return: an object, translated to the left by `dist` mm."""
         return self.x_translate(-dist)
 
     def forward(self, dist: float) -> Object:
-        """
-        Helper method to apply a forward Translation on Y axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated forwards by `dist` mm
+        """Helper method to apply a forward Translation on Y axis on the current object :param dist:
+
+        distance in mm :return: an object, translated forwards by `dist` mm.
+
         """
         return self.y_translate(dist)
 
     def backward(self, dist: float) -> Object:
-        """
-        Helper method to apply a backward Translation on Y axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated backwards by `dist` mm
-        """
+        """Helper method to apply a backward Translation on Y axis on the current object :param
+        dist: distance in mm :return: an object, translated backwards by `dist` mm."""
         return self.y_translate(-dist)
 
     def up(self, dist: float) -> Object:
-        """
-        Helper method to apply a upwards Translation on Z axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated upwards by `dist` mm
+        """Helper method to apply a upwards Translation on Z axis on the current object :param dist:
+
+        distance in mm :return: an object, translated upwards by `dist` mm.
+
         """
         return self.z_translate(dist)
 
     def down(self, dist: float) -> Object:
-        """
-        Helper method to apply a downwards Translation on Z axis on the current object
-        :param dist: distance in mm
-        :return: an object, translated downwards by `dist` mm
-        """
+        """Helper method to apply a downwards Translation on Z axis on the current object :param
+        dist: distance in mm :return: an object, translated downwards by `dist` mm."""
         return self.z_translate(-dist)
 
     def rotate(
@@ -249,6 +242,7 @@ class Object(MuSCAD):
         :param y: y angle
         :param z: z angle
         :return: a rotated object
+
         """
         x = normalize_angle(x)
         y = normalize_angle(y)
@@ -266,31 +260,22 @@ class Object(MuSCAD):
     def x_rotate(
         self, angle: float, center_y: float = 0, center_z: float = 0
     ) -> Object:
-        """
-        Helper method to apply a Rotation on X axis on the current object
-        :param angle: angle in degrees
-        :return: an object, rotated by `angle` degrees on X axis
-        """
+        """Helper method to apply a Rotation on X axis on the current object :param angle: angle in
+        degrees :return: an object, rotated by `angle` degrees on X axis."""
         return self.rotate(x=angle, center_y=center_y, center_z=center_z)
 
     def y_rotate(
         self, angle: float, center_x: float = 0, center_z: float = 0
     ) -> Object:
-        """
-        Helper method to apply a Rotation on Y axis on the current object
-        :param angle: angle in degrees
-        :return: an object, rotated by `angle` degrees on Y axis
-        """
+        """Helper method to apply a Rotation on Y axis on the current object :param angle: angle in
+        degrees :return: an object, rotated by `angle` degrees on Y axis."""
         return self.rotate(y=angle, center_x=center_x, center_z=center_z)
 
     def z_rotate(
         self, angle: float, center_x: float = 0, center_y: float = 0
     ) -> Object:
-        """
-        Helper method to apply a Rotation on Z axis on the current object
-        :param angle: angle in degrees
-        :return: an object, rotated by `angle` degrees on Z axis
-        """
+        """Helper method to apply a Rotation on Z axis on the current object :param angle: angle in
+        degrees :return: an object, rotated by `angle` degrees on Z axis."""
         return self.rotate(z=angle, center_x=center_x, center_y=center_y)
 
     def left_to_right(self) -> Object:
@@ -418,6 +403,7 @@ class Object(MuSCAD):
         Equivalent to self.y_rotate(180). If x_axis is True, rotate on x axis instead (like
         top_to_bottom()).
         :return: an object rotated 180° on X or Y axis
+
         """
         if x_axis:
             return self.x_rotate(180)
@@ -431,6 +417,7 @@ class Object(MuSCAD):
         :param y: y ratio
         :param z: z ratio
         :return: a scaled object
+
         """
         return Scaling(x=x, y=y, z=z)(self)
 
@@ -441,6 +428,7 @@ class Object(MuSCAD):
         :param y: y mirror factor
         :param z: z mirror factor
         :return: a mirrored object
+
         """
         return Mirroring(x=x, y=y, z=z)(self)
 
@@ -450,6 +438,7 @@ class Object(MuSCAD):
         :param center: the X coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
+
         """
         if keep:
             return self.x_mirror(center, keep=False) + self
@@ -461,6 +450,7 @@ class Object(MuSCAD):
         :param center: the Y coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
+
         """
         if keep:
             return self.backward(center).mirror(y=1).forward(center) + self
@@ -472,6 +462,7 @@ class Object(MuSCAD):
         :param center: the Y coordinate of the axis to mirror on
         :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
+
         """
         if keep:
             return self.down(center).mirror(z=1).up(center) + self
@@ -501,6 +492,7 @@ class Object(MuSCAD):
         :param scale:
         :param segments: number of segments. If None, automatically determines the number of
             segments to get a good-looking round result.
+
         """
         return LinearExtrusion(
             height=height,
@@ -606,6 +598,7 @@ class Object(MuSCAD):
         :param segments: number of segments. If None, automatically determines the number of
             segments to get a good-looking round result.
         :return:
+
         """
         return RotationalExtrusion(
             angle=angle,
@@ -669,6 +662,7 @@ class Object(MuSCAD):
         :param name:
         :param alpha:
         :return:
+
         """
         return Color(name, alpha=alpha)(self)
 
@@ -676,6 +670,7 @@ class Object(MuSCAD):
         """Turns this object into a Hole.
 
         :return: a Hole
+
         """
         return Hole(self)
 
@@ -683,6 +678,7 @@ class Object(MuSCAD):
         """Turns this object into a Misc item.
 
         :return: a Misc
+
         """
         return Misc(self)
 
@@ -690,6 +686,7 @@ class Object(MuSCAD):
         """Operator alternative to .hole().
 
         :return: a Hole based on this object
+
         """
         return self.hole()
 
@@ -815,6 +812,7 @@ class Primitive(Object):
     """Base class for simple objects with no children.
 
     Those are the primitive types such as Cube, Sphere, etc. Do not instantiate this class directly.
+
     """
 
     def __init__(self, **kwargs: Any):
@@ -826,6 +824,7 @@ class Primitive(Object):
 
         This must be implemented by subclasses
         :return: a dict of arguments as {"param_name": arg_value}
+
         """
         return self.arguments  # type: ignore[return-value]
 
@@ -835,6 +834,7 @@ class Primitive(Object):
         """Iterates over arguments.
 
         :return: a iterator of (key, val) tuples
+
         """
         for key, val in self._arguments().items():
             if val is None:
@@ -861,6 +861,7 @@ class Primitive(Object):
 
         (anything between the parenthesis)
         :return: a str
+
         """
         return ", ".join(f"{key}={val}" if key else f"{val}" for key, val in params)
 
@@ -869,6 +870,7 @@ class Primitive(Object):
         """Render this object as OpenSCAD code.
 
         :return: a str of OpenSCAD code
+
         """
         return f"{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())});"
 
@@ -889,6 +891,7 @@ class Composite(Object):
         """Add a children object to this Composite :param child:
 
         :return:
+
         """
         if child == 0:  # for sum(*Objects)
             return self
@@ -923,6 +926,7 @@ class Composite(Object):
         """Renders the children of this object as OpenSCAD code (anything between the brackets).
 
         :return: a str
+
         """
         return (
             "{" + "".join(f"\n{indent(child.render())}" for child in children) + "\n}"
@@ -933,6 +937,7 @@ class Composite(Object):
         """Render this composite as valid OpenSCAD code.
 
         :return: a str
+
         """
         return (
             f"{self.modifier}{self.object_name}() "
@@ -1084,6 +1089,7 @@ class Transformation(Primitive):
     """Base class for transformations.
 
     MuSCAD Transformations can have 1 single child (which can be a Union of multiple children)
+
     """
 
     def __init__(self, *children: Object):
@@ -1275,6 +1281,7 @@ class Misc(MuSCAD):
         """Operator alternative to .hole().
 
         :return: a Hole based on this object
+
         """
         return self.object.hole()
 
@@ -1365,6 +1372,7 @@ def calc(
     """Given at least 2 of from_, center, and distance, returns all 4.
 
     If only distance is given, default to center = 0
+
     """
     if distance is not None and from_ is None and to is None and center is None:
         center = 0

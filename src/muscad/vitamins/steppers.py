@@ -45,6 +45,7 @@ class StepperMotor(Part):
         :param d: diameter of the bulge
         :param h: height of the bulge
         :return: the stepper object, with bulge added
+
         """
         self.central_bulge = (
             Cylinder(d=d, h=h + 1)
@@ -87,6 +88,7 @@ class StepperMotor(Part):
         :param d: diameter of the shaft
         :param length: lenght of the shaft
         :return: the stepper object, with shaft added
+
         """
         self.shaft = (
             Cylinder(d=d, h=length + 2)
@@ -116,6 +118,7 @@ class StepperMotor(Part):
         :param holes: holes index to screw bolts in
         :param T: tolerance
         :return: a StepperMotor
+
         """
         width = 42.3
         spacing = 31.04

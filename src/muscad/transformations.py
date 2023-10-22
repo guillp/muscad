@@ -671,6 +671,7 @@ class Slide(Transformation):
     If the object is a Composite, each part component is hulled to its translated self. This is
     useful for parts that must be slided into their final position, such as screws. Bounding box of
     the original object is untouched..
+
     """
 
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
