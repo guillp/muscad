@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterable
 
 from typing_extensions import Self
@@ -63,8 +65,12 @@ class StepperMotor(Part):
         holes: Iterable[int] = (0, 1, 2, 3),
         depth: float = 5,
     ) -> Self:
-        """Adds the gearbox on the shaft side of the stepper :param d: diameter of the gearbox
-        :param h: height of the gearbox :return: the stepper object, with gearbox added.
+        """Adds the gearbox on the shaft side of the stepper.
+
+        :param d: diameter of the gearbox
+        :param h: height of the gearbox
+        :return: the stepper object, with gearbox added.
+
         """
         self.gearbox = Cylinder(d=d, h=h + E).align(
             center_x=self.body.center_x,

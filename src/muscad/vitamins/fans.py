@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterable
 
 from typing_extensions import Self
@@ -109,9 +111,9 @@ class Fan(Part):
 
     @classmethod
     def fan40x40x20(
-        cls, bolts: bool = True, bolt: Object = Bolt.M3(25).add_nut(-E), T: float = 0.2
+        cls, bolt: Object | None = Bolt.M3(25).add_nut(-E), T: float = 0.2
     ) -> Self:
         fan = cls(width=40 + 2 * T, height=20 + 2 * T, r=2)
-        if bolts:
+        if bolt:
             fan.add_bolts(bolt, 32)
         return fan

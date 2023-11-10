@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from muscad import Circle, Hull, Object, Point2D, Polygon, Square, calc
 
 
@@ -211,7 +213,7 @@ class Surface:
         ).align(left=0, back=0)
 
     @classmethod
-    def chamfer(self, radius: float) -> Object:
+    def chamfer(cls, radius: float) -> Object:
         chamfer_width = ((radius**2) * 2) ** 0.5
         return Square(radius, radius).align(back=0, left=0) - Square(
             chamfer_width, chamfer_width

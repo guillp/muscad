@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
 
 from muscad import EE, Cube, E, Object, Part, calc
 from muscad.utils.fillet import Chamfer, Fillet
@@ -10,18 +9,18 @@ class Volume(Part):
     def init(  # type: ignore[override]
         self,
         *,
-        left: Optional[float] = None,
-        center_x: Optional[float] = None,
-        right: Optional[float] = None,
-        width: Optional[float] = None,
-        back: Optional[float] = None,
-        center_y: Optional[float] = None,
-        front: Optional[float] = None,
-        depth: Optional[float] = None,
-        bottom: Optional[float] = None,
-        center_z: Optional[float] = None,
-        top: Optional[float] = None,
-        height: Optional[float] = None,
+        left: float | None = None,
+        center_x: float | None = None,
+        right: float | None = None,
+        width: float | None = None,
+        back: float | None = None,
+        center_y: float | None = None,
+        front: float | None = None,
+        depth: float | None = None,
+        bottom: float | None = None,
+        center_z: float | None = None,
+        top: float | None = None,
+        height: float | None = None,
     ) -> None:
         self._left, self._center_x, self._right, self._width = calc(
             left, center_x, right, width

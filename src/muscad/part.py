@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, Iterable, Iterator, Literal, Type
+from typing import Any, Iterable, Iterator, Literal, ClassVar
 
 from muscad import (
     EE,
     Composite,
     Hole,
-    List,
     Misc,
     Object,
     Union,
@@ -21,7 +20,7 @@ from muscad import (
 )
 
 
-def walk_mro_until(cls: Type[Any], supercls: Type[Any]) -> Iterator[Type[Any]]:
+def walk_mro_until(cls: type[Any], supercls: type[Any]) -> Iterator[type[Any]]:
     for c in cls.mro():
         if c == supercls:
             break
@@ -33,17 +32,17 @@ class Part(Composite):
 
     A Part is made of 3 kind of objects:
     - instances of Object, which will form the "main" structure of this Part
-    - instances of Misc, which are miscellaneous items that will not be taken into account when evaluating this Part dimensions
-    - instances of Hole, which will be "unfillable" holes which will be substracted from that Part.
+    - instances of Misc, which are misc items that will not be taken into account when evaluating this Part dimensions
+    - instances of Hole, which will be "unfillable" holes which will be substracted from the other objects
 
     Those objects can be added to that Part using add_child(), add_misc() or add_hole().
     All class attributes that are instances of Object, Misc or Hole will be added to all instances of this Part.
 
     """
 
-    class_parts: list[Object]
-    class_misc: list[Object]
-    class_holes: list[Object]
+    class_parts: ClassVar[list[Object]]
+    class_misc: ClassVar[list[Object]]
+    class_holes: ClassVar[list[Object]]
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """When creating an inherited class, sort all class-level attributes and make lists of all
@@ -353,7 +352,7 @@ class MirroredPart(Part):
         return top(self.children)
 
 
-from muscad.primitives import Square
+from muscad.primitives import Square, Cube
 
 
 class RotationalExtrudedPart(Part):

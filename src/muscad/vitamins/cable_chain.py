@@ -1,4 +1,4 @@
-from typing import Tuple
+from __future__ import annotations
 
 from muscad.utils.tube import Tube
 
@@ -42,7 +42,7 @@ class CableChain:
     @classmethod
     def couple(
         cls, outer_diameter: float = 16, inner_diameter: float = 6, T: float = 0.2
-    ) -> Tuple[Tube, Tube]:
+    ) -> tuple[Tube, Tube]:
         return cls.female(outer_diameter, inner_diameter, T), cls.male(
             outer_diameter, inner_diameter, T
         )

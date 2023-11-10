@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import typing
 
 from muscad import Misc, Object, Part
 
 
-def stack(*parts: typing.Union[Object, Misc], overlap: float = 0.01) -> Part:
+def stack(*parts: Object | Misc, overlap: float = 0.01) -> Part:
     """Stack each part on top of each other :param parts: all parts :param overlap: separation
     between each part (positive value: pieces will overlap, negative value: pieces will be
     separated) :return: parts stacked on top of each other, bottom to top."""

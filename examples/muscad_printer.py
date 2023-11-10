@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import Literal
 
@@ -707,7 +709,7 @@ class XCarriage(Part):
     ).fillet_depth(2)
 
     fan = (
-        ~Fan.fan40x40x20(bolts=False)
+        ~Fan.fan40x40x20(bolt=None)
         .add_bolts(
             bolt=Bolt.M3(30).add_nut(-8.5, side_clearance_size=10, angle=180, T=0.1),
             spacing=32,
@@ -1492,8 +1494,8 @@ class XYIdler(Part):
     inner_y_pulley = (
         ~Pulley.placeholder(18, 10.3)
         .add_clearance(10, 270)
-        .add_belt_clearance(10, 270, True)
-        .add_belt_clearance(40, 180)
+        .add_belt_clearance(10, angle=270, left=True)
+        .add_belt_clearance(40, angle=180)
         .align(
             center_x=gantry.y_stepper.center_x + 10,
             center_y=z_extrusion.back,
@@ -1566,10 +1568,10 @@ xy_idler_clamp_right = xy_idler_clamp_left.x_mirror(center=frame.center_x)
 
 class XYIdlerLeft(XYIdler):
     outer_y_pulley = (
-        ~Pulley.placeholder(18, 10.3)
+        ~Pulley.placeholder(18, height=10.3)
         .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(70, 270, True)
+        .add_belt_clearance(40, angle=180)
+        .add_belt_clearance(70, angle=270, left=True)
         .align(
             center_x=XYIdler.y_rod.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER,
             center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
@@ -1589,10 +1591,10 @@ class XYIdlerLeft(XYIdler):
     )
 
     x_pulley = (
-        ~Pulley.placeholder(18, 10.3)
+        ~Pulley.placeholder(18, height=10.3)
         .add_clearance(10, 270)
-        .add_belt_clearance(10, 270, True)
-        .add_belt_clearance(40, 180)
+        .add_belt_clearance(10, angle=270, left=True)
+        .add_belt_clearance(40, angle=180)
         .align(
             center_x=outer_y_pulley.center_x + 10,
             center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
@@ -1616,10 +1618,10 @@ xy_idler_left = XYIdlerLeft()
 
 class XYIdlerRight(XYIdler):
     outer_x_pulley = (
-        ~Pulley.placeholder(18, 10.3)
+        ~Pulley.placeholder(18, height=10.3)
         .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(40, 270, True)
+        .add_belt_clearance(40, angle=180)
+        .add_belt_clearance(40, angle=270, left=True)
         .align(
             center_x=gantry.y_stepper.center_x,
             center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
@@ -1638,10 +1640,10 @@ class XYIdlerRight(XYIdler):
     )
 
     outer_y_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(70, 270, True)
+        ~Pulley.placeholder(18, height=10.3)
+        .add_clearance(20, angle=0)
+        .add_belt_clearance(40, angle=180)
+        .add_belt_clearance(70, angle=270, left=True)
         .align(
             center_x=gantry.y_stepper.center_x,
             center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
@@ -2630,7 +2632,7 @@ z_bracket_bottom_right_front = z_bracket_bottom_right_back.y_mirror(
 )
 
 
-class ZBracketTop(Part):
+class ZBracketTopLeft(Part):
     extrusion = ~frame.y_extrusion_left_middle
     rod = ~gantry.z_rod_left_front
 
@@ -2711,12 +2713,83 @@ class ZBracketTop(Part):
         return self.upside_down()
 
 
-z_bracket_top_left_front = ZBracketTop()
+z_bracket_top_left_front = ZBracketTopLeft()
 z_bracket_top_left_back = z_bracket_top_left_front.y_mirror(
     gantry.z_threaded_rod_left.center_y
 )
 z_bracket_top_right_front = z_bracket_top_left_front.x_mirror(bed.center_x)
 z_bracket_top_right_back = z_bracket_top_left_back.x_mirror(bed.center_x)
+
+
+class ZBracketTop(MirroredPart, y=True, keep_y=True):
+    extrusion = ~frame.y_extrusion_left_middle.debug()
+    rod = ~gantry.z_rod_left_front.debug()
+
+    body = (
+        Volume(
+            left=extrusion.left + 3,
+            right=extrusion.right - 1,
+            back=0,
+            front=rod.front - 10,
+            bottom=extrusion.bottom + 4,
+            top=rod.top - E,
+        )
+        .fillet_height(4, left=True, front=True)
+        .fillet_width(4, bottom=True)
+    )
+
+    rod_holder = Surface.free(
+        Circle(d=16).align(center_x=extrusion.right - 1, front=rod.back),
+        Circle(d=6).align(right=rod.right + 3, back=rod.back - 5),
+        Circle(d=6).align(right=rod.right + 3, front=rod.front + 3),
+        Circle(d=4).align(left=rod.left - 15, front=rod.front + 3),
+        Circle(d=4).align(center_x=body.right, front=body.front),
+    ).z_linear_extrude(top=body.top, distance=10)
+
+    rod_holder_bolt = (
+        ~Bolt.M3(20, head_clearance=20)
+        .add_nut(-4, angle=90, inline_clearance_size=20)
+        .bottom_to_front()
+        .align(
+            center_x=rod.left - 5,
+            center_y=rod.center_y - 2,
+            center_z=rod_holder.center_z,
+        )
+    )
+    rod_holder_clearance = ~Volume(
+        right=rod.left + 1,
+        left=extrusion.left,
+        center_y=rod.center_y,
+        depth=2,
+        center_z=rod_holder.center_z,
+        height=rod_holder.height + 1,
+    )
+
+    top_bolt = (
+        ~Bolt.M6(12, head_clearance=40)
+        .top_to_bottom()
+        .align(
+            center_x=extrusion.center_x,
+            center_y=body.front - 10,
+            center_z=extrusion.top + 3,
+        )
+    )
+
+    side_bolt = (
+        ~Bolt.M6(12)
+        .bottom_to_left()
+        .align(
+            center_x=extrusion.left,
+            center_y=0,
+            center_z=extrusion.center_z,
+        )
+        .slide(z=-20)
+        .debug()
+    )
+
+
+z_bracket_top = ZBracketTop()
+z_bracket_top.render_to_file()
 
 
 class ZStepperMount(Part):
@@ -3267,6 +3340,79 @@ class CableClip(Part):
 cable_clip = CableClip()
 
 
+class MotorCableGuide(Part):
+    body = (
+        Volume(
+            left=frame.y_extrusion_right_middle.right,
+            width=15,
+            front=frame.z_extrusion_right_front.front + 15,
+            back=mainboard_mount.back,
+            top=frame.y_extrusion_right_middle.top - 2,
+            bottom=frame.y_extrusion_right_middle.bottom + 2,
+        )
+        .fillet_width(back=True, r=8)
+        .fillet_height(front=True, right=True)
+    )
+    front_part = Volume(
+        left=frame.z_extrusion_right_front.left + 2,
+        right=body.left,
+        back=frame.z_extrusion_right_front.front,
+        front=body.front,
+        top=body.top,
+        bottom=body.bottom,
+    ).fillet_depth(left=True, r=8)
+
+    bolt_back = (
+        ~Bolt.M5(30)
+        .bottom_to_right()
+        .align(
+            right=body.right + E,
+            back=body.back + 4,
+            center_z=frame.y_extrusion_right_middle.center_z,
+        )
+    )
+    bolt_front = (
+        ~Bolt.M5(30)
+        .bottom_to_front()
+        .align(
+            center_x=frame.z_extrusion_right_front.center_x,
+            front=front_part.front + E,
+            center_z=front_part.center_z,
+        )
+    )
+    cables = ~Volume(
+        left=frame.z_extrusion_right_front.left + 6,
+        right=body.right - 4,
+        back=bolt_back.front + 4,
+        front=body.front - 5,
+        top=body.top + E,
+        bottom=body.bottom + 4,
+    ).fillet_height()
+    cutout = ~(
+        Union(
+            Volume(
+                left=frame.y_extrusion_right_middle.right - E,
+                width=4,
+                center_y=frame.z_extrusion_right_front.back - 110 + 20 * x,
+                depth=10,
+                bottom=frame.y_extrusion_right_middle.bottom - 5,
+                top=frame.y_extrusion_right_middle.top + E,
+            ).fillet_height(right=True)
+            for x in range(5)
+        )
+        + Volume(
+            center_x=frame.z_extrusion_right_front.center_x,
+            width=10,
+            back=frame.z_extrusion_right_front.front - E,
+            depth=4,
+            bottom=body.bottom - E,
+            top=body.top + E,
+        ).fillet_height(front=True)
+    )
+
+
+motor_cable_guide = MotorCableGuide()
+
 frame_spacer = Volume(
     center_x=frame.y_extrusion_right_top.center_x,
     width=30,
@@ -3360,6 +3506,7 @@ if __name__ == "__main__":
             + z_stepper_mount_right
             + z_top_endstop
             + z_bottom_endstop
+            + motor_cable_guide
         ).color("#505050")
         + (
             x_carriage
@@ -3400,6 +3547,7 @@ if __name__ == "__main__":
     z_bottom_endstop.render_to_file()
     z_bracket_top_right_front.render_to_file("z_bracket_top_right_front")
     z_bracket_top_right_back.render_to_file("z_bracket_top_right_back")
+    motor_cable_guide.render_to_file()
 
     if "--stl" in sys.argv:
         for part in (

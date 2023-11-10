@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional, Tuple
+from __future__ import annotations
+
+from typing import Any
 
 from muscad.helpers import normalize_angle
 
@@ -13,7 +15,7 @@ class Translation(Transformation, name="translate"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
@@ -62,7 +64,7 @@ class Rotation(Transformation, name="rotate"):
         self.y = normalize_angle(y)
         self.z = normalize_angle(z)
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"a": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
@@ -339,7 +341,7 @@ class Scaling(Transformation, name="scale"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -374,7 +376,7 @@ class Mirroring(Transformation, name="mirror"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -444,16 +446,16 @@ class Mirroring(Transformation, name="mirror"):
 class Multmatrix(Transformation):
     def __init__(
         self,
-        matrix: Tuple[
-            Tuple[float, float, float, float],
-            Tuple[float, float, float, float],
-            Tuple[float, float, float, float],
+        matrix: tuple[
+            tuple[float, float, float, float],
+            tuple[float, float, float, float],
+            tuple[float, float, float, float],
         ],
     ):
         super().__init__()
         self.matrix = matrix
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"m": self.matrix}
 
 
@@ -463,7 +465,7 @@ class Color(Transformation):
         self.colorname = colorname
         self.alpha = alpha
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {None: self.colorname, "alpha": self.alpha}
 
     def copy(self) -> Transformation:
@@ -473,9 +475,9 @@ class Color(Transformation):
 class Offset(Transformation):
     def __init__(
         self,
-        r: Optional[float] = None,
-        delta: Optional[float] = None,
-        chamfer: Optional[bool] = False,
+        r: float | None = None,
+        delta: float | None = None,
+        chamfer: bool | None = False,
     ):
         super().__init__()
         if r and delta:
@@ -486,7 +488,7 @@ class Offset(Transformation):
         self.delta = delta
         self.chamfer = chamfer
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"r": self.radius, "delta": self.delta, "chamfer": self.chamfer}
 
 
@@ -525,7 +527,7 @@ class Projection(Transformation):
         super().__init__()
         self.cut = cut
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"cut": self.cut}
 
     @property
@@ -542,7 +544,7 @@ class Render(Transformation):
         super().__init__()
         self._convexity = convexity
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"convexity": self._convexity}
 
 
@@ -568,7 +570,7 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
             segments = int(twist * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "height": self._height,
             "center": self._center,
@@ -615,8 +617,8 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
     def __init__(
         self,
         angle: float = 360,
-        convexity: Optional[int] = None,
-        segments: Optional[int] = None,
+        convexity: int | None = None,
+        segments: int | None = None,
     ):
         super().__init__()
         self.angle = angle
@@ -625,7 +627,7 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
             segments = int(angle / 3.14 * 0.4)
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "angle": self.angle,
             "convexity": self.convexity,

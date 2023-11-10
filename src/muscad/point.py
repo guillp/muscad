@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from muscad.helpers import atan2, cos, radians, sin
 
 
@@ -20,36 +22,36 @@ class Point2D(Vector):
     def __init__(self, x: float, y: float):
         super().__init__(x=x, y=y)
 
-    def z_rotate(self, angle: float) -> "Point2D":
+    def z_rotate(self, angle: float) -> Point2D:
         return Point2D(
             cos(angle) * self.x + sin(angle) * self.y,
             cos(angle) * self.y - sin(angle) * self.x,
         )
 
-    def x_mirror(self) -> "Point2D":
+    def x_mirror(self) -> Point2D:
         return Point2D(-self.x, self.y)
 
-    def y_mirror(self) -> "Point2D":
+    def y_mirror(self) -> Point2D:
         return Point2D(self.x, -self.y)
 
-    def opposite(self) -> "Point2D":
+    def opposite(self) -> Point2D:
         return Point2D(-self.x, -self.y)
 
     def angle(self) -> float:
         return atan2(self.y, self.x)
 
     @classmethod
-    def from_radius_and_angle(cls, radius: float, angle: float) -> "Point2D":
+    def from_radius_and_angle(cls, radius: float, angle: float) -> Point2D:
         return cls(radius * cos(angle), radius * sin(angle))
 
     @classmethod
-    def involute(cls, radius: float, angle: float) -> "Point2D":
+    def involute(cls, radius: float, angle: float) -> Point2D:
         return cls(
             radius * (cos(angle) + radians(angle) * sin(angle)),
             radius * (sin(angle) - radians(angle) * cos(angle)),
         )
 
-    def to_3d(self, z: float = 0) -> "Point3D":
+    def to_3d(self, z: float = 0) -> Point3D:
         """Turns this Point2D into a Point3D."""
         return Point3D(self.x, self.y, z)
 

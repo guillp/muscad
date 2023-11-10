@@ -1,4 +1,6 @@
 """A port of https://www.thingiverse.com/thing:3575 in MuSCAD."""
+from __future__ import annotations
+
 from typing import Iterable, Literal
 
 from muscad import (
@@ -40,9 +42,8 @@ class Gear(Part):
             circular_pitch = 180 / diametral_pitch
 
         if not circular_pitch:
-            raise ValueError(
-                "gear module needs either a diametral_pitch or circular_pitch"
-            )
+            msg = "gear module needs either a diametral_pitch or circular_pitch"
+            raise ValueError(msg)
 
         # Pitch diameter: Diameter of pitch circle
         pitch_diameter = nb_teeth * circular_pitch / 180
@@ -254,7 +255,8 @@ class BevelGear(Part):
             - face_cone_descent / tan(pitch_angle)
         )
 
-        # For the bevel_gear_flat finish option, calculate the height of a cube to select the portion of the gear that includes the full pitch face.
+        # For the bevel_gear_flat finish option, calculate the height of a cube
+        # to select the portion of the gear that includes the full pitch face.
         bevel_gear_flat_height = pitch_apex - (cone_distance - face_width) * cos(
             pitch_angle
         )

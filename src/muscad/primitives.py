@@ -1,7 +1,9 @@
 """This modules contains 2D & 3D Primitives classes that match OpenSCAD primitives."""
+from __future__ import annotations
+
 import os
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Iterable, Sequence
 
 from muscad.base import Object, Primitive
 from muscad.point import Point2D, Point3D
@@ -52,7 +54,7 @@ class Cube(Primitive):
     def top(self) -> float:
         return self.height / 2
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "size": Point3D(self._width, self._depth, self._height),
             "center": True,
@@ -64,8 +66,8 @@ class Cylinder(Primitive):
         self,
         h: float,
         d: float,
-        d2: Optional[float] = None,
-        segments: Optional[int] = None,
+        d2: float | None = None,
+        segments: int | None = None,
     ):
         super().__init__()
         self._height = h
@@ -75,7 +77,7 @@ class Cylinder(Primitive):
             segments = int(d * 3.14 / 0.4)
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         if self.top_diameter is None:
             return {
                 "h": self._height,
@@ -142,7 +144,7 @@ class Sphere(Primitive):
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
@@ -208,7 +210,7 @@ class Polyhedron(Primitive):
                     point,
                 )
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "points": self.points,
             "faces": self.faces,
@@ -239,7 +241,7 @@ class Circle(Primitive2D):
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
@@ -265,7 +267,7 @@ class Square(Primitive2D):
         self._width = width
         self._depth = depth
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"size": Point2D(self._width, self._depth), "center": True}
 
     @property
@@ -319,7 +321,7 @@ class Text(Primitive2D):
         self.script = script
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "text": self.text,
             "size": self.size,
@@ -369,17 +371,17 @@ class Text(Primitive2D):
 class Polygon(Primitive2D):
     def __init__(
         self,
-        *points: Point2D | Tuple[float, float],
+        *points: Point2D | tuple[float, float],
         path: Iterable[int] | None = None,
         hole_paths: Iterable[Iterable[int]] | None = None,
-        convexity: int | None = None
+        convexity: int | None = None,
     ) -> None:
         super().__init__()
         self.points = list(self.unpack_points(points))
         if hole_paths:
             if not path:
                 path = list(range(len(points)))
-        self.paths: Optional[List[List[int]]] = [list(path)] if path else None
+        self.paths: list[list[int]] | None = [list(path)] if path else None
         if hole_paths and self.paths:
             for hole_path in hole_paths:
                 self.paths.append(list(hole_path))
@@ -387,7 +389,7 @@ class Polygon(Primitive2D):
 
     @staticmethod
     def unpack_points(
-        points: Iterable[Point2D | Tuple[float, float]]
+        points: Iterable[Point2D | tuple[float, float]]
     ) -> Iterable[Point2D]:
         for point in points:
             if isinstance(point, Point2D):
@@ -401,7 +403,7 @@ class Polygon(Primitive2D):
                     point,
                 )
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "points": self.points,
             "paths": self.paths,

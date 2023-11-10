@@ -55,7 +55,7 @@ class ThreadedRod(Part):
     def T8(cls, length: float = 300, T: float = 0.2) -> Self:
         return cls(diameter=8 + 2 * T, length=length)
 
-    def add_brass_nut(self, brass_nut: Object, align: bool = True) -> Self:
+    def add_brass_nut(self, brass_nut: Object, *, align: bool = True) -> Self:
         if align:
             self.brass_nut = brass_nut.align(
                 center_x=self.rod.center_x, center_y=self.rod.center_y

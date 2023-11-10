@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing_extensions import Self
 
 from muscad import TT, Cylinder, E, Object, Part, Union

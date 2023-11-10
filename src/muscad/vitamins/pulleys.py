@@ -22,7 +22,7 @@ class Pulley(Part):
         return self
 
     def add_flange(
-        self, diameter: float, height: float, top: bool = True, bottom: bool = True
+        self, diameter: float, *, height: float, top: bool = True, bottom: bool = True
     ) -> Self:
         if height > 0 and top:
             self.top_flange = Cylinder(d=diameter, h=height).align(
@@ -56,7 +56,7 @@ class Pulley(Part):
         return self
 
     def add_belt_clearance(
-        self, length: float, angle: float, left: bool = False
+        self, length: float, *, angle: float, left: bool = False
     ) -> Self:
         self.belt_clearance = (
             Cube(self.body.width / 2, length, self.body.height)
@@ -81,7 +81,8 @@ class Pulley(Part):
         cls, tooth_count: int, height: float = 6, shaft_dia: float = 3, T: float = 0.2
     ) -> Self:
         if tooth_count < 10:
-            raise ValueError("Unable to draw a GT2 pulley with less than 10 tooth")
+            msg = "Unable to draw a GT2 pulley with less than 10 tooth"
+            raise ValueError(msg)
         outer_dia = tooth_outer_diameter(tooth_count, 2, 0.254)
         return cls(outer_dia, height).add_shaft_clearance(shaft_dia, T=T)
 

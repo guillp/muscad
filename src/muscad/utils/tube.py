@@ -1,29 +1,26 @@
 from __future__ import annotations
 
-import typing
-from typing import Optional
-
 from muscad import Cylinder, E, Hole, Misc, Object, Part, Volume, calc
 
 
 class Tube(Part):
     def init(  # type: ignore[override]
         self,
-        *args: typing.Union[Misc, Hole, Object],
-        diameter: Optional[float] = None,
-        top_diameter: Optional[float] = None,
-        radius: Optional[float] = None,
-        left: Optional[float] = None,
-        center_x: Optional[float] = None,
-        right: Optional[float] = None,
-        back: Optional[float] = None,
-        center_y: Optional[float] = None,
-        front: Optional[float] = None,
-        bottom: Optional[float] = None,
-        center_z: Optional[float] = None,
-        top: Optional[float] = None,
-        height: Optional[float] = None,
-        **kwargs: typing.Union[Misc, Hole, Object],
+        *args: Misc | Hole | Object,
+        diameter: float | None = None,
+        top_diameter: float | None = None,
+        radius: float | None = None,
+        left: float | None = None,
+        center_x: float | None = None,
+        right: float | None = None,
+        back: float | None = None,
+        center_y: float | None = None,
+        front: float | None = None,
+        bottom: float | None = None,
+        center_z: float | None = None,
+        top: float | None = None,
+        height: float | None = None,
+        **kwargs: Misc | Hole | Object,
     ) -> None:
         if diameter is None and radius is not None:
             diameter = radius * 2
@@ -43,7 +40,7 @@ class Tube(Part):
         super().init(*args, **kwargs)
 
     def tunnel(
-        self, diameter: Optional[float] = None, radius: Optional[float] = None
+        self, diameter: float | None = None, radius: float | None = None
     ) -> Tube:
         """Hollows the center of this tube, making it a tunnel."""
         if diameter is None and radius is None:

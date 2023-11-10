@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
 
 from muscad import EE, Cylinder, Object, Part, Union
 from muscad.utils.volume import Volume
@@ -87,7 +86,7 @@ class BushingLinearBearing(Part):
         return self
 
     def add_rod_clearance(
-        self, length: float = 20, slide: Optional[Dict[str, float]] = None, T: float = 1
+        self, length: float = 20, slide: dict[str, float] | None = None, T: float = 1
     ) -> BushingLinearBearing:
         slide = slide or {}
         self.rod_clearance = (
@@ -145,7 +144,7 @@ class BushingLinearBearing(Part):
 
 class RotationBearing(Part):
     def init(  # type: ignore[override]
-        self, inner_diam: float, outer_diam: float, height: float, hole: bool = True
+        self, inner_diam: float, outer_diam: float, height: float, *, hole: bool = True
     ) -> None:
         self._outer_diameter = outer_diam
         self._inner_diameter = inner_diam
