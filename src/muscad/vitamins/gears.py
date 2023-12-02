@@ -76,18 +76,14 @@ class Gear(Part):
             involute_facets=involute_facets,
         ).linear_extrude(rim_thickness, convexity=10, twist=twist)
         if gear_thickness < rim_thickness:
-            gear -= Cylinder(
-                d=rim_radius * 2, h=rim_thickness - gear_thickness + E
-            ).align(bottom=gear_thickness)
+            gear -= Cylinder(d=rim_radius * 2, h=rim_thickness - gear_thickness + E).align(bottom=gear_thickness)
 
         self.add_child(gear, "gear")
         if gear_thickness > rim_thickness:
             self.add_child(Cylinder(d=rim_radius * 2, h=gear_thickness).align(bottom=0))
         if hub_thickness > gear_thickness:
             self.add_child(
-                Cylinder(d=hub_diameter, h=hub_thickness - gear_thickness).align(
-                    bottom=gear_thickness
-                ),
+                Cylinder(d=hub_diameter, h=hub_thickness - gear_thickness).align(bottom=gear_thickness),
                 "axis",
             )
 
@@ -151,9 +147,7 @@ class Gear(Part):
         involute_facets: int | Literal["auto"] = "auto",
     ) -> Object:
         min_radius = max(base_radius, root_radius)
-        pitch_angle = Point2D.involute(
-            base_radius, involute_intersect_angle(base_radius, pitch_radius)
-        ).angle()
+        pitch_angle = Point2D.involute(base_radius, involute_intersect_angle(base_radius, pitch_radius)).angle()
         center_angle = pitch_angle + half_thick_angle
 
         start_angle = involute_intersect_angle(base_radius, min_radius)
@@ -166,8 +160,7 @@ class Gear(Part):
             for i in range(1, involute_facets + 1):
                 point1 = Point2D.involute(
                     base_radius,
-                    start_angle
-                    + (stop_angle - start_angle) * (i - 1) / involute_facets,
+                    start_angle + (stop_angle - start_angle) * (i - 1) / involute_facets,
                 ).z_rotate(center_angle)
                 point2 = Point2D.involute(
                     base_radius,
@@ -230,19 +223,13 @@ class BevelGear(Part):
         root_cone_full_radius = tan(root_angle) * apex_to_apex
         back_cone_full_radius = apex_to_apex / tan(pitch_angle)
 
-        back_cone_end_radius = (
-            outside_pitch_radius
-            - dedendum * cos(pitch_angle)
-            - gear_thickness / tan(pitch_angle)
-        )
+        back_cone_end_radius = outside_pitch_radius - dedendum * cos(pitch_angle) - gear_thickness / tan(pitch_angle)
         back_cone_descent = dedendum * sin(pitch_angle) + gear_thickness
 
         # Root diameter: Diameter of bottom of tooth spaces.
         root_radius = back_cone_radius - dedendum
 
-        half_tooth_thickness = (
-            outside_pitch_radius * sin(360 / (4 * nb_teeth)) - backlash / 4
-        )
+        half_tooth_thickness = outside_pitch_radius * sin(360 / (4 * nb_teeth)) - backlash / 4
         half_thick_angle = asin(half_tooth_thickness / back_cone_radius)
 
         face_cone_height = apex_to_apex - face_width / cos(pitch_angle)
@@ -250,16 +237,12 @@ class BevelGear(Part):
         face_cone_descent = dedendum * sin(pitch_angle)
 
         face_cone_end_radius = (
-            outside_pitch_radius
-            - face_width / sin(pitch_angle)
-            - face_cone_descent / tan(pitch_angle)
+            outside_pitch_radius - face_width / sin(pitch_angle) - face_cone_descent / tan(pitch_angle)
         )
 
         # For the bevel_gear_flat finish option, calculate the height of a cube
         # to select the portion of the gear that includes the full pitch face.
-        bevel_gear_flat_height = pitch_apex - (cone_distance - face_width) * cos(
-            pitch_angle
-        )
+        bevel_gear_flat_height = pitch_apex - (cone_distance - face_width) * cos(pitch_angle)
 
         base = Cylinder(
             d=root_cone_full_radius * 2,
@@ -333,9 +316,7 @@ class BevelGear(Part):
                     )
 
         self.add_hole(
-            Cylinder(d=bore_diameter, h=apex_to_apex, segments=8).align(
-                bottom=pitch_apex - apex_to_apex
-            ),
+            Cylinder(d=bore_diameter, h=apex_to_apex, segments=8).align(bottom=pitch_apex - apex_to_apex),
             "bore",
         )
 
@@ -411,8 +392,7 @@ class BevelGear(Part):
             for i in range(1, involute_facets + 1):
                 point1 = Point2D.involute(
                     base_radius * 2,
-                    start_angle
-                    + (stop_angle - start_angle) * (i - 1) / involute_facets,
+                    start_angle + (stop_angle - start_angle) * (i - 1) / involute_facets,
                 ).z_rotate(center_angle)
                 point2 = Point2D.involute(
                     base_radius * 2,

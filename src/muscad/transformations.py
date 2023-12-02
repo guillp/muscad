@@ -147,9 +147,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
     @property
     def right(self) -> float:
@@ -195,9 +193,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
     @property
     def back(self) -> float:
@@ -243,9 +239,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
     @property
     def front(self) -> float:
@@ -291,9 +285,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
     @property
     def bottom(self) -> float:
@@ -310,9 +302,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.front
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
     @property
     def top(self) -> float:
@@ -329,9 +319,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.back
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
 
 
 class Scaling(Transformation, name="scale"):
@@ -384,9 +372,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.right
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.left
 
     @property
@@ -394,9 +380,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.left
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.right
 
     @property
@@ -404,9 +388,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.back
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.front
 
     @property
@@ -414,9 +396,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.front
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.back
 
     @property
@@ -424,9 +404,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.bottom
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.top
 
     @property
@@ -434,9 +412,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.top
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
         return self.child.bottom
 
     def copy(self) -> Transformation:
@@ -670,9 +646,8 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
 class Slide(Transformation):
     """Custom transformation that translate an object then Hulls the result to itself.
 
-    If the object is a Composite, each part component is hulled to its translated self. This is
-    useful for parts that must be slided into their final position, such as screws. Bounding box of
-    the original object is untouched..
+    If the object is a Composite, each part component is hulled to its translated self. This is useful for parts that
+    must be slided into their final position, such as screws. Bounding box of the original object is untouched.
 
     """
 
@@ -683,7 +658,4 @@ class Slide(Transformation):
         self.z = z
 
     def render(self) -> str:
-        return Union(
-            Hull(child, child.translate(x=self.x, y=self.y, z=self.z))
-            for child in self.child.walk()
-        ).render()
+        return Union(Hull(child, child.translate(x=self.x, y=self.y, z=self.z)) for child in self.child.walk()).render()

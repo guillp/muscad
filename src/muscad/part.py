@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Any, Iterable, Iterator, Literal, ClassVar
+from typing import Any, ClassVar, Iterable, Iterator, Literal
 
 from muscad import (
     EE,
@@ -45,8 +45,9 @@ class Part(Composite):
     class_holes: ClassVar[list[Object]]
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """When creating an inherited class, sort all class-level attributes and make lists of all
-        Objects, Misc and Holes."""
+        """When creating an inherited class, sort all class-level attributes and make lists of all Objects, Misc and
+        Holes.
+        """
         super().__init_subclass__(**kwargs)
         cls.class_parts = []
         cls.class_misc = []
@@ -94,9 +95,7 @@ class Part(Composite):
         super().__init__()
         self.children = self.class_parts.copy() if hasattr(self, "class_parts") else []
         self.holes = self.class_holes.copy() if hasattr(self, "class_holes") else []
-        self.miscellaneous = (
-            self.class_misc.copy() if hasattr(self, "class_misc") else []
-        )
+        self.miscellaneous = self.class_misc.copy() if hasattr(self, "class_misc") else []
         self.init(*args, **kwargs)
 
     def init(
@@ -125,9 +124,7 @@ class Part(Composite):
             elif isinstance(o, Object):
                 self.add_child(o, comment)
 
-    def add_child(
-        self, obj: Object | Iterable[Object] | Literal[0], comment: str | None = None
-    ) -> Object:
+    def add_child(self, obj: Object | Iterable[Object] | Literal[0], comment: str | None = None) -> Object:
         if comment and isinstance(obj, Object):
             obj.comment = comment
         super().add_child(obj)
@@ -152,8 +149,7 @@ class Part(Composite):
     def revert(self) -> Part:
         """Turns all holes to children, and all children to holes.
 
-        Note that misc items are untouched, so it probably makes no sense to revert a part
-        containing misc items.
+        Note that misc items are untouched, so it probably makes no sense to revert a part containing misc items.
         :return: the same part, with holes and children reverted
 
         """
@@ -205,10 +201,9 @@ class Part(Composite):
     def postprocess(self, renderable: Object) -> Object:
         """Applies some postprocessing transformation to the part, at render time.
 
-        Postprocessing will not be taken into account when calculating this part dimension or
-        position. You use it for example to position the Part to make printing easier.
-        Postprocessing can be disabled by passing `postprocess=False` to ` render()`. This method
-        can be overridden in subclasses. By default, it does nothing.
+        Postprocessing will not be taken into account when calculating this part dimension or position. You use it for
+        example to position the Part to make printing easier. Postprocessing can be disabled by passing
+        `postprocess=False` to ` render()`. This method can be overridden in subclasses. By default, it does nothing.
         :param renderable: the part to postprocess for rendering
         :return: the postprocessed renderable
 
@@ -352,14 +347,13 @@ class MirroredPart(Part):
         return top(self.children)
 
 
-from muscad.primitives import Square, Cube
+from muscad.primitives import Square
 
 
 class RotationalExtrudedPart(Part):
     """A part that will be transformed with a RotationalExtrusion as postprocessing.
 
-    You must build your part flat along the Y axis and have the shape defined on the positive X
-    axis.
+    You must build your part flat along the Y axis and have the shape defined on the positive X axis.
 
     """
 
@@ -369,9 +363,7 @@ class RotationalExtrudedPart(Part):
         **kwargs: Misc | Hole | Object,
     ) -> None:
         # mask will hide the shape on negative X axis.
-        mask = Square(width=self.width + EE, depth=self.depth + EE).align(
-            right=self.center_x, center_y=self.center_y
-        )
+        mask = Square(width=self.width + EE, depth=self.depth + EE).align(right=self.center_x, center_y=self.center_y)
         self.add_hole(mask)
 
     def postprocess(self, renderable: Object) -> Object:

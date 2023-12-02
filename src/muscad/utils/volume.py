@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from muscad import EE, Cube, E, Object, Part, calc
 from muscad.utils.fillet import Chamfer, Fillet
 
@@ -22,15 +21,9 @@ class Volume(Part):
         top: float | None = None,
         height: float | None = None,
     ) -> None:
-        self._left, self._center_x, self._right, self._width = calc(
-            left, center_x, right, width
-        )
-        self._back, self._center_y, self._front, self._depth = calc(
-            back, center_y, front, depth
-        )
-        self._bottom, self._center_z, self._top, self._height = calc(
-            bottom, center_z, top, height
-        )
+        self._left, self._center_x, self._right, self._width = calc(left, center_x, right, width)
+        self._back, self._center_y, self._front, self._depth = calc(back, center_y, front, depth)
+        self._bottom, self._center_z, self._top, self._height = calc(bottom, center_z, top, height)
         self.volume = Cube(self.width, self.depth, self.height).align(
             center_x=self.center_x,
             center_y=self.center_y,

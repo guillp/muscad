@@ -26,12 +26,14 @@ class StepperMotor(Part):
         depth: float = 3,
         holes: Iterable[int] = (0, 1, 2, 3),
     ) -> Self:
-        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items) :param bolt: the
-        bolt to add (must be head up) :param spacing: edge distance between 2 bolt centers :param
-        depth: depth of the fixing holes inside the stepper :param holes: index of the bolts to add.
+        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items).
 
-        Modify it if you only want 2 or 3 bolts.
+        :param bolt: the bolt to add (must be head up)
+        :param spacing: edge distance between 2 bolt centers
+        :param depth: depth of the fixing holes inside the stepper
+        :param holes: index of the bolts to add.  Modify it if you only want 2 or 3 bolts.
         :return: the stepper object, with bolts added
+
         """
         radius = ((spacing**2) * 2) ** 0.5 / 2
         self.bolts = (
@@ -49,11 +51,7 @@ class StepperMotor(Part):
         :return: the stepper object, with bulge added
 
         """
-        self.central_bulge = (
-            Cylinder(d=d, h=h + 1)
-            .align(center_x=0, center_y=0, top=self.top + h)
-            .misc()
-        )
+        self.central_bulge = Cylinder(d=d, h=h + 1).align(center_x=0, center_y=0, top=self.top + h).misc()
         return self
 
     def add_gearbox(
@@ -96,11 +94,7 @@ class StepperMotor(Part):
         :return: the stepper object, with shaft added
 
         """
-        self.shaft = (
-            Cylinder(d=d, h=length + 2)
-            .align(center_x=0, center_y=0, bottom=self.top - E)
-            .misc()
-        )
+        self.shaft = Cylinder(d=d, h=length + 2).align(center_x=0, center_y=0, bottom=self.top - E).misc()
         return self
 
     @classmethod

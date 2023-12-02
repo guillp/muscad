@@ -30,8 +30,8 @@ class MuSCAD:
     def __str__(self) -> str:
         return self.render()
 
-    def _repr_pretty_(self, p: Any, cycle: bool) -> None:
-        """Helper method for Jupyter Notebook to show the rendered code instead of __repr__"""
+    def _repr_pretty_(self, p: Any, cycle: bool) -> None:  # no-qa: FBT001
+        """Helper method for Jupyter Notebook to show the rendered code instead of `__repr__`."""
         p.text(str(self))  # pragma: no cover
 
 
@@ -40,7 +40,7 @@ class MuSCADError(Exception):
 
 
 def indent(s: str, token: str = "  ") -> str:
-    """Indents a given string, with characters from ``token`` Each line will be prefixed by token.
+    """Indents a given string, with characters from `token`. Each line will be prefixed by token.
 
     :param s: the string to indent (may contain multiple lines, separated by '\n'
     :param token: the string to use as indentation
@@ -142,13 +142,13 @@ class Object(MuSCAD):
         return self.set_modifier(None)
 
     def __add__(self, other: Object | Iterable[Object]) -> Object:
-        """Adding two objects together creates a Union of those objects :param other: another object
-        :return: a Union of both objects."""
+        """Adding two objects together creates a Union of those objects :param other: another object :return: a Union of
+        both objects.
+        """
         return Union(self, other)
 
     def __radd__(self, other: Literal[0]) -> Object:
-        """Makes sure sum(*[object, ...]) works :param other: another object, or 0 :return: a Union
-        of both objects."""
+        """Makes sure sum(*[object, ...]) works :param other: another object, or 0 :return: a Union of both objects."""
         assert other == 0
         return self
 
@@ -163,7 +163,8 @@ class Object(MuSCAD):
 
     def __and__(self, other: Object) -> Object:
         """Logical and between two objects creates an Intersection between those objects :param
-        other: another object :return: an Intersection of self and other."""
+        other: another object :return: an Intersection of self and other.
+        """
         return Intersection(self, other)
 
     def translate(self, *, x: float = 0, y: float = 0, z: float = 0) -> Object:
@@ -196,7 +197,8 @@ class Object(MuSCAD):
 
     def leftward(self, dist: float) -> Object:
         """Helper method to apply a Translation to the left on X axis on the current object :param
-        dist: distance in mm :return: an object, translated to the left by `dist` mm."""
+        dist: distance in mm :return: an object, translated to the left by `dist` mm.
+        """
         return self.x_translate(-dist)
 
     def forward(self, dist: float) -> Object:
@@ -262,15 +264,11 @@ class Object(MuSCAD):
             return self
         if center_x or center_y or center_z:
             return Translation(x=center_x, y=center_y, z=center_z)(
-                Rotation(x=x, y=y, z=z)(
-                    Translation(x=-center_x, y=-center_y, z=-center_z)(self)
-                )
+                Rotation(x=x, y=y, z=z)(Translation(x=-center_x, y=-center_y, z=-center_z)(self))
             )
         return Rotation(x=x, y=y, z=z)(self)
 
-    def x_rotate(
-        self, angle: float, center_y: float = 0, center_z: float = 0
-    ) -> Object:
+    def x_rotate(self, angle: float, center_y: float = 0, center_z: float = 0) -> Object:
         """Helper method to apply a Rotation on X axis on the current object.
 
         :param angle: angle in degrees
@@ -279,9 +277,7 @@ class Object(MuSCAD):
         """
         return self.rotate(x=angle, center_y=center_y, center_z=center_z)
 
-    def y_rotate(
-        self, angle: float, center_x: float = 0, center_z: float = 0
-    ) -> Object:
+    def y_rotate(self, angle: float, center_x: float = 0, center_z: float = 0) -> Object:
         """Helper method to apply a Rotation on Y axis on the current object.
 
         :param angle: angle in degrees
@@ -290,9 +286,7 @@ class Object(MuSCAD):
         """
         return self.rotate(y=angle, center_x=center_x, center_z=center_z)
 
-    def z_rotate(
-        self, angle: float, center_x: float = 0, center_y: float = 0
-    ) -> Object:
+    def z_rotate(self, angle: float, center_x: float = 0, center_y: float = 0) -> Object:
         """Helper method to apply a Rotation on Z axis on the current object.
 
         :param angle: angle in degrees
@@ -539,8 +533,7 @@ class Object(MuSCAD):
     def upside_down(self, x_axis: bool = False) -> Object:
         """Turns the object upside down on its Y axis.
 
-        Equivalent to self.y_rotate(180). If x_axis is True, rotate on X axis instead (like
-        top_to_bottom()).
+        Equivalent to self.y_rotate(180). If x_axis is True, rotate on X axis instead (like top_to_bottom()).
         :return: an object rotated 180° on X or Y axis
 
         """
@@ -571,7 +564,7 @@ class Object(MuSCAD):
         """
         return Mirroring(x=x, y=y, z=z)(self)
 
-    def x_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
+    def x_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
         """Helper method to mirror this object on the X axis or a parallel.
 
         :param center: the X coordinate of the axis to mirror on
@@ -629,8 +622,8 @@ class Object(MuSCAD):
         :param twist:
         :param slices:
         :param scale:
-        :param segments: number of segments. If None, automatically determines the number of
-            segments to get a good-looking round result.
+        :param segments: number of segments. If None, automatically determines the number of segments to get a good-
+            looking round result.
 
         """
         return LinearExtrusion(
@@ -734,8 +727,8 @@ class Object(MuSCAD):
 
         :param angle:
         :param convexity:
-        :param segments: number of segments. If None, automatically determines the number of
-            segments to get a good-looking round result.
+        :param segments: number of segments. If None, automatically determines the number of segments to get a good-
+            looking round result.
         :return:
 
         """
@@ -759,16 +752,12 @@ class Object(MuSCAD):
         center_z: float | None = None,
         top: float | None = None,
     ) -> Object:
-        bottom, center_z, top, _ = calc(
-            from_=bottom, center=center_z, to=top, distance=self.width
-        )
+        bottom, center_z, top, _ = calc(from_=bottom, center=center_z, to=top, distance=self.width)
         if angle is None and angle_from is None and angle_to is None:
             angle = 360
             angle_from = 0
         else:
-            angle_from, _, angle_to, angle = calc(
-                from_=angle_from, to=angle_to, distance=angle
-            )
+            angle_from, _, angle_to, angle = calc(from_=angle_from, to=angle_to, distance=angle)
         return (
             self.x_translate(radius)
             .rotational_extrude(angle, convexity, segments)
@@ -878,9 +867,7 @@ class Object(MuSCAD):
         return (self.top + self.bottom) / 2
 
     def bounding_box(self) -> Object:
-        return Cube(self.width, self.depth, self.height).translate(
-            x=self.left, y=self.back, z=self.bottom
-        )
+        return Cube(self.width, self.depth, self.height).translate(x=self.left, y=self.back, z=self.bottom)
 
     def slide(self, *, x: float = 0, y: float = 0, z: float = 0) -> Object:
         return Slide(x=x, y=y, z=z)(self)
@@ -1003,9 +990,7 @@ class Object(MuSCAD):
                 ),
             )
         else:
-            raise ValueError(
-                "You must provide one plane to divide the Object, defined by one X, Y, Z coordinate"
-            )
+            raise ValueError("You must provide one plane to divide the Object, defined by one X, Y, Z coordinate")
 
     def __stl__(self) -> Object:
         return self  # pragma: no cover
@@ -1154,9 +1139,7 @@ class Composite(Object):
         :return: a str
 
         """
-        return (
-            "{" + "".join(f"\n{indent(child.render())}" for child in children) + "\n}"
-        )
+        return "{" + "".join(f"\n{indent(child.render())}" for child in children) + "\n}"
 
     @render_comment
     def render(self) -> str:
@@ -1165,10 +1148,7 @@ class Composite(Object):
         :return: a str
 
         """
-        return (
-            f"{self.modifier}{self.object_name}() "
-            f"{self._render_children(self._iter_children())}"
-        )
+        return f"{self.modifier}{self.object_name}() " f"{self._render_children(self._iter_children())}"
 
     def walk(self) -> Iterable[Object]:
         for child in self.children:
@@ -1203,8 +1183,11 @@ class Union(Composite):
     """OpenSCAD union()"""
 
     def __add__(self, other: Object | Iterable[Object]) -> Object:
-        """Adding to a Union adds a children instead of creating a new Union :param other: a
-        children object :return: the same union with children appended."""
+        """Adding to a Union adds a children instead of creating a new Union :param other: a children object :return:
+
+        the same union with children appended.
+
+        """
         return self.add_child(other)
 
     @property
@@ -1247,8 +1230,8 @@ class Difference(Composite):
     """OpenSCAD difference()"""
 
     def __sub__(self, other: Object | Misc | Hole | Iterable[Object]) -> Object:
-        """Substracting from a Difference adds a children instead of creating a new Difference
-        :param other: a children object :return: the same difference with children appended.
+        """Substracting from a Difference adds a children instead of creating a new Difference :param other: a children
+        object :return: the same difference with children appended.
         """
         return self.add_child(other)
 
@@ -1281,8 +1264,8 @@ class Intersection(Composite):
     """OpenSCAD intersection()"""
 
     def __and__(self, other: Object) -> Object:
-        """Intersecting with an Intersection adds a children instead of creating a new Intersection
-        :param other: a children object :return: the same intersection with children appended.
+        """Intersecting with an Intersection adds a children instead of creating a new Intersection :param other: a
+        children object :return: the same intersection with children appended.
         """
         return self.add_child(other)
 
@@ -1377,7 +1360,8 @@ class Transformation(Primitive):
 
     def combine(self, child: Transformation) -> Transformation:
         """When applying multiple transformations of the same type, those may be combined :param
-        child: another Primitive :return: an object combining all transformations."""
+        child: another Primitive :return: an object combining all transformations.
+        """
         self.child = child
         return self
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+
 from muscad import Cylinder, E, Hole, Misc, Object, Part, Volume, calc
 
 
@@ -24,11 +26,9 @@ class Tube(Part):
     ) -> None:
         if diameter is None and radius is not None:
             diameter = radius * 2
-        try:
+        with contextlib.suppress(ValueError):
             # first try to get the cylinder diameter from the x coordinates
             left, center_x, right, diameter = calc(left, center_x, right, diameter)
-        except ValueError:
-            pass
 
         # fallback to the y coordinates
         back, center_y, front, diameter = calc(back, center_y, front, diameter)
@@ -39,16 +39,13 @@ class Tube(Part):
         )
         super().init(*args, **kwargs)
 
-    def tunnel(
-        self, diameter: float | None = None, radius: float | None = None
-    ) -> Tube:
+    def tunnel(self, diameter: float | None = None, radius: float | None = None) -> Tube:
         """Hollows the center of this tube, making it a tunnel."""
-        if diameter is None and radius is None:
-            raise ValueError("at least one of diameter or radius must be specified")
-        if diameter is None and radius is not None:
-            diameter = radius * 2
         if diameter is None:
-            raise ValueError("this is just to make mypy happy")
+            if radius is None:
+                msg = "at least one of diameter or radius must be specified"
+                raise ValueError(msg)
+            diameter = radius * 2
         self.tunnel_hole = ~Cylinder(d=diameter, h=self.height + 2).align(
             center_x=self.center_x,
             center_y=self.center_y,

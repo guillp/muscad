@@ -1,4 +1,4 @@
-from muscad import Part, Cylinder, Volume
+from muscad import Cylinder, Part, Volume
 from muscad.vitamins.bolts import Bolt
 
 
@@ -21,35 +21,22 @@ class DryingRackFix(Part):
         .debug()
     )
 
-    left_bolt = (
-        ~Bolt.M3(12, head_clearance=10)
-        .add_nut(-1, inline_clearance_size=10, angle=180)
-        .bottom_to_back()
-        .align(
-            right=vertical_tube.left - 1,
-            center_y=vertical_tube.center_y,
-            center_z=horizontal_tube.center_z,
-        )
+    left_bolt = ~Bolt.M3(12, head_clearance=10).add_nut(-1, inline_clearance_size=10, angle=180).bottom_to_back().align(
+        right=vertical_tube.left - 1,
+        center_y=vertical_tube.center_y,
+        center_z=horizontal_tube.center_z,
     )
-    top_bolt = (
-        ~Bolt.M3(12, head_clearance=10)
-        .add_nut(-1, inline_clearance_size=10, angle=180)
-        .bottom_to_back()
-        .align(
-            left=vertical_tube.right + 3,
-            center_y=vertical_tube.center_y,
-            bottom=horizontal_tube.top + 1,
-        )
+    top_bolt = ~Bolt.M3(12, head_clearance=10).add_nut(-1, inline_clearance_size=10, angle=180).bottom_to_back().align(
+        left=vertical_tube.right + 3,
+        center_y=vertical_tube.center_y,
+        bottom=horizontal_tube.top + 1,
     )
-    bottom_bolt = (
-        ~Bolt.M3(12, head_clearance=10)
-        .add_nut(-1, inline_clearance_size=10, angle=180)
-        .bottom_to_back()
-        .align(
-            left=vertical_tube.right + 3,
-            center_y=vertical_tube.center_y,
-            top=horizontal_tube.bottom - 1,
-        )
+    bottom_bolt = ~Bolt.M3(12, head_clearance=10).add_nut(
+        -1, inline_clearance_size=10, angle=180
+    ).bottom_to_back().align(
+        left=vertical_tube.right + 3,
+        center_y=vertical_tube.center_y,
+        top=horizontal_tube.bottom - 1,
     )
 
     reinforcement = (
@@ -66,15 +53,10 @@ class DryingRackFix(Part):
     )
 
 
-drying_rack_fix_bottom, drying_rack_fix_top = (
-    DryingRackFix().back_to_bottom().align(center_z=0).divide(z=0, T=0.2)
-)
+drying_rack_fix_bottom, drying_rack_fix_top = DryingRackFix().back_to_bottom().align(center_z=0).divide(z=0, T=0.2)
 
 drying_rack_fix_bottom.render_to_file("drying_rack_fix_bottom.scad")
 drying_rack_fix_top.render_to_file("drying_rack_fix_top.scad")
-
-
-# drying_rack_fix_top.export_stl("drying_rack_fix_top.scad")
 
 
 class DryingRackFoot(Part):

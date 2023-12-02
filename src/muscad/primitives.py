@@ -339,33 +339,25 @@ class Text(Primitive2D):
     def left(self) -> float:
         if self.halign in (None, "left"):
             return 0
-        raise NotImplementedError(
-            "use halign='left' (default) to be able to align a Text to left"
-        )
+        raise NotImplementedError("use halign='left' (default) to be able to align a Text to left")
 
     @property
     def right(self) -> float:
         if self.halign == "right":
             return 0
-        raise NotImplementedError(
-            "use halign='right' to be able to align a Text to right"
-        )
+        raise NotImplementedError("use halign='right' to be able to align a Text to right")
 
     @property
     def back(self) -> float:
         if self.valign in (None, "baseline", "bottom"):
             return 0
-        raise NotImplementedError(
-            "use valign='baseline' or 'bottom' to be able to align a Text to back"
-        )
+        raise NotImplementedError("use valign='baseline' or 'bottom' to be able to align a Text to back")
 
     @property
     def front(self) -> float:
         if self.valign == "top":
             return 0
-        raise NotImplementedError(
-            "use valign='top' to be able to align a Text to front"
-        )
+        raise NotImplementedError("use valign='top' to be able to align a Text to front")
 
 
 class Polygon(Primitive2D):
@@ -388,9 +380,7 @@ class Polygon(Primitive2D):
         self.convexity = convexity
 
     @staticmethod
-    def unpack_points(
-        points: Iterable[Point2D | tuple[float, float]]
-    ) -> Iterable[Point2D]:
+    def unpack_points(points: Iterable[Point2D | tuple[float, float]]) -> Iterable[Point2D]:
         for point in points:
             if isinstance(point, Point2D):
                 yield point
@@ -428,9 +418,7 @@ class Polygon(Primitive2D):
 
 
 class Import(Primitive):
-    def __init__(
-        self, file: str, convexity: int | None = None, layer: str | None = None
-    ) -> None:
+    def __init__(self, file: str, convexity: int | None = None, layer: str | None = None) -> None:
         if not os.path.isabs(file):
             file = os.path.join(os.path.dirname(sys.argv[0]), file)
         super().__init__(file=file, convexity=convexity, layer=layer)

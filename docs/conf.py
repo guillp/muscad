@@ -1,9 +1,9 @@
 """Sphinx configuration."""
-from datetime import datetime
+from datetime import UTC, datetime
 
 project = "MuSCAD"
 author = "Guillaume Pujol"
-copyright = f"{datetime.utcnow().year}, {author}"
+copyright = f"{datetime.now(tz=UTC).year}, {author}"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",

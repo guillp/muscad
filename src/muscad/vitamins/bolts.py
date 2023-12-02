@@ -25,6 +25,7 @@ class Bolt(Part):
     def init(  # type: ignore[override]
         self,
         diameter: float,
+        *,
         length: float,
         head_height: float,
         head_diameter: float,
@@ -35,21 +36,11 @@ class Bolt(Part):
     ) -> None:
         self.thread = Cylinder(d=diameter, h=length)
         if thread_clearance:
-            self.tread_clearance = (
-                Cylinder(d=diameter, h=thread_clearance)
-                .align(bottom=self.thread.top)
-                .misc()
-            )
+            self.tread_clearance = Cylinder(d=diameter, h=thread_clearance).align(bottom=self.thread.top).misc()
         if head:
-            self.head = Cylinder(d=head_diameter, h=head_height).align(
-                top=self.thread.bottom + E
-            )
+            self.head = Cylinder(d=head_diameter, h=head_height).align(top=self.thread.bottom + E)
             if head_clearance:
-                self.head_clearance = (
-                    Cylinder(d=head_diameter, h=head_clearance)
-                    .align(top=self.head.bottom + E)
-                    .misc()
-                )
+                self.head_clearance = Cylinder(d=head_diameter, h=head_clearance).align(top=self.head.bottom + E).misc()
 
         self.diameter = diameter
         self.length = length
@@ -70,17 +61,10 @@ class Bolt(Part):
         if placement < 0:
             placement = self.length + placement - nut_thickness + 0.1
 
-        nut = (
-            Nut(nut_width, nut_thickness)
-            .align(bottom=self.thread.bottom + placement)
-            .z_rotate(angle)
-            .misc()
-        )
+        nut = Nut(nut_width, nut_thickness).align(bottom=self.thread.bottom + placement).z_rotate(angle).misc()
         self.add_misc(nut)
         if inline_clearance_size > 0:
-            self.inline_nut_clearance = Hull(
-                nut.object, nut.up(inline_clearance_size)
-            ).misc()
+            self.inline_nut_clearance = Hull(nut.object, nut.up(inline_clearance_size)).misc()
         if side_clearance_size > 0:
             self.nut_clearance = (
                 Cube(

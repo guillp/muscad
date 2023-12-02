@@ -21,9 +21,7 @@ class Pulley(Part):
         )
         return self
 
-    def add_flange(
-        self, diameter: float, *, height: float, top: bool = True, bottom: bool = True
-    ) -> Self:
+    def add_flange(self, diameter: float, *, height: float, top: bool = True, bottom: bool = True) -> Self:
         if height > 0 and top:
             self.top_flange = Cylinder(d=diameter, h=height).align(
                 center_x=self.body.center_x,
@@ -55,9 +53,7 @@ class Pulley(Part):
         )
         return self
 
-    def add_belt_clearance(
-        self, length: float, *, angle: float, left: bool = False
-    ) -> Self:
+    def add_belt_clearance(self, length: float, *, angle: float, left: bool = False) -> Self:
         self.belt_clearance = (
             Cube(self.body.width / 2, length, self.body.height)
             .align(
@@ -70,16 +66,12 @@ class Pulley(Part):
         )
         return self
 
-    def add_shaft_clearance(
-        self, d: float = 5, lenght: float = 20, T: float = 0.2, **align: float
-    ) -> Self:
+    def add_shaft_clearance(self, d: float = 5, lenght: float = 20, T: float = 0.2, **align: float) -> Self:
         self.shaft = Cylinder(d=d + 2 * T, h=lenght).align(**align).misc()
         return self
 
     @classmethod
-    def GT2(
-        cls, tooth_count: int, height: float = 6, shaft_dia: float = 3, T: float = 0.2
-    ) -> Self:
+    def GT2(cls, tooth_count: int, height: float = 6, shaft_dia: float = 3, T: float = 0.2) -> Self:
         if tooth_count < 10:
             msg = "Unable to draw a GT2 pulley with less than 10 tooth"
             raise ValueError(msg)
@@ -91,7 +83,5 @@ class Pulley(Part):
         return cls(outer_dia=diameter + 2 * T, height=height + 2 * T)
 
 
-def tooth_outer_diameter(
-    tooth_count: int, tooth_pitch: float, pitch_line_offset: float
-) -> float:
+def tooth_outer_diameter(tooth_count: int, tooth_pitch: float, pitch_line_offset: float) -> float:
     return 2 * ((tooth_count * tooth_pitch) / (3.141_592_65 * 2) - pitch_line_offset)

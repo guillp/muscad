@@ -25,33 +25,21 @@ class OptoSwitch(Part):
         bottom=base.bottom,
     )
 
-    left_hole = (
-        ~Cylinder(d=3, h=4.5)
-        .bottom_to_front()
-        .align(
-            center_x=base.left + 2.75,
-            center_y=base.center_y,
-            center_z=base.center_z,
-        )
+    left_hole = ~Cylinder(d=3, h=4.5).bottom_to_front().align(
+        center_x=base.left + 2.75,
+        center_y=base.center_y,
+        center_z=base.center_z,
     )
-    right_hole = (
-        ~Cylinder(d=3, h=4.5)
-        .bottom_to_front()
-        .align(
-            center_x=base.right - 2.75,
-            center_y=base.center_y,
-            center_z=base.center_z,
-        )
+    right_hole = ~Cylinder(d=3, h=4.5).bottom_to_front().align(
+        center_x=base.right - 2.75,
+        center_y=base.center_y,
+        center_z=base.center_z,
     )
 
 
 class OpticalEndstop(Part):
     base = Volume(width=33, depth=1.6, height=10.5).color("red")
-    switch = (
-        OptoSwitch()
-        .align(right=base.right - 0.1, back=base.front, center_z=base.center_z)
-        .color("grey")
-    )
+    switch = OptoSwitch().align(right=base.right - 0.1, back=base.front, center_z=base.center_z).color("grey")
     connector = (
         Volume(
             width=5.8,
@@ -72,23 +60,15 @@ class OpticalEndstop(Part):
         back=base.front,
         center_z=base.center_z,
     ).color("blue")
-    left_hole = (
-        ~Cylinder(d=3, h=4.5)
-        .bottom_to_front()
-        .align(
-            center_x=switch.left + 2.75,
-            center_y=base.center_y,
-            center_z=base.center_z,
-        )
+    left_hole = ~Cylinder(d=3, h=4.5).bottom_to_front().align(
+        center_x=switch.left + 2.75,
+        center_y=base.center_y,
+        center_z=base.center_z,
     )
-    right_hole = (
-        ~Cylinder(d=3, h=4.5)
-        .bottom_to_front()
-        .align(
-            center_x=switch.right - 2.75,
-            center_y=base.center_y,
-            center_z=base.center_z,
-        )
+    right_hole = ~Cylinder(d=3, h=4.5).bottom_to_front().align(
+        center_x=switch.right - 2.75,
+        center_y=base.center_y,
+        center_z=base.center_z,
     )
 
     def add_bolts(self, bolt: Object) -> Self:
@@ -114,9 +94,9 @@ class OpticalEndstop(Part):
 
 
 class BIQUEndstop(Part):
-    body = Surface.free(
-        Circle(d=7).align(center_x=-10), Circle(d=7).align(center_x=10)
-    ).z_linear_extrude(bottom=0, top=1)
+    body = Surface.free(Circle(d=7).align(center_x=-10), Circle(d=7).align(center_x=10)).z_linear_extrude(
+        bottom=0, top=1
+    )
     endstop = Volume(
         width=13,
         depth=6,
@@ -141,10 +121,7 @@ class MechanicalSwitchEndstop(Part):
     lever = (
         (
             Volume(width=13.5, depth=0.5, height=6).align(right=0, back=0)
-            + (
-                Cube(10, 10, 20).y_translate(5.5)
-                & (Cylinder(d=4, h=6) - Cylinder(d=3, h=7))
-            ).translate(x=1.5, y=-0.5)
+            + (Cube(10, 10, 20).y_translate(5.5) & (Cylinder(d=4, h=6) - Cylinder(d=3, h=7))).translate(x=1.5, y=-0.5)
         )
         .align(left=body.left, back=body.front)
         .z_rotate(15, center_x=body.left, center_y=body.front)
@@ -163,12 +140,8 @@ class InductionSensor(Part):
 
 class MechanicalEndstopOnPCB(Part):
     pcb = Volume(width=40, depth=16, height=1.6)
-    switch = MechanicalSwitchEndstop().align(
-        right=pcb.right - 6, front=pcb.front, bottom=pcb.top
-    )
-    connector = Volume(width=10, depth=10, height=6).align(
-        left=pcb.left, center_y=pcb.center_y, bottom=pcb.top
-    )
+    switch = MechanicalSwitchEndstop().align(right=pcb.right - 6, front=pcb.front, bottom=pcb.top)
+    connector = Volume(width=10, depth=10, height=6).align(left=pcb.left, center_y=pcb.center_y, bottom=pcb.top)
 
     switch_welds = (
         Volume(
@@ -215,23 +188,17 @@ class BLTouchClassic(Part):
     attachment = (
         Hull(
             Surface.square(width=6, depth=11.53),
-            Surface.circle(radius=4, center_x=9).x_mirror(0, True),
+            Surface.circle(radius=4, center_x=9).x_mirror(0, keep=True),
         )
-        - Surface.circle(diameter=3.2, center_x=9).x_mirror(0, True)
+        - Surface.circle(diameter=3.2, center_x=9).x_mirror(0, keep=True)
     ).z_linear_extrude(2.3)
     cylinder = Tube(diameter=11, top=attachment.bottom, height=7.7)
     body = Tube(diameter=13, top=cylinder.bottom, height=26.3) & Volume(
         width=13, depth=11.53, top=cylinder.bottom, height=27
-    ) - Surface.chamfer(12).align(right=0).z_rotational_extrude(
-        bottom=cylinder.bottom - 30
-    )
+    ) - Surface.chamfer(12).align(right=0).z_rotational_extrude(bottom=cylinder.bottom - 30)
     pin = Tube(diameter=2, top=body.bottom, height=11)
 
     def init(  # type: ignore[override]
         self, bolt: Object = Bolt.M3(20).add_nut(-4, inline_clearance_size=10)
     ) -> None:
-        self.bolts = (
-            bolt.align(center_x=9, bottom=self.attachment.bottom - 3)
-            .x_mirror(0, True)
-            .misc()
-        )
+        self.bolts = bolt.align(center_x=9, bottom=self.attachment.bottom - 3).x_mirror(0, keep=True).misc()

@@ -77,27 +77,22 @@ class Fan(Part):
             center_z=0,
         ).fillet_height(r)
 
-    def add_bolts(
-        self, bolt: Object, spacing: float, holes: Iterable[int] = (0, 1, 2, 3)
-    ) -> Self:
-        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items) :param bolt: the
-        bolt to add (must be head up) :param spacing: edge distance between 2 bolt centers :param
-        depth: depth of the fixing holes inside the stepper :param holes: index of the bolts to add.
+    def add_bolts(self, bolt: Object, spacing: float, holes: Iterable[int] = (0, 1, 2, 3)) -> Self:
+        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items).
 
-        Modify it if you only want 2 or 3 bolts.
+        :param bolt: the bolt to add (must be head up)
+        :param spacing: edge distance between 2 bolt centers
+        :param holes: index of the bolts to add. Modify it if you only want 2 or 3 bolts.
         :return: the stepper object, with bolts added
+
         """
         radius = ((spacing**2) * 2) ** 0.5 / 2
         self.bolts = (
-            Union(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes)
-            .align(bottom=self.body.bottom)
-            .misc()
+            Union(bolt.rightward(radius).z_rotate(45 + 90 * i) for i in holes).align(bottom=self.body.bottom).misc()
         )
         return self
 
-    def add_tunnel(
-        self, diameter: float, length: float, d2: float | None = None
-    ) -> Self:
+    def add_tunnel(self, diameter: float, length: float, d2: float | None = None) -> Self:
         self.tunnel = (
             Cylinder(d=diameter, d2=d2, h=length)
             .align(
@@ -110,9 +105,7 @@ class Fan(Part):
         return self
 
     @classmethod
-    def fan40x40x20(
-        cls, bolt: Object | None = Bolt.M3(25).add_nut(-E), T: float = 0.2
-    ) -> Self:
+    def fan40x40x20(cls, bolt: Object | None = Bolt.M3(25).add_nut(-E), T: float = 0.2) -> Self:
         fan = cls(width=40 + 2 * T, height=20 + 2 * T, r=2)
         if bolt:
             fan.add_bolts(bolt, 32)

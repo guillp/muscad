@@ -14,9 +14,7 @@ class Chamfer(Part):
             chamfer_width = (radius**2 * 2) ** 0.5
             self.chamfer = ~Square(chamfer_width, chamfer_width + 1).z_rotate(angle)
         else:
-            chamfer_width = (
-                (radius * cos(angle)) ** 2 + (radius * sin(angle)) ** 2
-            ) ** 0.5
+            chamfer_width = ((radius * cos(angle)) ** 2 + (radius * sin(angle)) ** 2) ** 0.5
             self.chamfer = ~Square(chamfer_width, chamfer_width).z_rotate(
                 angle, center_x=-cos(45 + angle), center_y=-cos(angle)
             )
