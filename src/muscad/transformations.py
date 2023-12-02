@@ -55,6 +55,9 @@ class Translation(Transformation, name="translate"):
         return self.child.top + self.z
 
 
+RIGHT_ANGLE_ROTATIONS_ONLY = NotImplementedError("Only simple 90° rotations are supported")
+
+
 class Rotation(Transformation, name="rotate"):
     """OpenSCAD rotate()."""
 
@@ -68,17 +71,16 @@ class Rotation(Transformation, name="rotate"):
         return {"a": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
-        if isinstance(other, self.__class__):
-            if (
-                (self.x == 0 and self.y == 0)
-                or (other.z == 0 and self.x == self.z == 0)
-                or (other.y == other.z == 0 and self.y == self.z == 0)
-            ):
-                self.x = normalize_angle(self.x + other.x)
-                self.y = normalize_angle(self.y + other.y)
-                self.z = normalize_angle(self.z + other.z)
-                self.child: Object = other.child
-                return self
+        if isinstance(other, self.__class__) and (
+            (self.x == 0 and self.y == 0)
+            or (other.z == 0 and self.x == self.z == 0)
+            or (other.y == other.z == 0 and self.y == self.z == 0)
+        ):
+            self.x = normalize_angle(self.x + other.x)
+            self.y = normalize_angle(self.y + other.y)
+            self.z = normalize_angle(self.z + other.z)
+            self.child: Object = other.child
+            return self
         return super().combine(other)
 
     def copy(self) -> Transformation:
@@ -147,7 +149,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def right(self) -> float:
@@ -193,7 +195,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def back(self) -> float:
@@ -239,7 +241,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def front(self) -> float:
@@ -285,7 +287,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def bottom(self) -> float:
@@ -302,7 +304,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.front
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def top(self) -> float:
@@ -319,7 +321,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.back
 
-        raise NotImplementedError("Only simple 90° rotations are supported", self.x, self.y, self.z)
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
 
 class Scaling(Transformation, name="scale"):
@@ -357,6 +359,9 @@ class Scaling(Transformation, name="scale"):
         return self.child.top * self.z
 
 
+MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED = NotImplementedError("Only single axis mirror vectors are supported")
+
+
 class Mirroring(Transformation, name="mirror"):
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
         super().__init__()
@@ -372,7 +377,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.right
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.left
 
     @property
@@ -380,7 +385,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.left
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.right
 
     @property
@@ -388,7 +393,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.back
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.front
 
     @property
@@ -396,7 +401,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.front
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.back
 
     @property
@@ -404,7 +409,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.bottom
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.top
 
     @property
@@ -412,7 +417,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.top
-            raise NotImplementedError("Only single axis mirror vectors are supported")  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.bottom
 
     def copy(self) -> Transformation:
@@ -452,14 +457,17 @@ class Offset(Transformation):
     def __init__(
         self,
         r: float | None = None,
+        *,
         delta: float | None = None,
         chamfer: bool | None = False,
     ):
         super().__init__()
-        if r and delta:
-            raise ValueError("can't set both 'r' and 'delta'")  # pragma: no cover
-        if r is None and delta is None:
-            raise ValueError("must set either 'r' or 'delta'")  # pragma: no cover
+        if r and delta:  # pragma: no cover
+            msg = "can't set both 'r' and 'delta'"
+            raise ValueError(msg)
+        if r is None and delta is None:  # pragma: no cover
+            msg = "must set either 'r' or 'delta'"
+            raise ValueError(msg)
         self.radius = r
         self.delta = delta
         self.chamfer = chamfer
@@ -499,7 +507,7 @@ class Hull(Transformation):
 
 
 class Projection(Transformation):
-    def __init__(self, cut: bool = False) -> None:
+    def __init__(self, *, cut: bool = False) -> None:
         super().__init__()
         self.cut = cut
 
@@ -524,10 +532,14 @@ class Render(Transformation):
         return {"convexity": self._convexity}
 
 
+TWIST_NOT_SUPPORTED = NotImplementedError("Linear extrusion with 'twist' is not supported")
+
+
 class LinearExtrusion(Transformation, name="linear_extrude"):
     def __init__(
         self,
         height: float,
+        *,
         center: bool = False,
         convexity: int = 10,
         twist: float = 0,
@@ -560,25 +572,25 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
     def left(self) -> float:
         if self._twist == 0:
             return self.child.left * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def right(self) -> float:
         if self._twist == 0:
             return self.child.right * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def back(self) -> float:
         if self._twist == 0:
             return self.child.back * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def front(self) -> float:
         if self._twist == 0:
             return self.child.front * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def bottom(self) -> float:

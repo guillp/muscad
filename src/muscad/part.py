@@ -45,8 +45,11 @@ class Part(Composite):
     class_holes: ClassVar[list[Object]]
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """When creating an inherited class, sort all class-level attributes and make lists of all Objects, Misc and
+        """Handle class level attributes.
+
+        When creating an inherited class, sort all class-level attributes and build lists of all Objects, Misc and
         Holes.
+
         """
         super().__init_subclass__(**kwargs)
         cls.class_parts = []
@@ -103,9 +106,10 @@ class Part(Composite):
         *args: float | bool | Misc | Hole | Object,
         **kwargs: float | bool | Misc | Hole | Object,
     ) -> None:
-        """Override this to add parametric children to this Part :param args:
+        """Override this to add parametric children to this Part.
 
-        :param kwargs:
+        :param args: arguments passed to __init__
+        :param kwargs: keyword arguments passed to __init__
         :return:
 
         """
@@ -164,14 +168,10 @@ class Part(Composite):
         elif isinstance(value, Misc):
             if value.comment is None:
                 value.comment = key
-            # if previous:
-            #     self.miscellaneous.remove(previous)
             self.add_misc(value)
         elif isinstance(value, Hole):
             if value.comment is None:
                 value.comment = key
-            #            if previous:
-            #               self.holes.remove(previous)
             self.add_hole(value)
         elif isinstance(value, Object):
             if value.comment is None:
@@ -181,12 +181,13 @@ class Part(Composite):
             self.add_child(value)
 
     @render_comment
-    def render(self, postprocess: bool = True) -> str:
+    def render(self, *, postprocess: bool = True) -> str:
         if not self.children and not self.miscellaneous:
             if self.holes:
                 self.children, self.holes = self.holes, self.children
             else:
-                raise RuntimeError("This part has no children")
+                msg = "This part has no children"
+                raise RuntimeError(msg)
         # renders children and misc
         renderable: Object = Union(chain(self.children, self.miscellaneous))
         # if this part has holes, render a diff of all children with all holes
@@ -239,7 +240,7 @@ class Part(Composite):
     def top(self) -> float:
         return top(self.children)
 
-    def debug(self, include_misc: bool = False) -> Object:
+    def debug(self, *, include_misc: bool = False) -> Object:
         """Turn all children to debug, not the misc (Unless include_misc is set to True)."""
         if include_misc:
             return super().debug()
@@ -261,6 +262,7 @@ class MirroredPart(Part):
 
     def __init_subclass__(
         cls,
+        *,
         x: bool = False,
         y: bool = False,
         z: bool = False,
@@ -286,7 +288,8 @@ class MirroredPart(Part):
     @render_comment
     def render(self) -> str:
         if not self.children:
-            raise RuntimeError("This part has no children")
+            msg = "This part has no children"
+            raise RuntimeError(msg)
         children: Object = Union(self.children)
         if self.holes:
             children = children - self.holes

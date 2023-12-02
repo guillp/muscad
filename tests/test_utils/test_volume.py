@@ -52,7 +52,7 @@ def test_volume() -> None:
     assert upside_down.bottom == -top
     assert upside_down.top == -bottom
 
-    upside_down_x = ref.upside_down(True)
+    upside_down_x = ref.upside_down(x_axis=True)
     assert upside_down_x.left == left
     assert upside_down_x.right == right
     assert upside_down_x.back == -front

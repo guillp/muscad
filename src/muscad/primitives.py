@@ -1,8 +1,8 @@
 """This modules contains 2D & 3D Primitives classes that match OpenSCAD primitives."""
 from __future__ import annotations
 
-import os
 import sys
+from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 from muscad.base import Object, Primitive
@@ -205,8 +205,9 @@ class Polyhedron(Primitive):
                 x, y, z = point
                 yield Point3D(x, y, z)
             else:
+                msg = "invalid point, must be a 3 floats tuple or a Point3D instance"
                 raise ValueError(
-                    "invalid point, must be a 3 floats tuple or a Point3D instance",
+                    msg,
                     point,
                 )
 
@@ -339,25 +340,29 @@ class Text(Primitive2D):
     def left(self) -> float:
         if self.halign in (None, "left"):
             return 0
-        raise NotImplementedError("use halign='left' (default) to be able to align a Text to left")
+        msg = "use halign='left' (default) to be able to align a Text to left"
+        raise NotImplementedError(msg)
 
     @property
     def right(self) -> float:
         if self.halign == "right":
             return 0
-        raise NotImplementedError("use halign='right' to be able to align a Text to right")
+        msg = "use halign='right' to be able to align a Text to right"
+        raise NotImplementedError(msg)
 
     @property
     def back(self) -> float:
         if self.valign in (None, "baseline", "bottom"):
             return 0
-        raise NotImplementedError("use valign='baseline' or 'bottom' to be able to align a Text to back")
+        msg = "use valign='baseline' or 'bottom' to be able to align a Text to back"
+        raise NotImplementedError(msg)
 
     @property
     def front(self) -> float:
         if self.valign == "top":
             return 0
-        raise NotImplementedError("use valign='top' to be able to align a Text to front")
+        msg = "use valign='top' to be able to align a Text to front"
+        raise NotImplementedError(msg)
 
 
 class Polygon(Primitive2D):
@@ -370,9 +375,8 @@ class Polygon(Primitive2D):
     ) -> None:
         super().__init__()
         self.points = list(self.unpack_points(points))
-        if hole_paths:
-            if not path:
-                path = list(range(len(points)))
+        if hole_paths and not path:
+            path = list(range(len(points)))
         self.paths: list[list[int]] | None = [list(path)] if path else None
         if hole_paths and self.paths:
             for hole_path in hole_paths:
@@ -388,8 +392,9 @@ class Polygon(Primitive2D):
                 x, y = point
                 yield Point2D(x, y)
             else:
+                msg = ("invalid point, must be a 2 floats tuple or a Point2D instance",)
                 raise ValueError(
-                    "invalid point, must be a 2 floats tuple or a Point2D instance",
+                    msg,
                     point,
                 )
 
@@ -419,8 +424,8 @@ class Polygon(Primitive2D):
 
 class Import(Primitive):
     def __init__(self, file: str, convexity: int | None = None, layer: str | None = None) -> None:
-        if not os.path.isabs(file):
-            file = os.path.join(os.path.dirname(sys.argv[0]), file)
+        if not Path(file).is_absolute():
+            file = str(Path(sys.argv[0]).parent / file)
         super().__init__(file=file, convexity=convexity, layer=layer)
 
 

@@ -5,6 +5,7 @@ import os
 import subprocess
 import typing
 from functools import wraps
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -30,7 +31,7 @@ class MuSCAD:
     def __str__(self) -> str:
         return self.render()
 
-    def _repr_pretty_(self, p: Any, cycle: bool) -> None:  # no-qa: FBT001
+    def _repr_pretty_(self, p: Any, cycle: bool) -> None:  # noqa: FBT001
         """Helper method for Jupyter Notebook to show the rendered code instead of `__repr__`."""
         p.text(str(self))  # pragma: no cover
 
@@ -40,7 +41,7 @@ class MuSCADError(Exception):
 
 
 def indent(s: str, token: str = "  ") -> str:
-    """Indents a given string, with characters from `token`. Each line will be prefixed by token.
+    r"""Indents a given string, with characters from `token`. Each line will be prefixed by token.
 
     :param s: the string to indent (may contain multiple lines, separated by '\n'
     :param token: the string to use as indentation
@@ -58,7 +59,7 @@ def add_comment(code: str, comment: str | None = None) -> str:
     return f"{comment}{code}"
 
 
-def render_comment(f: Callable[[O], str]) -> Callable[[O], str]:
+def render_comment(f: Callable[[O_contra], str]) -> Callable[[O_contra], str]:
     """A helper decorator to add comments to rendered code."""
 
     @wraps(f)
@@ -69,7 +70,7 @@ def render_comment(f: Callable[[O], str]) -> Callable[[O], str]:
     return wrapper
 
 
-O = typing.TypeVar("O", contravariant=True)
+O_contra = typing.TypeVar("O_contra", contravariant=True)
 
 
 class Object(MuSCAD):
@@ -142,13 +143,21 @@ class Object(MuSCAD):
         return self.set_modifier(None)
 
     def __add__(self, other: Object | Iterable[Object]) -> Object:
-        """Adding two objects together creates a Union of those objects :param other: another object :return: a Union of
-        both objects.
+        """Adding two objects together creates a Union of those objects.
+
+        :param other: another object
+        :return: a Union of both objects.
+
         """
         return Union(self, other)
 
     def __radd__(self, other: Literal[0]) -> Object:
-        """Makes sure sum(*[object, ...]) works :param other: another object, or 0 :return: a Union of both objects."""
+        """Makes sure sum(*[object, ...]) works.
+
+        :param other: another object, or 0
+        :return: a Union of both objects.*
+
+        """
         assert other == 0
         return self
 
@@ -162,8 +171,11 @@ class Object(MuSCAD):
         return Difference(self, other)
 
     def __and__(self, other: Object) -> Object:
-        """Logical and between two objects creates an Intersection between those objects :param
-        other: another object :return: an Intersection of self and other.
+        """Logical and between two objects creates an Intersection between those objects.
+
+        :param other: another object
+        :return: an Intersection of self and other.
+
         """
         return Intersection(self, other)
 
@@ -190,21 +202,28 @@ class Object(MuSCAD):
         return self.translate(z=z)
 
     def rightward(self, dist: float) -> Object:
-        """Helper method to apply a Translation to the right on X axis on the current object :param
-        dist: distance in mm :return: an object, translated to the right by `dist` mm.
+        """Helper method to apply a Translation to the right on X axis on the current object.
+
+        :param dist: distance in mm
+        :return: an object, translated to the right by `dist` mm.
+
         """
         return self.x_translate(dist)
 
     def leftward(self, dist: float) -> Object:
-        """Helper method to apply a Translation to the left on X axis on the current object :param
-        dist: distance in mm :return: an object, translated to the left by `dist` mm.
+        """Helper method to apply a Translation to the left on X axis on the current object.
+
+        :param dist: distance in mm
+        :return: an object, translated to the left by `dist` mm.
+
         """
         return self.x_translate(-dist)
 
     def forward(self, dist: float) -> Object:
-        """Helper method to apply a forward Translation on Y axis on the current object :param dist:
+        """Helper method to apply a forward Translation on Y axis on the current object.
 
-        distance in mm :return: an object, translated forwards by `dist` mm.
+        :param dist: distance in mm
+        :return: an object, translated forwards by `dist` mm.
 
         """
         return self.y_translate(dist)
@@ -296,7 +315,7 @@ class Object(MuSCAD):
         return self.rotate(z=angle, center_x=center_x, center_y=center_y)
 
     def left_to_right(self) -> Object:
-        """Alias for self.z_rotate(180)
+        """Alias for `self.z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -304,7 +323,7 @@ class Object(MuSCAD):
         return self.z_rotate(180)
 
     def left_to_bottom(self) -> Object:
-        """Alias for self.y_rotate(-90).z_rotate(90)
+        """Alias for `self.y_rotate(-90).z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -312,7 +331,7 @@ class Object(MuSCAD):
         return self.y_rotate(-90).z_rotate(90)
 
     def left_to_top(self) -> Object:
-        """Alias for self.y_rotate(90).z_rotate(90)
+        """Alias for `self.y_rotate(90).z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -320,7 +339,7 @@ class Object(MuSCAD):
         return self.y_rotate(90).z_rotate(90)
 
     def left_to_front(self) -> Object:
-        """Alias for self.z_rotate(-90)
+        """Alias for `self.z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -328,7 +347,7 @@ class Object(MuSCAD):
         return self.z_rotate(-90)
 
     def left_to_back(self) -> Object:
-        """Alias for self.z_rotate(90)
+        """Alias for `self.z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -336,7 +355,7 @@ class Object(MuSCAD):
         return self.z_rotate(90)
 
     def right_to_bottom(self) -> Object:
-        """Alias for self.y_rotate(90).z_rotate(-90)
+        """Alias for `self.y_rotate(90).z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -344,7 +363,7 @@ class Object(MuSCAD):
         return self.y_rotate(90).z_rotate(-90)
 
     def right_to_top(self) -> Object:
-        """Alias for self.y_rotate(-90).z_rotate(90)
+        """Alias for `self.y_rotate(-90).z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -352,7 +371,7 @@ class Object(MuSCAD):
         return self.y_rotate(-90).z_rotate(90)
 
     def right_to_front(self) -> Object:
-        """Alias for self.z_rotate(90)
+        """Alias for `self.z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -360,7 +379,7 @@ class Object(MuSCAD):
         return self.z_rotate(90)
 
     def right_to_back(self) -> Object:
-        """Alias for self.z_rotate(-90)
+        """Alias for `self.z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -368,7 +387,7 @@ class Object(MuSCAD):
         return self.z_rotate(-90)
 
     def right_to_left(self) -> Object:
-        """Alias for self.z_rotate(180)
+        """Alias for `self.z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -376,7 +395,7 @@ class Object(MuSCAD):
         return self.z_rotate(180)
 
     def front_to_left(self) -> Object:
-        """Alias for self.z_rotate(90)
+        """Alias for `self.z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -384,7 +403,7 @@ class Object(MuSCAD):
         return self.z_rotate(90)
 
     def front_to_right(self) -> Object:
-        """Alias for self.z_rotate(-90)
+        """Alias for `self.z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -392,7 +411,7 @@ class Object(MuSCAD):
         return self.z_rotate(-90)
 
     def front_to_top(self) -> Object:
-        """Alias for self.x_rotate(90).z_rotate(180)
+        """Alias for `self.x_rotate(90).z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -400,7 +419,7 @@ class Object(MuSCAD):
         return self.x_rotate(90).z_rotate(180)
 
     def front_to_bottom(self) -> Object:
-        """Alias for self.x_rotate(-90).z_rotate(180)
+        """Alias for `self.x_rotate(-90).z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -408,7 +427,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90).z_rotate(180)
 
     def front_to_back(self) -> Object:
-        """Alias for self.z_rotate(180)
+        """Alias for `self.z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -416,7 +435,7 @@ class Object(MuSCAD):
         return self.z_rotate(180)
 
     def back_to_left(self) -> Object:
-        """Alias for self.z_rotate(-90)
+        """Alias for `self.z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -424,7 +443,7 @@ class Object(MuSCAD):
         return self.z_rotate(-90)
 
     def back_to_right(self) -> Object:
-        """Alias for self.z_rotate(90)
+        """Alias for `self.z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -432,10 +451,15 @@ class Object(MuSCAD):
         return self.z_rotate(90)
 
     def back_to_front(self) -> Object:
+        """Alias for `self.z_rotate(180)`.
+
+        :return: a rotated Object.
+
+        """
         return self.z_rotate(180)
 
     def back_to_top(self) -> Object:
-        """Alias for self.x_rotate(-90)
+        """Alias for `self.x_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -443,7 +467,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90)
 
     def back_to_bottom(self) -> Object:
-        """Alias for self.x_rotate(90)
+        """Alias for `self.x_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -451,7 +475,7 @@ class Object(MuSCAD):
         return self.x_rotate(90)
 
     def bottom_to_left(self) -> Object:
-        """Alias for self.x_rotate(-90).z_rotate(-90)
+        """Alias for `self.x_rotate(-90).z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -459,7 +483,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90).z_rotate(-90)
 
     def bottom_to_right(self) -> Object:
-        """Alias for self.x_rotate(-90).z_rotate(90)
+        """Alias for `self.x_rotate(-90).z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -467,7 +491,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90).z_rotate(90)
 
     def bottom_to_front(self) -> Object:
-        """Alias for self.x_rotate(-90).z_rotate(180)
+        """Alias for `self.x_rotate(-90).z_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -475,7 +499,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90).z_rotate(180)
 
     def bottom_to_back(self) -> Object:
-        """Alias for self.x_rotate(-90)
+        """Alias for `self.x_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -483,7 +507,7 @@ class Object(MuSCAD):
         return self.x_rotate(-90)
 
     def bottom_to_top(self) -> Object:
-        """Alias for self.x_rotate(180)
+        """Alias for `self.x_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -491,7 +515,7 @@ class Object(MuSCAD):
         return self.x_rotate(180)
 
     def top_to_left(self) -> Object:
-        """Alias for self.x_rotate(90).z_rotate(-90)
+        """Alias for `self.x_rotate(90).z_rotate(-90)`.
 
         :return: a rotated Object.
 
@@ -499,7 +523,7 @@ class Object(MuSCAD):
         return self.x_rotate(90).z_rotate(-90)
 
     def top_to_right(self) -> Object:
-        """Alias for self.x_rotate(90).z_rotate(90)
+        """Alias for `self.x_rotate(90).z_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -507,7 +531,7 @@ class Object(MuSCAD):
         return self.x_rotate(90).z_rotate(90)
 
     def top_to_back(self) -> Object:
-        """Alias for self.x_rotate(90)
+        """Alias for `self.x_rotate(90)`.
 
         :return: a rotated Object.
 
@@ -515,7 +539,7 @@ class Object(MuSCAD):
         return self.x_rotate(90)
 
     def top_to_front(self) -> Object:
-        """Alias for self.x_rotate(-90).y_rotate(180)
+        """Alias for `self.x_rotate(-90).y_rotate(180)`.
 
         :return: a rotated Object.
 
@@ -523,14 +547,14 @@ class Object(MuSCAD):
         return self.x_rotate(-90).y_rotate(180)
 
     def top_to_bottom(self) -> Object:
-        """Alias for self.x_rotate(180)
+        """Alias for `self.x_rotate(180)`.
 
         :return: a rotated Object.
 
         """
         return self.x_rotate(180)
 
-    def upside_down(self, x_axis: bool = False) -> Object:
+    def upside_down(self, *, x_axis: bool = False) -> Object:
         """Turns the object upside down on its Y axis.
 
         Equivalent to self.y_rotate(180). If x_axis is True, rotate on X axis instead (like top_to_bottom()).
@@ -576,7 +600,7 @@ class Object(MuSCAD):
             return self.x_mirror(center, keep=False) + self
         return self.leftward(center).mirror(x=1).rightward(center)
 
-    def y_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
+    def y_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
         """Helper method to mirror this object on the Y axis or a parallel.
 
         :param center: the Y coordinate of the axis to mirror on
@@ -588,7 +612,7 @@ class Object(MuSCAD):
             return self.backward(center).mirror(y=1).forward(center) + self
         return self.backward(center).mirror(y=1).forward(center)
 
-    def z_mirror(self, center: float = 0.0, keep: bool = False) -> Object:
+    def z_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
         """Helper method to mirror this object on the Z axis or a parallel.
 
         :param center: the Y coordinate of the axis to mirror on
@@ -600,13 +624,14 @@ class Object(MuSCAD):
             return self.down(center).mirror(z=1).up(center) + self
         return self.down(center).mirror(z=1).up(center)
 
-    def project(self, cut: bool = False) -> Object:
+    def project(self, *, cut: bool = False) -> Object:
         """Transform this object into a 2D shape by projecting it to the (x,y) plane."""
         return Projection(cut=cut)(self)
 
     def linear_extrude(
         self,
         height: float,
+        *,
         center: bool = False,
         convexity: int = 10,
         twist: float = 0.0,
@@ -773,15 +798,16 @@ class Object(MuSCAD):
     def offset(
         self,
         r: float,
+        *,
         delta: float | None = None,
         chamfer: bool = False,
         invert: bool = False,
     ) -> Object:
         if invert:
             if r < 0:
-                return self - self.offset(r, delta, chamfer)
+                return self - self.offset(r, delta=delta, chamfer=chamfer)
             else:
-                return self.offset(r, delta, chamfer) - self
+                return self.offset(r, delta=delta, chamfer=chamfer) - self
         return Offset(r=r, delta=delta, chamfer=chamfer)(self)
 
     def color(self, name: str, alpha: float | None = None) -> Object:
@@ -832,11 +858,11 @@ class Object(MuSCAD):
 
     @property
     def left(self) -> float:
-        raise NotImplementedError("left", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def right(self) -> float:
-        raise NotImplementedError("right", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def center_x(self) -> float:
@@ -844,11 +870,11 @@ class Object(MuSCAD):
 
     @property
     def back(self) -> float:
-        raise NotImplementedError("back", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def front(self) -> float:
-        raise NotImplementedError("front", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def center_y(self) -> float:
@@ -856,11 +882,11 @@ class Object(MuSCAD):
 
     @property
     def bottom(self) -> float:
-        raise NotImplementedError("bottom", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def top(self) -> float:
-        raise NotImplementedError("top", self.__class__)  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @property
     def center_z(self) -> float:
@@ -919,7 +945,10 @@ class Object(MuSCAD):
 
         if x is not None:
             if not self.left < x < self.right:
-                msg = f"x must be the x coordinate of a pane that divides the object in 2, between {self.left} and {self.right}"
+                msg = (
+                    "x must be the x coordinate of a pane that divides the object in 2,"
+                    f" between {self.left} and {self.right}"
+                )
                 raise ValueError(msg)
             return (
                 self
@@ -943,7 +972,10 @@ class Object(MuSCAD):
             )
         elif y is not None:
             if not self.back < y < self.front:
-                msg = f"y must be the y coordinate of a pane that divides the object in 2, between {self.back} and {self.front}"
+                msg = (
+                    "y must be the y coordinate of a pane that divides the object in 2,"
+                    f" between {self.back} and {self.front}"
+                )
                 raise ValueError(msg)
             return (
                 self
@@ -967,7 +999,10 @@ class Object(MuSCAD):
             )
         elif z is not None:
             if not self.bottom < z < self.top:
-                msg = f"z must be the z coordinate of a pane that divides the object in 2, between {self.bottom} and {self.top}"
+                msg = (
+                    "z must be the z coordinate of a pane that divides the object in 2,"
+                    f" between {self.bottom} and {self.top}"
+                )
                 raise ValueError(msg)
             return (
                 self
@@ -990,7 +1025,8 @@ class Object(MuSCAD):
                 ),
             )
         else:
-            raise ValueError("You must provide one plane to divide the Object, defined by one X, Y, Z coordinate")
+            msg = "You must provide one plane to divide the Object, defined by one X, Y, Z coordinate"
+            raise ValueError(msg)
 
     def __stl__(self) -> Object:
         return self  # pragma: no cover
@@ -1000,15 +1036,13 @@ class Object(MuSCAD):
         return camel_to_snake(self.__class__.__name__)  # pragma: no cover
 
     def render_to_file(
-        self, path: str | None = None, mode: str = "wt", openscad: bool = False
-    ) -> str:  # pragma: no cover
+        self, path: str | Path | None = None, *, mode: str = "wt", openscad: bool = False
+    ) -> Path:  # pragma: no cover
         if path is None:
             path = self.file_name
-        if mode is None:
-            mode = self.mode
-        return render_to_file(self, mode, path, openscad=openscad)
+        return render_to_file(self, path, mode=mode, openscad=openscad)
 
-    def export_stl(self, path: str | None = None) -> str:  # pragma: no cover
+    def export_stl(self, path: str | Path | None = None) -> Path:  # pragma: no cover
         obj = self.__stl__()
         if path is None:
             path = self.file_name
@@ -1090,7 +1124,7 @@ class Primitive(Object):
 
 
 class Composite(Object):
-    """Base class for Boolean operations (Union, Difference, Intersection)"""
+    """Base class for Boolean operations (Union, Difference, Intersection)."""
 
     def __init__(self, *children: Object | Iterable[Object]):
         super().__init__()
@@ -1099,9 +1133,10 @@ class Composite(Object):
             self.apply(*children)
 
     def add_child(self, child: Object | Iterable[Object] | Literal[0]) -> Object:
-        """Add a children object to this Composite :param child:
+        """Add a children object to this Composite.
 
-        :return:
+        :param child: the child object to add
+        :return: another composite with the additional child
 
         """
         if child == 0:  # for sum(*Objects)
@@ -1180,12 +1215,13 @@ def top(children: Iterable[Object]) -> float:
 
 
 class Union(Composite):
-    """OpenSCAD union()"""
+    """OpenSCAD `union()`."""
 
     def __add__(self, other: Object | Iterable[Object]) -> Object:
-        """Adding to a Union adds a children instead of creating a new Union :param other: a children object :return:
+        """Adding to a Union adds a children instead of creating a new Union.
 
-        the same union with children appended.
+        :param other: a children object
+        :return: the same union with children appended.
 
         """
         return self.add_child(other)
@@ -1227,11 +1263,14 @@ class ImplicitUnion(Union):
 
 
 class Difference(Composite):
-    """OpenSCAD difference()"""
+    """OpenSCAD `difference()`."""
 
     def __sub__(self, other: Object | Misc | Hole | Iterable[Object]) -> Object:
-        """Substracting from a Difference adds a children instead of creating a new Difference :param other: a children
-        object :return: the same difference with children appended.
+        """Substracting from a Difference adds a children instead of creating a new Difference.
+
+        :param other: a children object
+        :return: the same difference with children appended.
+
         """
         return self.add_child(other)
 
@@ -1261,11 +1300,14 @@ class Difference(Composite):
 
 
 class Intersection(Composite):
-    """OpenSCAD intersection()"""
+    """OpenSCAD `intersection()`."""
 
     def __and__(self, other: Object) -> Object:
-        """Intersecting with an Intersection adds a children instead of creating a new Intersection :param other: a
-        children object :return: the same intersection with children appended.
+        """Intersecting with an Intersection adds a children instead of creating a new Intersection.
+
+        :param other: a children object
+        :return: the same intersection with children appended.
+
         """
         return self.add_child(other)
 
@@ -1309,7 +1351,8 @@ class Transformation(Primitive):
     @property
     def child(self) -> Object:
         if self._child is None:
-            raise RuntimeError("This Transformation has no child")
+            msg = "This Transformation has no child"
+            raise RuntimeError(msg)
         return self._child
 
     @child.setter
@@ -1338,13 +1381,16 @@ class Transformation(Primitive):
 
     @render_comment
     def render(self) -> str:
-        return f"{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())})\n{self._render_child()}"
+        return f"""\
+{self.modifier}{self.object_name}({self._render_arguments(self._iter_arguments())})
+{self._render_child()}"""
 
     def childattr(self, item: str) -> Any:
-        """Makes properties from the transformed object accessible through the Transformation :param
-        item:
+        """Makes properties from the transformed object accessible through the Transformation.
 
-        :return:
+        :param item: name of an attribute on the child
+        :return: the child attribute, with transformation applied
+
         """
         return self.copy()(getattr(self.child, item))
 
@@ -1359,8 +1405,11 @@ class Transformation(Primitive):
         return self.child.file_name
 
     def combine(self, child: Transformation) -> Transformation:
-        """When applying multiple transformations of the same type, those may be combined :param
-        child: another Primitive :return: an object combining all transformations.
+        """When applying multiple transformations of the same type, those may be combined.
+
+        :param child: another Primitive
+        :return: an object combining all transformations.
+
         """
         self.child = child
         return self
@@ -1449,7 +1498,8 @@ class Hole(MuSCAD):
 
     def __add__(self, other: Object) -> Hole:
         if not isinstance(other, Hole):
-            raise ValueError("Holes can only be added to Holes")
+            msg = "Holes can only be added to Holes"
+            raise TypeError(msg)
         return Hole(self.object + other.object)
 
     def render(self) -> str:
@@ -1504,14 +1554,17 @@ def middle_of(one: float, other: float) -> float:
     return one + (other - one) / 2
 
 
-def render_to_file(obj: Object, mode: str, path: str, openscad: bool = False) -> str:
-    if not path.endswith(".scad"):
-        path = path + ".scad"
-    if not os.path.isabs(path):
-        path = os.path.join(os.getcwd(), path)
+def render_to_file(obj: Object, path: str | Path, *, mode: str, openscad: bool = False) -> Path:
+    if not isinstance(path, Path):
+        path = Path(path)
+
+    if path.suffix != ".scad":
+        path = path.with_suffix(".scad")
+    if not path.is_absolute():
+        path = Path.cwd() / path
 
     render = obj.render()
-    with open(path, mode) as foutput:
+    with path.open(mode) as foutput:
         foutput.write(render)
     if openscad and not os.environ.get("MUSCAD_NO_OPENSCAD"):
         try:
@@ -1544,13 +1597,17 @@ def validate_calc(
     ) -> tuple[float, float, float, float]:
         _from, _center, _to, _distance = f(from_, center, to, distance)
         if center is not None and _center != center:
-            raise ValueError(
-                f"calculated center incompatible with specified center (specified: {center}, calculated: {_center}, difference={center - _center})"
+            msg = (
+                "calculated center incompatible with specified center"
+                f" (specified: {center}, calculated: {_center}, difference={center - _center})"
             )
+            raise ValueError(msg)
         if distance is not None and not math.isclose(_distance, abs(distance)):
-            raise ValueError(
-                f"calculated distance incompatible with specified from_ (specified: {distance}, calculated: {_distance}, difference={distance - _distance})"
+            msg = (
+                "calculated distance incompatible with specified from_"
+                f" (specified: {distance}, calculated: {_distance}, difference={distance - _distance})"
             )
+            raise ValueError(msg)
         if (
             (from_ is not None and to is not None and from_ > to)
             or (from_ is not None and center is not None and from_ > center)
@@ -1560,13 +1617,11 @@ def validate_calc(
             from_, to = to, from_
 
         if from_ is not None and _from != from_:
-            raise ValueError(
-                f"calculated from_ incompatible with specified from_ (specified: {from_}, calculated: {_from}, difference={from_ - _from})"
-            )
+            msg = f"calculated from_ incompatible with specified from_ (specified: {from_}, calculated: {_from}, difference={from_ - _from})"
+            raise ValueError(msg)
         if to is not None and _to != to:
-            raise ValueError(
-                f"calculated to incompatible with specified to (specified: {to}, calculated: {_to}, difference={to - _to})"
-            )
+            msg = f"calculated to incompatible with specified to (specified: {to}, calculated: {_to}, difference={to - _to})"
+            raise ValueError(msg)
         return _from, _center, _to, _distance
 
     return wrapper
@@ -1637,12 +1692,15 @@ def calc(
         else:
             center = (from_ - to) / 2 + from_
             return to, center, from_, distance
-    raise ValueError("no sufficient input to calculate all params")
+    msg = "no sufficient input to calculate all params"
+    raise ValueError(msg)
 
 
-def export_stl(scad_path: str, stl_path: str | None = None) -> str:
-    if not stl_path:
-        stl_path = os.path.splitext(scad_path)[0] + ".stl"
+def export_stl(scad_path: str | Path, stl_path: str | Path | None = None) -> Path:
+    if stl_path is None:
+        stl_path = Path(scad_path).stem + ".stl"
+    if not isinstance(stl_path, Path):
+        stl_path = Path(stl_path)
     subprocess.call(["openscad", "-o", stl_path, scad_path])
     return stl_path
 

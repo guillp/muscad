@@ -55,9 +55,10 @@ def atan2(x: float, y: float) -> float:
 
 
 def hypotenuse(leg1: float, leg2: float) -> float:
-    """Returns the length of the hypotenuse based on the length of both legs :param leg1: length of one leg :param leg2:
+    """In a triangle, returns the length of the hypotenuse based on the length of both perpendicular sides.
 
-    length of the other leg
+    :param leg1: length of one leg
+    :param leg2: length of the other leg
     :return: the hypotenuse length.
 
     """
@@ -65,9 +66,12 @@ def hypotenuse(leg1: float, leg2: float) -> float:
 
 
 def catheti(hypot: float, leg: float) -> float:
-    """Returns the length of one leg based on the length of the hypotenuse and the other leg :param
-    hypot: length of the hypotenuse :param leg: length of the other leg :return: the length of the
-    missing leg.
+    """In a triangle, returns the length of one leg based on the length of the hypotenuse and the other leg.
+
+    :param hypot: length of the hypotenuse
+    :param leg: length of the other leg
+    :return: the length of the missing leg.
+
     """
     return (hypot**2 - leg**2) ** 0.5  # type: ignore[no-any-return]
 

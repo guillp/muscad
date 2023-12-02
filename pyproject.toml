@@ -63,7 +63,6 @@ target-version = "py38"
 line-length = 120
 select = [
     "A",
-    "C",
     "C4",
     "D",
     "DTZ",
@@ -95,7 +94,7 @@ exclude = [
     "tests"
 ]
 extend-ignore = [
-    "D100", "D101", "D102", "D103", "D104", "D105", "N802", "N803"
+    "D100", "D101", "D102", "D103", "D104", "D105", "E402", "N802", "N803"
 ]
 
 
