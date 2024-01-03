@@ -351,6 +351,13 @@ class Text(Primitive2D):
         raise NotImplementedError(msg)
 
     @property
+    def center_x(self) -> float:
+        if self.halign == "center":
+            return 0
+        msg = "use halign='center' to be able to align a Text to center_x"
+        raise NotImplementedError(msg)
+
+    @property
     def back(self) -> float:
         if self.valign in (None, "baseline", "bottom"):
             return 0
@@ -362,6 +369,13 @@ class Text(Primitive2D):
         if self.valign == "top":
             return 0
         msg = "use valign='top' to be able to align a Text to front"
+        raise NotImplementedError(msg)
+
+    @property
+    def center_y(self) -> float:
+        if self.valign == "center":
+            return 0
+        msg = "use valign='center' to be able to align a Text to center_y"
         raise NotImplementedError(msg)
 
 
