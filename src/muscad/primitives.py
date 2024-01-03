@@ -196,6 +196,13 @@ class Polyhedron(Primitive):
         self.faces = [list(face) for face in faces]
         self.convexity = convexity
 
+        self._left = min(p.x for p in self.points)
+        self._right = max(p.x for p in self.points)
+        self._back = min(p.y for p in self.points)
+        self._front = max(p.y for p in self.points)
+        self._bottom = min(p.z for p in self.points)
+        self._top = max(p.z for p in self.points)
+
     @staticmethod
     def unpack_points(points: Iterable[Point3D | Sequence[float]]) -> Iterable[Point3D]:
         for point in points:

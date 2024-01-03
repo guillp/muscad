@@ -10,7 +10,7 @@ def test_heart_z() -> None:
             Circle(d=20).align(right=3, front=30),
             Circle(d=2).align(center_x=0, back=0),
         )
-        .x_mirror(keep=True)
+        .x_symmetry()
         .z_linear_extrude(bottom=-1, top=3)
     )
 
@@ -51,8 +51,7 @@ def test_spade_z() -> None:
                 Square(1, 15).align(left=0, back=0),
             )
         )
-        .x_mirror(keep=True)
-        .z_linear_extrude(bottom=-1, top=4)
+        .x_symmetry()       .z_linear_extrude(bottom=-1, top=4)
     )
 
     assert compare_str(
@@ -104,7 +103,7 @@ def test_heart_y() -> None:
             Circle(d=20).align(right=3, front=30),
             Circle(d=2).align(center_x=0, back=0),
         )
-        .x_mirror(keep=True)
+        .x_symmetry()
         .y_linear_extrude(back=3, front=6)
     )
 
@@ -146,7 +145,7 @@ def test_spade_y() -> None:
                 Square(1, 15).align(left=0, back=0),
             ),
         )
-        .x_mirror(keep=True)
+        .x_symmetry()
         .y_linear_extrude(10, center_y=3)
     )
 
@@ -200,7 +199,7 @@ def test_heart_x() -> None:
             Circle(d=20).align(right=3, front=30),
             Circle(d=2).align(center_x=0, back=0),
         )
-        .x_mirror(keep=True)
+        .x_symmetry()
         .x_linear_extrude(5, leftwards=True)
     )
 
@@ -242,7 +241,7 @@ def test_spade_x() -> None:
                 Square(1, 15).align(left=0, back=0),
             )
         )
-        .x_mirror(keep=True)
+        .x_symmetry()
         .x_linear_extrude(9, left=-3)
     )
 

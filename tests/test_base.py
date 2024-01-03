@@ -201,22 +201,24 @@ def test_mirror() -> None:
     assert z_mirrored_circle.left == -5
     assert z_mirrored_circle.right == 5
 
-    x_mirrored_circle = Circle(d=10).align(left=0).x_mirror(keep=True)
+def test_symmetry() -> None:
+    """Test for Object.?_symmetry()"""
+    x_mirrored_circle = Circle(d=10).align(left=0).x_symmetry()
     assert x_mirrored_circle.left == -10
     assert x_mirrored_circle.right == 10
 
-    y_mirrored_circle = Circle(d=10).align(back=0).y_mirror(keep=True)
+    y_mirrored_circle = Circle(d=10).align(back=0).y_symmetry()
     assert y_mirrored_circle.back == -10
     assert y_mirrored_circle.front == 10
 
-    z_mirrored_circle = Sphere(d=10).align(bottom=0).z_mirror(keep=True)
+    z_mirrored_circle = Sphere(d=10).align(bottom=0).z_symmetry()
     assert z_mirrored_circle.bottom == -10
     assert z_mirrored_circle.top == 10
 
 
 def test_hull() -> None:
     """Test for Hull."""
-    hulled_mirrored_circle = Circle(d=10).align(left=0).x_mirror(keep=True).hull()
+    hulled_mirrored_circle = Circle(d=10).align(left=0).x_symmetry().hull()
     assert compare_str(
         hulled_mirrored_circle,
         """hull()

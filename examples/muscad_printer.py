@@ -13,11 +13,11 @@ from muscad import (
     E,
     Fillet,
     Hull,
-    MirroredPart,
     Object,
     Part,
     Sphere,
     Surface,
+    SymmetricPart,
     T,
     Union,
     Volume,
@@ -490,8 +490,8 @@ thumbwheel_right = thumbwheel_front.align(center_x=bed.bolt_right.center_x, cent
 
 
 class ZTopEndStop(Part):
-    bed_extrusion = ~bed.x_extrusion_front.debug()
-    frame_extrusion = ~frame.y_extrusion_right_middle.debug()
+    bed_extrusion = ~bed.x_extrusion_front
+    frame_extrusion = ~frame.y_extrusion_right_middle
     endstop = (
         ~MechanicalEndstopOnPCB(Bolt.M3(10).add_nut(-3, side_clearance_size=10, angle=-90))
         .front_to_bottom()
@@ -625,7 +625,7 @@ class XCarriage(Part):
             back=cable_guide_top.back - E,
             center_z=cable_guide_top.top - 6,
         )
-        .z_mirror(cable_guide_top.top - 10, keep=True)
+        .z_mirror(cable_guide_top.top - 10)
         .debug()
     )
 
@@ -794,7 +794,7 @@ class XAxisPulleys(Part):
         center_x=body.center_x + 8,
         front=body.front + 8,
         center_z=center_pulleys_bolt.center_z,
-    ).x_mirror(center=center_pulleys_bolt.center_x, keep=True)
+    ).x_symmetry(center=center_pulleys_bolt.center_x)
 
     def __stl__(self) -> Object:
         return self.bottom_to_back()
@@ -1027,7 +1027,7 @@ class CableChainCarriageAttachment(Part):
             height=4,
         )
         .add_corner(angle=270)
-        .z_mirror(center=frame.y_extrusion_right_top.center_z, keep=True)
+        .z_symmetry(center=frame.y_extrusion_right_top.center_z)
     )
 
     shaft = (
@@ -1117,7 +1117,7 @@ class CableChainFrameAttachement(Part):
         ~Bolt.M5(16)
         .bottom_to_left()
         .align(left=body.left - 1, center_y=body.back + 8, center_z=body.center_z)
-        .y_mirror(body.center_y, keep=True)
+        .y_symmetry(body.center_y)
         .debug()
     )
     chain_bolts = (
@@ -1125,7 +1125,7 @@ class CableChainFrameAttachement(Part):
         .add_nut(-1)
         .bottom_to_left()
         .align(right=body.right + 1, center_z=body.center_z)
-        .y_mirror(center=-7.5 / 2, keep=True)
+        .y_symmetry(center=-7.5 / 2)
         .align(center_y=body.back + 24)
         .debug()
     )
@@ -1139,7 +1139,7 @@ class CableChainFrameAttachement(Part):
             center_y=chain_bolts.front + 8,
             center_z=body.center_z + 8,
         )
-        .z_mirror(center=body.center_z, keep=True)
+        .z_mirror(center=body.center_z)
         .debug()
     )
 
@@ -2034,8 +2034,8 @@ class ExtruderStepperMount(Part):
             center_y=stepper_holder.back,
             center_z=stepper.center_z + 15.52,
         )
-        .x_mirror(center=stepper.center_x, keep=True)
-        .z_mirror(center=stepper.center_z, keep=True)
+        .x_symmetry(center=stepper.center_x)
+        .z_symmetry(center=stepper.center_z)
         .debug()
     )
 
@@ -2218,7 +2218,7 @@ class SpoolHolder(Part):
 spool_holder = SpoolHolder()
 
 
-class ZBedMount(MirroredPart, y=True, keep_y=True):
+class ZBedMount(SymmetricPart, y=True):
     extrusion = ~bed.y_extrusion_left
     z_rod = ~gantry.z_rod_left_front
     t8 = ~gantry.z_threaded_rod_left
@@ -2238,7 +2238,7 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         left=extrusion.left - 10,
         center_y=bearing.back - 7,
         center_z=extrusion.center_z,
-    ).slide(y=-10).y_mirror(center=z_rod.center_y, keep=True)
+    ).slide(y=-10).y_symmetry(center=z_rod.center_y)
 
     base = Surface.free(
         Circle(d=30).align(center_x=bearing.center_x, center_y=bearing.center_y),
@@ -2336,7 +2336,7 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         center_x=extrusion.center_x,
         center_y=bearing.center_y + 16,
         center_z=extrusion.top + 2,
-    ).slide(y=20).y_mirror(bearing.center_y, keep=True)
+    ).slide(y=20).y_symmetry(bearing.center_y)
 
     def __stl__(self) -> Object:
         return self.upside_down()
@@ -2486,8 +2486,8 @@ z_bracket_top_right_front = z_bracket_top_left_front.x_mirror(bed.center_x)
 z_bracket_top_right_back = z_bracket_top_left_back.x_mirror(bed.center_x)
 
 
-class ZBracketTop(MirroredPart, y=True, keep_y=True):
-    extrusion = ~frame.y_extrusion_left_middle.debug()
+class ZBracketTop(SymmetricPart, y=True):
+    extrusion = ~frame.y_extrusion_left_middle
     rod = ~gantry.z_rod_left_front.debug()
 
     body = (
@@ -3227,7 +3227,7 @@ if __name__ == "__main__":
             + thumbwheel_left
             + thumbwheel_right
         ).color("orange")
-        + (frame_spacer + z_rod_spacer).color("green")
+        # + (frame_spacer + z_rod_spacer).color("green")
     ).render_to_file("muscad_printer")
 
     glass_plate_corner_left_front.render_to_file()

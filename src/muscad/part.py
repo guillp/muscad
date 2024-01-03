@@ -256,9 +256,6 @@ class MirroredPart(Part):
     _center_x: float
     _center_y: float
     _center_z: float
-    keep_x: bool
-    keep_y: bool
-    keep_z: bool
 
     def __init_subclass__(
         cls,
@@ -269,9 +266,6 @@ class MirroredPart(Part):
         center_x: float = 0,
         center_y: float = 0,
         center_z: float = 0,
-        keep_x: bool = False,
-        keep_y: bool = False,
-        keep_z: bool = False,
         **kwargs: Any,
     ):
         super().__init_subclass__(**kwargs)
@@ -281,9 +275,6 @@ class MirroredPart(Part):
         cls._center_x = center_x
         cls._center_y = center_y
         cls._center_z = center_z
-        cls.keep_x = keep_x
-        cls.keep_y = keep_y
-        cls.keep_z = keep_z
 
     @render_comment
     def render(self) -> str:
@@ -294,59 +285,127 @@ class MirroredPart(Part):
         if self.holes:
             children = children - self.holes
         if self.mirror_x:
-            children = children.x_mirror(center=self._center_x, keep=self.keep_x)
+            children = children.x_mirror(center=self._center_x)
         if self.mirror_y:
-            children = children.y_mirror(center=self._center_y, keep=self.keep_y)
+            children = children.y_mirror(center=self._center_y)
         if self.mirror_z:
-            children = children.z_mirror(center=self._center_z, keep=self.keep_z)
+            children = children.z_mirror(center=self._center_z)
         return Union(children, self.miscellaneous).set_modifier(self.modifier).render()
 
     @property
     def left(self) -> float:
         if self.mirror_x:
-            if self.keep_x:
-                return -max(abs(left(self.children)), abs(right(self.children)))
             return -right(self.children)
         return left(self.children)
 
     @property
     def right(self) -> float:
         if self.mirror_x:
-            if self.keep_x:
-                return max(abs(left(self.children)), abs(right(self.children)))
             return -left(self.children)
         return right(self.children)
 
     @property
     def back(self) -> float:
         if self.mirror_y:
-            if self.keep_y:
-                return -max(abs(back(self.children)), abs(front(self.children)))
             return -front(self.children)
         return back(self.children)
 
     @property
     def front(self) -> float:
         if self.mirror_y:
-            if self.keep_y:
-                return max(abs(back(self.children)), abs(front(self.children)))
             return -back(self.children)
         return front(self.children)
 
     @property
     def bottom(self) -> float:
         if self.mirror_z:
-            if self.keep_z:
-                return -max(abs(bottom(self.children)), abs(top(self.children)))
             return -top(self.children)
         return bottom(self.children)
 
     @property
     def top(self) -> float:
         if self.mirror_z:
-            if self.keep_z:
-                return max(abs(bottom(self.children)), abs(top(self.children)))
             return -bottom(self.children)
+        return top(self.children)
+
+
+class SymmetricPart(Part):
+    mirror_x: bool
+    mirror_y: bool
+    mirror_z: bool
+    _center_x: float
+    _center_y: float
+    _center_z: float
+
+    def __init_subclass__(
+        cls,
+        *,
+        x: bool = False,
+        y: bool = False,
+        z: bool = False,
+        center_x: float = 0,
+        center_y: float = 0,
+        center_z: float = 0,
+        **kwargs: Any,
+    ):
+        super().__init_subclass__(**kwargs)
+        cls.mirror_x = x
+        cls.mirror_y = y
+        cls.mirror_z = z
+        cls._center_x = center_x
+        cls._center_y = center_y
+        cls._center_z = center_z
+
+    @render_comment
+    def render(self) -> str:
+        if not self.children:
+            msg = "This part has no children"
+            raise RuntimeError(msg)
+        children: Object = Union(self.children)
+        if self.holes:
+            children = children - self.holes
+        if self.mirror_x:
+            children = children.x_symmetry(center=self._center_x)
+        if self.mirror_y:
+            children = children.y_symmetry(center=self._center_y)
+        if self.mirror_z:
+            children = children.z_symmetry(center=self._center_z)
+        return Union(children, self.miscellaneous).set_modifier(self.modifier).render()
+
+    @property
+    def left(self) -> float:
+        if self.mirror_x:
+            return -max(abs(left(self.children)), abs(right(self.children)))
+        return left(self.children)
+
+    @property
+    def right(self) -> float:
+        if self.mirror_x:
+            return max(abs(left(self.children)), abs(right(self.children)))
+        return right(self.children)
+
+    @property
+    def back(self) -> float:
+        if self.mirror_y:
+            return -max(abs(back(self.children)), abs(front(self.children)))
+        return back(self.children)
+
+    @property
+    def front(self) -> float:
+        if self.mirror_y:
+            return max(abs(back(self.children)), abs(front(self.children)))
+        return front(self.children)
+
+    @property
+    def bottom(self) -> float:
+        if self.mirror_z:
+            return -max(abs(bottom(self.children)), abs(top(self.children)))
+        return bottom(self.children)
+
+    @property
+    def top(self) -> float:
+        if self.mirror_z:
+            return max(abs(bottom(self.children)), abs(top(self.children)))
         return top(self.children)
 
 

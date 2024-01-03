@@ -588,41 +588,65 @@ class Object(MuSCAD):
         """
         return Mirroring(x=x, y=y, z=z)(self)
 
-    def x_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
+    def x_mirror(self, center: float = 0.0) -> Object:
         """Helper method to mirror this object on the X axis or a parallel.
 
         :param center: the X coordinate of the axis to mirror on
-        :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
 
         """
-        if keep:
-            return self.x_mirror(center, keep=False) + self
         return self.leftward(center).mirror(x=1).rightward(center)
 
-    def y_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
+    def y_mirror(self, center: float = 0.0) -> Object:
         """Helper method to mirror this object on the Y axis or a parallel.
 
         :param center: the Y coordinate of the axis to mirror on
-        :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
 
         """
-        if keep:
-            return self.backward(center).mirror(y=1).forward(center) + self
         return self.backward(center).mirror(y=1).forward(center)
 
-    def z_mirror(self, center: float = 0.0, *, keep: bool = False) -> Object:
+    def z_mirror(self, center: float = 0.0) -> Object:
         """Helper method to mirror this object on the Z axis or a parallel.
 
         :param center: the Y coordinate of the axis to mirror on
-        :param keep: if True, the initial object is kept in addition to its mirror
         :return: a mirrored object
 
         """
-        if keep:
-            return self.down(center).mirror(z=1).up(center) + self
         return self.down(center).mirror(z=1).up(center)
+
+    def x_symmetry(self, center: float = 0.0) -> Object:
+        """Helper method to create a symmetric object using a mirror on a plane parallel to the X plane.
+
+        Similar to x_mirror(), but the original object is kept.
+
+        :param center: the X coordinate of the axis to mirror on
+        :return: a symmetric object
+
+        """
+        return self.x_mirror(center) + self
+
+    def y_symmetry(self, center: float = 0.0) -> Object:
+        """Helper method to create a symmetric object using a mirror on a plane parallel to the Y plane.
+
+        Similar to y_mirror(), but the original object is kept.
+
+        :param center: the Y coordinate of the axis to mirror on
+        :return: a symmetric object
+
+        """
+        return self.y_mirror(center) + self
+
+    def z_symmetry(self, center: float = 0.0) -> Object:
+        """Helper method to create a symmetric object using a mirror on a plane parallel to the Z plane.
+
+        Similar to z_mirror(), but the original object is kept.
+
+        :param center: the Z coordinate of the axis to mirror on
+        :return: a symmetric object
+
+        """
+        return self.z_mirror(center) + self
 
     def project(self, *, cut: bool = False) -> Object:
         """Transform this object into a 2D shape by projecting it to the (x,y) plane."""

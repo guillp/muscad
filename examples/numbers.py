@@ -15,7 +15,7 @@ class Number1(Part):
         .leftward(0.3)
         .backward(0.8)
     )
-    screws = ~Screw().align(center_x=0, center_y=30, top=number.top + T).y_mirror(keep=True)
+    screws = ~Screw().align(center_x=0, center_y=30, top=number.top + T).y_symmetry()
 
 
 class Number2(Part):
@@ -37,7 +37,7 @@ class Number3(Part):
         .leftward(0.3)
         .backward(0.8)
     )
-    screws = ~Screw().align(center_x=16, center_y=24, top=number.top + T).y_mirror(keep=True).x_mirror(keep=True)
+    screws = ~Screw().align(center_x=16, center_y=24, top=number.top + T).y_symmetry().x_symmetry()
 
 
 class Number4(Part):
@@ -47,7 +47,7 @@ class Number4(Part):
         .leftward(0.3)
         .backward(0.8)
     )
-    screws_right = ~Screw().align(center_x=10, center_y=10, top=number.top + T).y_mirror(-10, keep=True)
+    screws_right = ~Screw().align(center_x=10, center_y=10, top=number.top + T).y_symmetry(-10)
     screw_top = ~Screw().align(center_x=-4, center_y=32, top=number.top + T)
     screw_left = ~Screw().align(center_x=-22, center_y=-19, top=number.top + T)
 

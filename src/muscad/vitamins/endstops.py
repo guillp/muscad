@@ -179,7 +179,7 @@ class MechanicalEndstopOnPCB(Part):
                     center_y=self.pcb.front - 2.5,
                 )
                 .z_translate(z_offset)
-                .x_mirror(self.switch.center_x, keep=True)
+                .x_symmetry(self.switch.center_x)
                 .misc()
             )
 
@@ -188,9 +188,9 @@ class BLTouchClassic(Part):
     attachment = (
         Hull(
             Surface.square(width=6, depth=11.53),
-            Surface.circle(radius=4, center_x=9).x_mirror(0, keep=True),
+            Surface.circle(radius=4, center_x=9).x_symmetry(),
         )
-        - Surface.circle(diameter=3.2, center_x=9).x_mirror(0, keep=True)
+        - Surface.circle(diameter=3.2, center_x=9).x_symmetry()
     ).z_linear_extrude(2.3)
     cylinder = Tube(diameter=11, top=attachment.bottom, height=7.7)
     body = Tube(diameter=13, top=cylinder.bottom, height=26.3) & Volume(
@@ -201,4 +201,4 @@ class BLTouchClassic(Part):
     def init(  # type: ignore[override]
         self, bolt: Object = Bolt.M3(20).add_nut(-4, inline_clearance_size=10)
     ) -> None:
-        self.bolts = bolt.align(center_x=9, bottom=self.attachment.bottom - 3).x_mirror(0, keep=True).misc()
+        self.bolts = bolt.align(center_x=9, bottom=self.attachment.bottom - 3).x_symmetry().misc()

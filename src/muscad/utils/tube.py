@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 
-from muscad import Cylinder, E, Hole, Misc, Object, Part, Volume, calc
+from muscad import Cylinder, E, Hole, Misc, Object, Part, calc
 
 
 class Tube(Part):
@@ -62,6 +62,8 @@ class Tube(Part):
         top_distance: float = 0,
     ) -> Tube:
         """Turns a quarter of this tube into a cube."""
+        from muscad import Volume
+
         self.add_misc(
             Volume(
                 left=self.center_x,
@@ -76,6 +78,8 @@ class Tube(Part):
 
     def cut_corner(self, angle: float = 0) -> Tube:
         """Removes a quarter of this tube."""
+        from muscad import Volume
+
         self.add_hole(
             Volume(
                 left=self.center_x,
@@ -90,6 +94,8 @@ class Tube(Part):
 
     def add_side(self, angle: float = 0, distance: float = 0) -> Tube:
         """Turns a quarter of this tube into a cube."""
+        from muscad import Volume
+
         self.add_misc(
             Volume(
                 left=self.center_x,

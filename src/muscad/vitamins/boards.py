@@ -132,7 +132,7 @@ class Board(Part):
                 top=lcd.lower_board.bottom + E,
             )
             .fillet_height(r=1)
-            .x_mirror(lcd.lower_board.center_x, keep=True)
+            .x_symmetry(lcd.lower_board.center_x)
             .misc()
         )
         return lcd
