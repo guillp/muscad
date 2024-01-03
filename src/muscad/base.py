@@ -1641,10 +1641,16 @@ def validate_calc(
             from_, to = to, from_
 
         if from_ is not None and _from != from_:
-            msg = f"calculated from_ incompatible with specified from_ (specified: {from_}, calculated: {_from}, difference={from_ - _from})"
+            msg = (
+                "calculated from_ incompatible with specified from_"
+                " (specified: {from_}, calculated: {_from}, difference={from_ - _from})"
+            )
             raise ValueError(msg)
         if to is not None and _to != to:
-            msg = f"calculated to incompatible with specified to (specified: {to}, calculated: {_to}, difference={to - _to})"
+            msg = (
+                "calculated to incompatible with specified to"
+                " (specified: {to}, calculated: {_to}, difference={to - _to})"
+            )
             raise ValueError(msg)
         return _from, _center, _to, _distance
 

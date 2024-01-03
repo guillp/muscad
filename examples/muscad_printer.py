@@ -3227,7 +3227,7 @@ if __name__ == "__main__":
             + thumbwheel_left
             + thumbwheel_right
         ).color("orange")
-        # + (frame_spacer + z_rod_spacer).color("green")
+        + (frame_spacer + z_rod_spacer).color("green")
     ).render_to_file("muscad_printer")
 
     glass_plate_corner_left_front.render_to_file()

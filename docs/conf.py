@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 project = "MuSCAD"
 author = "Guillaume Pujol"
-copyright = f"{datetime.now(tz=UTC).year}, {author}"
+copyright = f"{datetime.now(tz=UTC).year}, {author}"  # noqa: A001
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
