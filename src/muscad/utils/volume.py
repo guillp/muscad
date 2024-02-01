@@ -456,7 +456,7 @@ class Volume(Part):
             self.front_left_edge = (
                 part.z_linear_extrude(self.height)
                 .align(
-                    right=self.left - E,
+                    right=self.left + E,
                     front=self.front,
                     center_z=self.center_z,
                 )
@@ -508,7 +508,7 @@ class Volume(Part):
                 part.y_linear_extrude(self.depth)
                 .left_to_right()
                 .align(
-                    right=self.left - E,
+                    right=self.left + E,
                     center_y=self.center_y,
                     top=self.top,
                 )

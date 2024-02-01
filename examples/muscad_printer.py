@@ -82,7 +82,6 @@ BED_CENTER_X = 0
 BED_CENTER_Y = 0
 BED_CENTER_Z = 0
 
-
 EXTRUSION_SIZE = 30
 
 X_EXTRUSION_LENGTH = BED_WIDTH + 140
@@ -714,6 +713,174 @@ class XCarriage(Part):
 x_carriage = XCarriage()
 
 
+class XCarriageDirectDrive(Part):
+    x_bearing_top_left = ~gantry.x_bearing_top_left
+    x_bearing_top_right = ~gantry.x_bearing_top_right
+    x_bearing_bottom = ~gantry.x_bearing_bottom
+
+    body = Volume(
+        left=x_bearing_top_left.left + E,
+        right=x_bearing_top_right.right - E,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=gantry.x_bearing_bottom.top + 1,
+        top=x_bearing_top_left.top - E,
+    ).fillet_depth() + Volume(
+        left=x_bearing_bottom.left,
+        right=x_bearing_bottom.right,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=x_bearing_bottom.bottom + E,
+        top=x_bearing_bottom.top + 1,
+    ).fillet_depth(bottom=True, left=True).reverse_fillet_top(left=True, right=True)
+
+    center_pulleys_bolt = ~Bolt.M3(20, head_clearance=100).add_nut(
+        -1, inline_clearance_size=10
+    ).bottom_to_front().align(center_x=body.center_x, back=body.back, center_z=body.center_z)
+
+    extruder = (
+        ~E3Dv6Extruder()
+        .z_rotate(-90)
+        .align(
+            center_x=body.center_x,
+            center_y=body.back - 13,
+            top=body.center_z + 10,
+        )
+        .debug()
+    )
+
+    nema = (
+        ~StepperMotor.nema17()
+        .top_to_front()
+        .align(front=extruder.center_y - 8, bottom=extruder.top - 3, center_x=extruder.center_x + 7)
+        .debug()
+    )
+    blower = (
+        ~Blower.blower50x50x15(bolt=Bolt.M3(20).add_nut(-E, inline_clearance_size=20))
+        .x_rotate(-90)
+        .z_rotate(-90)
+        .align(
+            left=body.left,
+            front=body.back - 2,
+            bottom=extruder.top - 3,
+        )
+        .debug()
+    )
+
+    fan = (
+        ~Fan.fan40x40x20(bolt=None)
+        .add_bolts(
+            bolt=Bolt.M3(30).add_nut(-8.5, side_clearance_size=10, angle=180, T=0.1),
+            spacing=32,
+        )
+        .x_rotate(90)
+        .z_rotate(180)
+        .align(
+            center_x=nema.center_x,
+            back=nema.back,
+            top=nema.bottom - 1,
+        )
+        .debug()
+    )
+
+    extruder_holder = Volume(
+        left=fan.left,
+        right=fan.right,
+        front=body.back,
+        back=extruder.center_y - 1,
+        center_z=body.center_z,
+        bottom=x_bearing_bottom.top + 1,
+    ).fillet_depth()
+
+    cable_guide_top = (
+        Volume(
+            center_x=body.center_x,
+            width=24,
+            back=body.back,
+            front=body.front,
+            bottom=body.top - E,
+            top=frame.y_extrusion_right_top.top - 1,
+        )
+        .reverse_fillet_bottom(left=True, right=True)
+        .fillet_depth(r=6, top=True)
+    )
+
+    cable_guide_bolts = (
+        ~Bolt.M3(10)
+        .add_nut(-T, inline_clearance_size=10)
+        .bottom_to_back()
+        .align(
+            center_x=cable_guide_top.center_x,
+            back=cable_guide_top.back - E,
+            center_z=cable_guide_top.top - 6,
+        )
+        .z_mirror(cable_guide_top.top - 10)
+        .debug()
+    )
+
+    cable_guide_side = (
+        Volume(
+            left=gantry.x_bearing_bottom.right,
+            right=body.right,
+            back=body.back,
+            front=body.front,
+            bottom=body.bottom,
+            height=12,
+        )
+        .fillet_depth(right=True)
+        .reverse_fillet_left(top=True)
+    )
+    cable_hole = ~Volume(
+        right=body.right + E,
+        width=10,
+        front=x_bearing_bottom.front,
+        back=body.back - 1,
+        bottom=body.bottom + 3,
+        height=6,
+    ).fillet_depth(2)
+
+    anti_warp = ~(
+        Volume(
+            center_x=body.center_x,
+            width=1,
+            front=body.front + E,
+            depth=1,
+            top=cable_guide_top.top - 1,
+            bottom=body.bottom + 1,
+        ).fillet_height(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            top=x_bearing_top_left.bottom,
+            height=1,
+        ).fillet_width(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            bottom=x_bearing_bottom.top,
+            height=1,
+        ).fillet_width(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            bottom=x_bearing_top_left.top,
+            height=1,
+        ).fillet_width(0.5, front=True)
+    )
+
+    def __stl__(self) -> Object:
+        return self.back_to_top()
+
+
+x_carriage_direct_drive = XCarriageDirectDrive()
+
+
 class XAxisPulleys(Part):
     x_rod_bottom = ~gantry.x_rod_bottom
     center_pulleys_bolt = x_carriage.center_pulleys_bolt
@@ -1007,6 +1174,191 @@ class Tunnel(Part):
 tunnel = Tunnel()
 
 
+class ExtruderClampDirectDrive(Part):
+    _extruder_holder = x_carriage_direct_drive.extruder_holder
+
+    extruder = x_carriage_direct_drive.extruder
+
+    fan = x_carriage_direct_drive.fan
+    # sensor = (
+    #     ~InductionSensor.LJ12A3()
+    #     .align(
+    #         center_x=extruder.center_x - 35,
+    #         front=x_carriage.body.back - 3,
+    #         bottom=extruder.bottom + 4,
+    #     )
+    #     .debug()
+    # )
+
+    clamp = Volume(
+        left=_extruder_holder.left,
+        right=_extruder_holder.right,
+        front=_extruder_holder.back - 0.5,
+        back=fan.front + T,
+        bottom=_extruder_holder.bottom - 29,
+        top=_extruder_holder.top,
+    ).fillet_depth()
+
+    tunnel = ~Hull(
+        Volume(
+            center_x=clamp.center_x,
+            width=36,
+            front=clamp.back,
+            back=clamp.back - 1,
+            top=clamp.top - 7,
+            bottom=clamp.bottom + 5,
+        ).fillet_depth(7),
+        Volume(
+            center_x=extruder.center_x,
+            width=20,
+            front=clamp.front + 1,
+            back=clamp.front,
+            top=clamp.top - 13,
+            bottom=clamp.bottom - 1,
+        ).fillet_depth(4),
+    )
+
+    cable_guide = Volume(
+        left=clamp.right,
+        width=3,
+        front=clamp.front,
+        back=clamp.back,
+        bottom=clamp.bottom,
+        height=6,
+    ).fillet_depth(1, right=True).reverse_fillet_left(top=True).reverse_fillet_bottom(left=True) - Volume(
+        left=clamp.right,
+        width=4,
+        front=clamp.front + E,
+        back=clamp.back - E,
+        center_z=clamp.bottom + 3,
+        height=3,
+    ).fillet_depth(1, left=True)
+
+    # sensor_holder_up = (
+    #     Volume(
+    #         right=clamp.left - TT,
+    #         width=18,
+    #         depth=18,
+    #         center_y=sensor.center_y,
+    #         top=clamp.top - 2,
+    #         height=9,
+    #     )
+    #     .fillet_height(6, left=True)
+    #     .fillet_height(6, front=True, right=True)
+    # )
+
+    # sensor_holder_down = sensor_holder_up.z_mirror(center=clamp.center_z)
+    #
+    # sensor_arm_up = Volume(
+    #     right=clamp.left - TT,
+    #     width=3,
+    #     back=clamp.back,
+    #     front=sensor_holder_up.back,
+    #     top=sensor_holder_up.top,
+    #     bottom=sensor_holder_up.bottom,
+    # ).fillet_height(back=True, left=True).reverse_fillet_front(left=True) + Volume(
+    #     right=clamp.left,
+    #     width=1,
+    #     front=clamp.front,
+    #     back=clamp.back,
+    #     top=sensor_holder_up.top,
+    #     bottom=sensor_holder_up.bottom,
+    # )
+    #
+    # sensor_arm_down = sensor_arm_up.z_mirror(center=clamp.center_z)
+
+    def __stl__(self) -> Object:
+        return self.back_to_bottom()
+
+
+extruder_clamp_direct_drive = ExtruderClampDirectDrive()
+
+
+class TunnelDirectDrive(Part):
+    NOZZLE_SIZE = 0.4
+
+    extruder = x_carriage_direct_drive.extruder
+
+    tunnel = Volume(
+        left=x_carriage_direct_drive.blower.blower.left + T,
+        right=x_carriage_direct_drive.blower.blower.right - T,
+        front=x_carriage_direct_drive.body.back - T,
+        back=x_carriage_direct_drive.blower.blower.back + T,
+        top=x_carriage_direct_drive.extruder_holder.center_z,
+        bottom=x_carriage_direct_drive.bottom,
+    ).fillet_height(NOZZLE_SIZE * 3) - Volume(
+        left=x_carriage_direct_drive.blower.blower.left + NOZZLE_SIZE * 3.1 + T,
+        right=x_carriage_direct_drive.blower.blower.right - NOZZLE_SIZE * 3.1 - T,
+        front=x_carriage_direct_drive.body.back - NOZZLE_SIZE * 3.1 - T,
+        back=x_carriage_direct_drive.blower.blower.back + NOZZLE_SIZE * 3.1 + T,
+        top=x_carriage_direct_drive.extruder_holder.center_z + E,
+        bottom=x_carriage_direct_drive.bottom - E,
+    ).fillet_height(NOZZLE_SIZE * 2)
+
+    blower = Hull(
+        Volume(
+            center_x=extruder.center_x - 6,
+            width=5,
+            center_y=extruder.center_y,
+            depth=30,
+            bottom=extruder.bottom + 1,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+        Volume(
+            left=tunnel.left,
+            right=tunnel.right,
+            back=tunnel.back,
+            front=tunnel.front,
+            top=tunnel.bottom,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 2),
+    ) - Hull(
+        Volume(
+            center_x=extruder.center_x - 6,
+            width=3,
+            center_y=extruder.center_y,
+            depth=28,
+            bottom=extruder.bottom + 1 - E,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+        Volume(
+            left=tunnel.left + NOZZLE_SIZE * 3.1,
+            right=tunnel.right - NOZZLE_SIZE * 3.1,
+            back=tunnel.back + NOZZLE_SIZE * 3.1,
+            front=tunnel.front - NOZZLE_SIZE * 3.1,
+            top=tunnel.bottom + E,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+    )
+
+    bolt_left = ~Bolt.M2(10).bottom_to_back().align(
+        center_x=tunnel.left - 3,
+        center_y=x_carriage_direct_drive.body.back,
+        center_z=x_carriage_direct_drive.bottom + 20,
+    )
+    bolt_holder_left = (
+        Volume(
+            center_x=bolt_left.center_x,
+            right=tunnel.left + 0.5,
+            front=x_carriage_direct_drive.body.back - T,
+            depth=3,
+            center_z=bolt_left.center_z + 2,
+            height=15,
+        )
+        .chamfer_depth(8, top=True, left=True)
+        .fillet_depth(bottom=True, left=True)
+    )
+
+    bolt_right = ~bolt_left.x_mirror(center=tunnel.center_x)
+    bolt_holder_right = bolt_holder_left.x_mirror(center=tunnel.center_x)
+
+    def __stl__(self) -> Object:
+        return self.upside_down()
+
+
+tunnel_direct_drive = TunnelDirectDrive()
+
+
 class CableChainCarriageAttachment(Part):
     bolts = x_carriage.cable_guide_bolts
     body = Volume(
@@ -1016,7 +1368,9 @@ class CableChainCarriageAttachment(Part):
         depth=3,
         bottom=x_carriage.x_bearing_top_right.top + 1,
         top=x_carriage.cable_guide_top.top,
-    ).fillet_depth(6)
+    ).fillet_depth(
+        6,
+    )
 
     chain_attach = (
         Tube(
@@ -3141,6 +3495,16 @@ if __name__ == "__main__":
         + cable_clamp_top
         + tunnel
     ).render_to_file("x_carriage_assembled")
+
+    (
+        x_carriage_direct_drive
+        + x_axis_pulleys
+        + cable_clamp_back
+        + extruder_clamp_direct_drive
+        + cable_chain_carriage_attachment
+        + cable_clamp_top
+        + tunnel_direct_drive
+    ).render_to_file("x_carriage_direct_drive_assembled")
 
     (
         y_carriage_right
