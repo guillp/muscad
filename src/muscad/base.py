@@ -1052,6 +1052,10 @@ class Object(MuSCAD):
             msg = "You must provide one plane to divide the Object, defined by one X, Y, Z coordinate"
             raise ValueError(msg)
 
+    def array(self, n: int, x: float = 0, y: float = 0, z: float = 0) -> Object:
+        """Multiply this object n times, translating each one by (x,y,z)."""
+        return Union(self.translate(x=x * i, y=y * i, z=z * i) for i in range(n))
+
     def __stl__(self) -> Object:
         return self  # pragma: no cover
 
