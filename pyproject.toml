@@ -61,6 +61,12 @@ blank = true
 [tool.ruff]
 target-version = "py38"
 line-length = 120
+exclude = [
+    "tests"
+]
+
+
+[tool.ruff.lint]
 select = [
     "A",
     "C4",
@@ -90,19 +96,15 @@ select = [
     "W",
     "YTT",
 ]
-exclude = [
-    "tests"
-]
 extend-ignore = [
-    "D100", "D101", "D102", "D103", "D104", "D105", "D107", "E402", "F403", "N802", "N803"
+    "D100", "D101", "D102", "D103", "D104", "D105", "D107", "E402", "F403", "N802", "N803", "ERA001"
 ]
 
-
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 ignore-decorators = ['override']
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 10
 
 [tool.coverage.report]
