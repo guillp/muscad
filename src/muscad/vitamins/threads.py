@@ -4,12 +4,12 @@ from __future__ import annotations
 from math import floor, pi
 
 from muscad import (
-    Barrel,
     Cylinder,
     Object,
     Part,
     Polygon,
     Polyhedron,
+    Tube,
     Union,
     cos,
     sin,
@@ -29,18 +29,30 @@ class ThreadShape(Part):
         bottom_countersink: bool = False,
     ) -> None:
         if not top_countersink and not bottom_countersink:
-            self.shape = Barrel(height=length, d=outer_diameter, segments=segments)
+            self.shape = Tube(height=length, diameter=outer_diameter, bottom=0, segments=segments)
         else:
-            self.shape = Barrel(bottom=step / 2, height=length - step + 0.005, d=outer_diameter, segments=segments)
+            self.shape = Tube(bottom=step / 2, height=length - step + 0.005, diameter=outer_diameter, segments=segments)
             self.top_countersink = (
-                Barrel(bottom=self.shape.top, height=step / 2, d=outer_diameter, d2=inner_diameter, segments=segments)
+                Tube(
+                    bottom=self.shape.top,
+                    height=step / 2,
+                    diameter=outer_diameter,
+                    top_diameter=inner_diameter,
+                    segments=segments,
+                )
                 if top_countersink
-                else Barrel(bottom=self.shape.top, height=step / 2, d=outer_diameter, segments=segments)
+                else Tube(bottom=self.shape.top, height=step / 2, diameter=outer_diameter, segments=segments)
             )
             self.bottom_countersink = (
-                Barrel(height=step / 2, top=self.shape.bottom, d=outer_diameter, d2=inner_diameter, segments=segments)
+                Tube(
+                    height=step / 2,
+                    top=self.shape.bottom,
+                    diameter=inner_diameter,
+                    top_diameter=outer_diameter,
+                    segments=segments,
+                )
                 if bottom_countersink
-                else Barrel(height=step / 2, top=self.shape.bottom, d=outer_diameter, segments=segments)
+                else Tube(height=step / 2, top=self.shape.bottom, diameter=outer_diameter, segments=segments)
             )
 
 
@@ -48,7 +60,7 @@ class ScrewThread(Part):
     def init(  # type: ignore[override]
         self,
         *,
-        outer_diameter: float,
+        diameter: float,
         length: float,
         step: int,
         top_countersink: bool = False,
@@ -56,14 +68,14 @@ class ScrewThread(Part):
         shape_degrees: float = 45,
         resolution: float = 0.5,
     ) -> None:
-        inner_diameter = outer_diameter - step * cos(shape_degrees) / sin(shape_degrees)
-        segments = floor(pi * outer_diameter / resolution)
+        inner_diameter = diameter - step * cos(shape_degrees) / sin(shape_degrees)
+        segments = floor(pi * diameter / resolution)
         ttn = round(length / step + 1)
         lfxy = 360 / segments
         zt = step / segments
         self.thread = ThreadShape(
             length=length,
-            outer_diameter=outer_diameter,
+            outer_diameter=diameter,
             inner_diameter=inner_diameter,
             segments=segments,
             step=step,
@@ -85,13 +97,13 @@ class ScrewThread(Part):
                     ],
                     [0, 0, i * step],
                     [
-                        outer_diameter / 2 * cos(j * lfxy),
-                        outer_diameter / 2 * sin(j * lfxy),
+                        diameter / 2 * cos(j * lfxy),
+                        diameter / 2 * sin(j * lfxy),
                         i * step + j * zt - step / 2,
                     ],
                     [
-                        outer_diameter / 2 * cos((j + 1) * lfxy),
-                        outer_diameter / 2 * sin((j + 1) * lfxy),
+                        diameter / 2 * cos((j + 1) * lfxy),
+                        diameter / 2 * sin((j + 1) * lfxy),
                         i * step + (j + 1) * zt - step / 2,
                     ],
                     [
@@ -182,7 +194,7 @@ class HexHead(Part):
         y1 = height / 2
         y2 = height
 
-        self.head = Barrel(bottom=0, height=height, d=d0, segments=6) & Polygon(
+        self.head = Tube(bottom=0, height=height, d=d0, segments=6) & Polygon(
             (x0, y0), (x1, y0), (x2, y1), (x1, y2), (x0, y2)
         ).z_rotational_extrude(bottom=0)
 
@@ -199,15 +211,15 @@ class HexNut(Part):
         resolution: float = 0.5,
     ) -> None:
         self.nut = HexHead(height, diameter)
-        self.countersinks = ~Barrel(
+        self.countersinks = ~Tube(
             bottom=self.nut.bottom - 0.1,
             height=thread_step / 2,
             d=thread_outer_diameter,
             d2=thread_outer_diameter - (diameter / 2 + 0.1) * cos(step_shape_degrees) / sin(step_shape_degrees),
         ).z_mirror(center=self.nut.center_z)
         self.bore = ~ScrewThread(
-            outer_diameter=thread_outer_diameter, length=height, step=thread_step, shape_degrees=step_shape_degrees
+            diameter=thread_outer_diameter, length=height, step=thread_step, shape_degrees=step_shape_degrees
         ).align(center_z=self.nut.center_z)
 
 
-HexNut(diameter=9, height=4, thread_outer_diameter=6.2).render_to_file()
+# HexNut(diameter=9, height=4, thread_outer_diameter=6.2).render_to_file()
