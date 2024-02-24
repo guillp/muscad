@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional, Tuple
+from __future__ import annotations
+
+from typing import Any
 
 from muscad.helpers import normalize_angle
 
@@ -13,7 +15,7 @@ class Translation(Transformation, name="translate"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
@@ -53,6 +55,9 @@ class Translation(Transformation, name="translate"):
         return self.child.top + self.z
 
 
+RIGHT_ANGLE_ROTATIONS_ONLY = NotImplementedError("Only simple 90° rotations are supported")
+
+
 class Rotation(Transformation, name="rotate"):
     """OpenSCAD rotate()."""
 
@@ -62,21 +67,20 @@ class Rotation(Transformation, name="rotate"):
         self.y = normalize_angle(y)
         self.z = normalize_angle(z)
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"a": Point3D(self.x, self.y, self.z)}
 
     def combine(self, other: Transformation) -> Transformation:
-        if isinstance(other, self.__class__):
-            if (
-                (self.x == 0 and self.y == 0)
-                or (other.z == 0 and self.x == self.z == 0)
-                or (other.y == other.z == 0 and self.y == self.z == 0)
-            ):
-                self.x = normalize_angle(self.x + other.x)
-                self.y = normalize_angle(self.y + other.y)
-                self.z = normalize_angle(self.z + other.z)
-                self.child: Object = other.child
-                return self
+        if isinstance(other, self.__class__) and (
+            (self.x == 0 and self.y == 0)
+            or (other.z == 0 and self.x == self.z == 0)
+            or (other.y == other.z == 0 and self.y == self.z == 0)
+        ):
+            self.x = normalize_angle(self.x + other.x)
+            self.y = normalize_angle(self.y + other.y)
+            self.z = normalize_angle(self.z + other.z)
+            self.child: Object = other.child
+            return self
         return super().combine(other)
 
     def copy(self) -> Transformation:
@@ -145,9 +149,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def right(self) -> float:
@@ -193,9 +195,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def back(self) -> float:
@@ -241,9 +241,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.top
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def front(self) -> float:
@@ -289,9 +287,7 @@ class Rotation(Transformation, name="rotate"):
         ]:
             return -self.child.bottom
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def bottom(self) -> float:
@@ -308,9 +304,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.front
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
     @property
     def top(self) -> float:
@@ -327,9 +321,7 @@ class Rotation(Transformation, name="rotate"):
         if (self.x == 90 and self.y == 180) or (self.x == 270 and self.y == 0):
             return -self.child.back
 
-        raise NotImplementedError(
-            "Only simple 90° rotations are supported", self.x, self.y, self.z
-        )
+        raise RIGHT_ANGLE_ROTATIONS_ONLY
 
 
 class Scaling(Transformation, name="scale"):
@@ -339,7 +331,7 @@ class Scaling(Transformation, name="scale"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -367,6 +359,9 @@ class Scaling(Transformation, name="scale"):
         return self.child.top * self.z
 
 
+MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED = NotImplementedError("Only single axis mirror vectors are supported")
+
+
 class Mirroring(Transformation, name="mirror"):
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
         super().__init__()
@@ -374,7 +369,7 @@ class Mirroring(Transformation, name="mirror"):
         self.y = y
         self.z = z
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"v": Point3D(self.x, self.y, self.z)}
 
     @property
@@ -382,9 +377,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.right
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.left
 
     @property
@@ -392,9 +385,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.x:
             if not self.y and not self.z:
                 return -self.child.left
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.right
 
     @property
@@ -402,9 +393,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.back
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.front
 
     @property
@@ -412,9 +401,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.y:
             if not self.x and not self.z:
                 return -self.child.front
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.back
 
     @property
@@ -422,9 +409,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.bottom
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.top
 
     @property
@@ -432,9 +417,7 @@ class Mirroring(Transformation, name="mirror"):
         if self.z:
             if not self.x and not self.y:
                 return -self.child.top
-            raise NotImplementedError(
-                "Only single axis mirror vectors are supported"
-            )  # pragma: no cover
+            raise MULTI_AXIS_MIRROR_VECTOR_NOT_SUPPORTED  # pragma: no cover
         return self.child.bottom
 
     def copy(self) -> Transformation:
@@ -444,16 +427,16 @@ class Mirroring(Transformation, name="mirror"):
 class Multmatrix(Transformation):
     def __init__(
         self,
-        matrix: Tuple[
-            Tuple[float, float, float, float],
-            Tuple[float, float, float, float],
-            Tuple[float, float, float, float],
+        matrix: tuple[
+            tuple[float, float, float, float],
+            tuple[float, float, float, float],
+            tuple[float, float, float, float],
         ],
     ):
         super().__init__()
         self.matrix = matrix
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"m": self.matrix}
 
 
@@ -463,7 +446,7 @@ class Color(Transformation):
         self.colorname = colorname
         self.alpha = alpha
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {None: self.colorname, "alpha": self.alpha}
 
     def copy(self) -> Transformation:
@@ -473,20 +456,23 @@ class Color(Transformation):
 class Offset(Transformation):
     def __init__(
         self,
-        r: Optional[float] = None,
-        delta: Optional[float] = None,
-        chamfer: Optional[bool] = False,
+        r: float | None = None,
+        *,
+        delta: float | None = None,
+        chamfer: bool | None = False,
     ):
         super().__init__()
-        if r and delta:
-            raise ValueError("can't set both 'r' and 'delta'")  # pragma: no cover
-        if r is None and delta is None:
-            raise ValueError("must set either 'r' or 'delta'")  # pragma: no cover
+        if r and delta:  # pragma: no cover
+            msg = "can't set both 'r' and 'delta'"
+            raise ValueError(msg)
+        if r is None and delta is None:  # pragma: no cover
+            msg = "must set either 'r' or 'delta'"
+            raise ValueError(msg)
         self.radius = r
         self.delta = delta
         self.chamfer = chamfer
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"r": self.radius, "delta": self.delta, "chamfer": self.chamfer}
 
 
@@ -521,11 +507,11 @@ class Hull(Transformation):
 
 
 class Projection(Transformation):
-    def __init__(self, cut: bool = False) -> None:
+    def __init__(self, *, cut: bool = False) -> None:
         super().__init__()
         self.cut = cut
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"cut": self.cut}
 
     @property
@@ -542,14 +528,18 @@ class Render(Transformation):
         super().__init__()
         self._convexity = convexity
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"convexity": self._convexity}
+
+
+TWIST_NOT_SUPPORTED = NotImplementedError("Linear extrusion with 'twist' is not supported")
 
 
 class LinearExtrusion(Transformation, name="linear_extrude"):
     def __init__(
         self,
         height: float,
+        *,
         center: bool = False,
         convexity: int = 10,
         twist: float = 0,
@@ -568,7 +558,7 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
             segments = int(twist * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "height": self._height,
             "center": self._center,
@@ -582,25 +572,25 @@ class LinearExtrusion(Transformation, name="linear_extrude"):
     def left(self) -> float:
         if self._twist == 0:
             return self.child.left * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def right(self) -> float:
         if self._twist == 0:
             return self.child.right * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def back(self) -> float:
         if self._twist == 0:
             return self.child.back * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def front(self) -> float:
         if self._twist == 0:
             return self.child.front * self._scale
-        raise NotImplementedError("Linear extrusion with 'twist' is not supported")
+        raise TWIST_NOT_SUPPORTED
 
     @property
     def bottom(self) -> float:
@@ -615,8 +605,8 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
     def __init__(
         self,
         angle: float = 360,
-        convexity: Optional[int] = None,
-        segments: Optional[int] = None,
+        convexity: int | None = None,
+        segments: int | None = None,
     ):
         super().__init__()
         self.angle = angle
@@ -625,7 +615,7 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
             segments = int(angle / 3.14 * 0.4)
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "angle": self.angle,
             "convexity": self.convexity,
@@ -668,9 +658,9 @@ class RotationalExtrusion(Transformation, name="rotate_extrude"):
 class Slide(Transformation):
     """Custom transformation that translate an object then Hulls the result to itself.
 
-    If the object is a Composite, each part component is hulled to its translated self. This is
-    useful for parts that must be slided into their final position, such as screws. Bounding box of
-    the original object is untouched..
+    If the object is a Composite, each part component is hulled to its translated self. This is useful for parts that
+    must be slided into their final position, such as screws. Bounding box of the original object is untouched.
+
     """
 
     def __init__(self, *, x: float = 0, y: float = 0, z: float = 0):
@@ -680,7 +670,4 @@ class Slide(Transformation):
         self.z = z
 
     def render(self) -> str:
-        return Union(
-            Hull(child, child.translate(x=self.x, y=self.y, z=self.z))
-            for child in self.child.walk()
-        ).render()
+        return Union(Hull(child, child.translate(x=self.x, y=self.y, z=self.z)) for child in self.child.walk()).render()

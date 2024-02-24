@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from muscad import Circle, Hull, Object, Point2D, Polygon, Square, calc
 
 
@@ -88,6 +90,7 @@ class Surface:
         """Makes a square surface with rounded corners.
 
         Each corner can have a different radius
+
         """
         return cls.custom_corners(
             fl=Circle(fl) if fl > 0 else Square(1, 1),
@@ -122,6 +125,7 @@ class Surface:
         :param d:
         :param kwargs:
         :return:
+
         """
         return cls.rounded_corners(
             d,
@@ -139,9 +143,7 @@ class Surface:
         )
 
     @classmethod
-    def circle_from_3_points(
-        cls, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float
-    ) -> Object:
+    def circle_from_3_points(cls, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> Object:
         """Draws a circle from 3 points.
 
         :param x1: first point X coordinate
@@ -151,6 +153,7 @@ class Surface:
         :param x3: third point X coordinate
         :param y3: third point Y coordiante
         :return: a Surface that is a Circle touching the 3 points
+
         """
         temp = x2**2 + y2**2
         bc = (x1**2 + y1**2 - temp) / 2
@@ -158,7 +161,8 @@ class Surface:
         det = (x1 - x2) * (y2 - y3) - (x2 - x3) * (y1 - y2)
 
         if abs(det) < 1.0e-6:
-            raise ValueError("Unable to draw a circle from those 3 points")
+            msg = "Unable to draw a circle from those 3 points"
+            raise ValueError(msg)
 
         cx = (bc * (y2 - y3) - cd * (y1 - y2)) / det
         cy = ((x1 - x2) * cd - (x2 - x3) * bc) / det
@@ -173,14 +177,15 @@ class Surface:
 
     @classmethod
     def regular_polygon(cls, nb_sides: int, radius: float) -> Object:
-        """Returns the largest regular Polygon with `nb_sides` sides contained in a circle of
-        `radius`.
+        """Returns the largest regular Polygon with `nb_sides` sides fitting in a circle of `radius`.
 
-        Difference compared to a simple Circle(segments=nb_sides) is that the object dimensions
-        are those of the Polygon, not the circle.
+        Difference compared to a simple Circle(segments=nb_sides) is that the object dimensions are those of the
+        Polygon, not the circle.
+
         :param nb_sides:
         :param radius:
         :return: a 2D Polygon
+
         """
         if nb_sides <= 2:
             return Square(radius, 0)
@@ -189,12 +194,7 @@ class Surface:
         if nb_sides == 4:
             width = ((radius * 2) ** 2 / 2) ** 0.5
             return Square(width, width)
-        return Polygon(
-            *(
-                Point2D.from_radius_and_angle(radius, angle=i * 360 / nb_sides)
-                for i in range(nb_sides)
-            )
-        )
+        return Polygon(*(Point2D.from_radius_and_angle(radius, angle=i * 360 / nb_sides) for i in range(nb_sides)))
 
     @classmethod
     def ellipse(cls, width: float, height: float) -> Object:
@@ -202,13 +202,11 @@ class Surface:
 
     @classmethod
     def fillet(cls, radius: float) -> Object:
-        return Square(radius, radius).align(left=0, back=0) - Circle(
-            d=radius * 2
-        ).align(left=0, back=0)
+        return Square(radius, radius).align(left=0, back=0) - Circle(d=radius * 2).align(left=0, back=0)
 
     @classmethod
-    def chamfer(self, radius: float) -> Object:
+    def chamfer(cls, radius: float) -> Object:
         chamfer_width = ((radius**2) * 2) ** 0.5
-        return Square(radius, radius).align(back=0, left=0) - Square(
-            chamfer_width, chamfer_width
-        ).z_rotate(45).align(center_x=radius, center_y=radius)
+        return Square(radius, radius).align(back=0, left=0) - Square(chamfer_width, chamfer_width).z_rotate(45).align(
+            center_x=radius, center_y=radius
+        )

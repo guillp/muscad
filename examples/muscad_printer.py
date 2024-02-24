@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import Literal
 
@@ -11,11 +13,11 @@ from muscad import (
     E,
     Fillet,
     Hull,
-    MirroredPart,
     Object,
     Part,
     Sphere,
     Surface,
+    SymmetricPart,
     T,
     Union,
     Volume,
@@ -61,9 +63,7 @@ BED_SIDE_TO_Z_ROD_CENTER_X_OFFSET = 27
 Z_RODS_DISTANCE = 65 * 2
 Z_HEIGHT = 480  # Maximum Z travel
 
-Y_ROD_OFFSET = (
-    17.5  # Z distance between an Y rod center and the upper Y extrusion bottom
-)
+Y_ROD_OFFSET = 17.5  # Z distance between an Y rod center and the upper Y extrusion bottom
 X_ROD_OFFSET = 47  # Z distance between the 2 X rods
 
 X_ROD_LENGTH = 500  # length of the X rods
@@ -81,7 +81,6 @@ BACK_BELT_Y_OFFSET = -2
 BED_CENTER_X = 0
 BED_CENTER_Y = 0
 BED_CENTER_Z = 0
-
 
 EXTRUSION_SIZE = 30
 
@@ -124,9 +123,7 @@ class Bed(Part):
         )
         .misc()
     )
-    x_extrusion_back = x_extrusion_front.y_mirror(
-        center=y_extrusion_right.center_y
-    ).misc()
+    x_extrusion_back = x_extrusion_front.y_mirror(center=y_extrusion_right.center_y).misc()
 
     bolt_front = (
         Bolt.M3(40, thread_clearance=20)
@@ -177,9 +174,7 @@ class GlassPlateCorner(Part):
 
 
 glass_plate_corner_left_front = GlassPlateCorner()
-glass_plate_corner_right_front = glass_plate_corner_left_front.x_mirror().align(
-    right=bed.right, front=bed.front
-)
+glass_plate_corner_right_front = glass_plate_corner_left_front.x_mirror().align(right=bed.right, front=bed.front)
 
 
 class GlassPlateFrontFix(Part):
@@ -271,9 +266,7 @@ class Frame(Part):
         back=z_extrusion_left_back.front,
         center_z=y_extrusion_left_top.center_z - MIDDLE_Y_EXTRUSION_OFFSET,
     )
-    y_extrusion_right_middle = y_extrusion_left_middle.x_mirror(
-        x_extrusion_front_top.center_x
-    )
+    y_extrusion_right_middle = y_extrusion_left_middle.x_mirror(x_extrusion_front_top.center_x)
 
     x_extrusion_front_bottom = X_EXTRUSION.align(
         left=z_extrusion_left_front.right,
@@ -379,13 +372,9 @@ gantry = Gantry()
 class Extrusion3030Endcap(Part):
     base = Volume(width=30, depth=30, height=6).fillet_height(4)
     x_insert = (
-        Extrusion3030Insert(25)
-        .front_to_right()
-        .align(left=base.right, center_y=base.center_y, bottom=base.bottom)
+        Extrusion3030Insert(25).front_to_right().align(left=base.right, center_y=base.center_y, bottom=base.bottom)
     )
-    y_insert = Extrusion3030Insert(25).align(
-        center_x=base.center_x, back=base.front, bottom=base.bottom
-    )
+    y_insert = Extrusion3030Insert(25).align(center_x=base.center_x, back=base.front, bottom=base.bottom)
     x_insert_left = (
         Extrusion3030Insert(25)
         .back_to_top()
@@ -393,9 +382,7 @@ class Extrusion3030Endcap(Part):
         .align(left=base.left, center_y=base.center_y, bottom=base.top)
     )
     z_insert_back = (
-        Extrusion3030Insert(25)
-        .bottom_to_back()
-        .align(center_x=base.center_x, back=base.back, bottom=base.top)
+        Extrusion3030Insert(25).bottom_to_back().align(center_x=base.center_x, back=base.back, bottom=base.top)
     )
 
     def __stl__(self) -> Object:
@@ -403,27 +390,14 @@ class Extrusion3030Endcap(Part):
 
 
 endcap_left_back = (
-    Extrusion3030Endcap()
-    .upside_down()
-    .z_rotate(-90)
-    .align(left=frame.left, back=frame.back, top=frame.top)
+    Extrusion3030Endcap().upside_down().z_rotate(-90).align(left=frame.left, back=frame.back, top=frame.top)
 )
 endcap_left_front = (
-    Extrusion3030Endcap()
-    .upside_down()
-    .z_rotate(180)
-    .align(left=frame.left, front=frame.front, top=frame.top)
+    Extrusion3030Endcap().upside_down().z_rotate(180).align(left=frame.left, front=frame.front, top=frame.top)
 )
-endcap_right_back = (
-    Extrusion3030Endcap()
-    .upside_down()
-    .align(right=frame.right, back=frame.back, top=frame.top)
-)
+endcap_right_back = Extrusion3030Endcap().upside_down().align(right=frame.right, back=frame.back, top=frame.top)
 endcap_right_front = (
-    Extrusion3030Endcap()
-    .upside_down()
-    .z_rotate(90)
-    .align(right=frame.right, front=frame.front, top=frame.top)
+    Extrusion3030Endcap().upside_down().z_rotate(90).align(right=frame.right, front=frame.front, top=frame.top)
 )
 
 
@@ -454,38 +428,25 @@ class BedBracket(Part):
 
     body = Hull(_base, _bolt_holder)
 
-    bottom_bolt = (
-        ~Bolt.M5(10)
-        .slide(y=-10)
-        .align(
-            center_x=_base.center_x,
-            center_y=extrusion.center_y,
-            center_z=extrusion.bottom - 2,
-        )
+    bottom_bolt = ~Bolt.M5(10).slide(y=-10).align(
+        center_x=_base.center_x,
+        center_y=extrusion.center_y,
+        center_z=extrusion.bottom - 2,
     )
-    front_bolt = (
-        ~Bolt.M5(10, head_clearance=20)
-        .bottom_to_front()
-        .slide(z=10)
-        .align(
-            center_x=_base.center_x,
-            center_y=extrusion.front,
-            center_z=extrusion.center_z,
-        )
+    front_bolt = ~Bolt.M5(10, head_clearance=20).bottom_to_front().slide(z=10).align(
+        center_x=_base.center_x,
+        center_y=extrusion.front,
+        center_z=extrusion.center_z,
     )
 
-    clearance = (
-        ~Volume(
-            center_x=bed_bolt.center_x,
-            width=10,
-            back=extrusion.front + 6,
-            front=_bolt_holder.front,
-            bottom=extrusion.bottom,
-            height=extrusion.height,
-        )
-        .fillet_height(r=2, back=True)
-        .fillet_depth(bottom=True)
-    )
+    clearance = ~Volume(
+        center_x=bed_bolt.center_x,
+        width=10,
+        back=extrusion.front + 6,
+        front=_bolt_holder.front,
+        bottom=extrusion.bottom,
+        height=extrusion.height,
+    ).fillet_height(r=2, back=True).fillet_depth(bottom=True)
 
 
 bed_bracket_front = BedBracket()
@@ -523,21 +484,15 @@ class ThumbWheel(Part):
 
 
 thumbwheel_front = ThumbWheel()
-thumbwheel_left = thumbwheel_front.align(
-    center_x=bed.bolt_left.center_x, center_y=bed.bolt_left.center_y
-)
-thumbwheel_right = thumbwheel_front.align(
-    center_x=bed.bolt_right.center_x, center_y=bed.bolt_right.center_y
-)
+thumbwheel_left = thumbwheel_front.align(center_x=bed.bolt_left.center_x, center_y=bed.bolt_left.center_y)
+thumbwheel_right = thumbwheel_front.align(center_x=bed.bolt_right.center_x, center_y=bed.bolt_right.center_y)
 
 
 class ZTopEndStop(Part):
-    bed_extrusion = ~bed.x_extrusion_front.debug()
-    frame_extrusion = ~frame.y_extrusion_right_middle.debug()
+    bed_extrusion = ~bed.x_extrusion_front
+    frame_extrusion = ~frame.y_extrusion_right_middle
     endstop = (
-        ~MechanicalEndstopOnPCB(
-            Bolt.M3(10).add_nut(-3, side_clearance_size=10, angle=-90)
-        )
+        ~MechanicalEndstopOnPCB(Bolt.M3(10).add_nut(-3, side_clearance_size=10, angle=-90))
         .front_to_bottom()
         .front_to_right()
         .align(
@@ -548,16 +503,11 @@ class ZTopEndStop(Part):
         .debug()
     )
 
-    bolt = (
-        ~Bolt.M5(12, head_clearance=30)
-        .bottom_to_left()
-        .align(
-            center_x=frame_extrusion.left,
-            center_y=endstop.back - 10,
-            center_z=frame_extrusion.center_z + 20,
-        )
-        .slide(z=-30)
-    )
+    bolt = ~Bolt.M5(12, head_clearance=30).bottom_to_left().align(
+        center_x=frame_extrusion.left,
+        center_y=endstop.back - 10,
+        center_z=frame_extrusion.center_z + 20,
+    ).slide(z=-30)
     plate = Volume(
         width=6,
         right=frame_extrusion.left - TT,
@@ -601,18 +551,11 @@ class XCarriage(Part):
         depth=8,
         bottom=x_bearing_bottom.bottom + E,
         top=x_bearing_bottom.top + 1,
-    ).fillet_depth(
-        bottom=True, left=True
-    ).reverse_fillet_top(
-        left=True, right=True
-    )
+    ).fillet_depth(bottom=True, left=True).reverse_fillet_top(left=True, right=True)
 
-    center_pulleys_bolt = (
-        ~Bolt.M3(20, head_clearance=100)
-        .add_nut(-1, inline_clearance_size=10)
-        .bottom_to_front()
-        .align(center_x=body.center_x, back=body.back, center_z=body.center_z)
-    )
+    center_pulleys_bolt = ~Bolt.M3(20, head_clearance=100).add_nut(
+        -1, inline_clearance_size=10
+    ).bottom_to_front().align(center_x=body.center_x, back=body.back, center_z=body.center_z)
 
     extruder_holder = Volume(
         center_x=body.center_x,
@@ -681,7 +624,7 @@ class XCarriage(Part):
             back=cable_guide_top.back - E,
             center_z=cable_guide_top.top - 6,
         )
-        .z_mirror(cable_guide_top.top - 10, keep=True)
+        .z_mirror(cable_guide_top.top - 10)
         .debug()
     )
 
@@ -707,7 +650,7 @@ class XCarriage(Part):
     ).fillet_depth(2)
 
     fan = (
-        ~Fan.fan40x40x20(bolts=False)
+        ~Fan.fan40x40x20(bolt=None)
         .add_bolts(
             bolt=Bolt.M3(30).add_nut(-8.5, side_clearance_size=10, angle=180, T=0.1),
             spacing=32,
@@ -770,19 +713,183 @@ class XCarriage(Part):
 x_carriage = XCarriage()
 
 
+class XCarriageDirectDrive(Part):
+    x_bearing_top_left = ~gantry.x_bearing_top_left
+    x_bearing_top_right = ~gantry.x_bearing_top_right
+    x_bearing_bottom = ~gantry.x_bearing_bottom
+
+    body = Volume(
+        left=x_bearing_top_left.left + E,
+        right=x_bearing_top_right.right - E,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=gantry.x_bearing_bottom.top + 1,
+        top=x_bearing_top_left.top - E,
+    ).fillet_depth() + Volume(
+        left=x_bearing_bottom.left,
+        right=x_bearing_bottom.right,
+        front=x_bearing_bottom.back - E,
+        depth=8,
+        bottom=x_bearing_bottom.bottom + E,
+        top=x_bearing_bottom.top + 1,
+    ).fillet_depth(bottom=True, left=True).reverse_fillet_top(left=True, right=True)
+
+    center_pulleys_bolt = ~Bolt.M3(20, head_clearance=100).add_nut(
+        -1, inline_clearance_size=10
+    ).bottom_to_front().align(center_x=body.center_x, back=body.back, center_z=body.center_z)
+
+    extruder = (
+        ~E3Dv6Extruder()
+        .z_rotate(-90)
+        .align(
+            center_x=body.center_x,
+            center_y=body.back - 13,
+            top=body.center_z + 10,
+        )
+        .debug()
+    )
+
+    nema = (
+        ~StepperMotor.nema17()
+        .top_to_front()
+        .align(front=extruder.center_y - 8, bottom=extruder.top - 3, center_x=extruder.center_x + 7)
+        .debug()
+    )
+    blower = (
+        ~Blower.blower50x50x15(bolt=Bolt.M3(20).add_nut(-E, inline_clearance_size=20))
+        .x_rotate(-90)
+        .z_rotate(-90)
+        .align(
+            left=body.left,
+            front=body.back - 2,
+            bottom=extruder.top - 3,
+        )
+        .debug()
+    )
+
+    fan = (
+        ~Fan.fan40x40x20(bolt=None)
+        .add_bolts(
+            bolt=Bolt.M3(30).add_nut(-8.5, side_clearance_size=10, angle=180, T=0.1),
+            spacing=32,
+        )
+        .x_rotate(90)
+        .z_rotate(180)
+        .align(
+            center_x=nema.center_x,
+            back=nema.back,
+            top=nema.bottom - 1,
+        )
+        .debug()
+    )
+
+    extruder_holder = Volume(
+        left=fan.left,
+        right=fan.right,
+        front=body.back,
+        back=extruder.center_y - 1,
+        center_z=body.center_z,
+        bottom=x_bearing_bottom.top + 1,
+    ).fillet_depth()
+
+    cable_guide_top = (
+        Volume(
+            center_x=body.center_x,
+            width=24,
+            back=body.back,
+            front=body.front,
+            bottom=body.top - E,
+            top=frame.y_extrusion_right_top.top - 1,
+        )
+        .reverse_fillet_bottom(left=True, right=True)
+        .fillet_depth(r=6, top=True)
+    )
+
+    cable_guide_bolts = (
+        ~Bolt.M3(10)
+        .add_nut(-T, inline_clearance_size=10)
+        .bottom_to_back()
+        .align(
+            center_x=cable_guide_top.center_x,
+            back=cable_guide_top.back - E,
+            center_z=cable_guide_top.top - 6,
+        )
+        .z_mirror(cable_guide_top.top - 10)
+        .debug()
+    )
+
+    cable_guide_side = (
+        Volume(
+            left=gantry.x_bearing_bottom.right,
+            right=body.right,
+            back=body.back,
+            front=body.front,
+            bottom=body.bottom,
+            height=12,
+        )
+        .fillet_depth(right=True)
+        .reverse_fillet_left(top=True)
+    )
+    cable_hole = ~Volume(
+        right=body.right + E,
+        width=10,
+        front=x_bearing_bottom.front,
+        back=body.back - 1,
+        bottom=body.bottom + 3,
+        height=6,
+    ).fillet_depth(2)
+
+    anti_warp = ~(
+        Volume(
+            center_x=body.center_x,
+            width=1,
+            front=body.front + E,
+            depth=1,
+            top=cable_guide_top.top - 1,
+            bottom=body.bottom + 1,
+        ).fillet_height(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            top=x_bearing_top_left.bottom,
+            height=1,
+        ).fillet_width(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            bottom=x_bearing_bottom.top,
+            height=1,
+        ).fillet_width(0.5, front=True)
+        + Volume(
+            left=body.left + 1,
+            right=body.right - 1,
+            front=body.front + E,
+            depth=1,
+            bottom=x_bearing_top_left.top,
+            height=1,
+        ).fillet_width(0.5, front=True)
+    )
+
+    def __stl__(self) -> Object:
+        return self.back_to_top()
+
+
+x_carriage_direct_drive = XCarriageDirectDrive()
+
+
 class XAxisPulleys(Part):
     x_rod_bottom = ~gantry.x_rod_bottom
     center_pulleys_bolt = x_carriage.center_pulleys_bolt
     bottom_bearing = ~gantry.x_bearing_bottom
 
-    left_pulley = (
-        ~Pulley.placeholder(15, 10.3)
-        .add_clearance(20, angle=90)
-        .align(
-            right=gantry.x_bearing_bottom.left - 0.5,
-            center_y=gantry.x_rod_top.center_y,
-            top=gantry.y_rod_left.center_z + X_PULLEYS_Z_OFFSET,
-        )
+    left_pulley = ~Pulley.placeholder(15, 10.3).add_clearance(20, angle=90).align(
+        right=gantry.x_bearing_bottom.left - 0.5,
+        center_y=gantry.x_rod_top.center_y,
+        top=gantry.y_rod_left.center_z + X_PULLEYS_Z_OFFSET,
     )
 
     right_pulley = ~left_pulley.x_mirror(center=bed.center_x)
@@ -833,9 +940,7 @@ class XAxisPulleys(Part):
 
     right_endstop = (
         ~MechanicalEndstopOnPCB(
-            bolt=Bolt.M3(12, thread_clearance=4)
-            .add_nut(-1, side_clearance_size=10, angle=-90)
-            .upside_down(),
+            bolt=Bolt.M3(12, thread_clearance=4).add_nut(-1, side_clearance_size=10, angle=-90).upside_down(),
             z_offset=5.5,
         )
         .front_to_right()
@@ -845,26 +950,18 @@ class XAxisPulleys(Part):
     )
 
     left_endstop = (
-        ~MechanicalEndstopOnPCB(
-            bolt=Bolt.M3(8).add_nut(-2, side_clearance_size=10, angle=-90)
-        )
+        ~MechanicalEndstopOnPCB(bolt=Bolt.M3(8).add_nut(-2, side_clearance_size=10, angle=-90))
         .back_to_right()
         .back_to_top()
         .align(left=body.left, back=body.front, bottom=body.bottom - 1)
         .debug()
     )
 
-    cable_guide_bolts = (
-        ~Bolt.M3(16, head_clearance=10)
-        .add_nut(-3, inline_clearance_size=20)
-        .bottom_to_front()
-        .align(
-            center_x=body.center_x + 8,
-            front=body.front + 8,
-            center_z=center_pulleys_bolt.center_z,
-        )
-        .x_mirror(center=center_pulleys_bolt.center_x, keep=True)
-    )
+    cable_guide_bolts = ~Bolt.M3(16, head_clearance=10).add_nut(-3, inline_clearance_size=20).bottom_to_front().align(
+        center_x=body.center_x + 8,
+        front=body.front + 8,
+        center_z=center_pulleys_bolt.center_z,
+    ).x_symmetry(center=center_pulleys_bolt.center_x)
 
     def __stl__(self) -> Object:
         return self.bottom_to_back()
@@ -943,18 +1040,14 @@ class ExtruderClamp(Part):
         back=clamp.back,
         bottom=clamp.bottom,
         height=6,
-    ).fillet_depth(1, right=True).reverse_fillet_left(top=True).reverse_fillet_bottom(
-        left=True
-    ) - Volume(
+    ).fillet_depth(1, right=True).reverse_fillet_left(top=True).reverse_fillet_bottom(left=True) - Volume(
         left=clamp.right,
         width=4,
         front=clamp.front + E,
         back=clamp.back - E,
         center_z=clamp.bottom + 3,
         height=3,
-    ).fillet_depth(
-        1, left=True
-    )
+    ).fillet_depth(1, left=True)
 
     sensor_holder_up = (
         Volume(
@@ -1015,9 +1108,7 @@ class Tunnel(Part):
         back=x_carriage.blower.blower.back + NOZZLE_SIZE * 3.1 + T,
         top=x_carriage.extruder_holder.center_z + E,
         bottom=x_carriage.bottom - E,
-    ).fillet_height(
-        NOZZLE_SIZE * 2
-    )
+    ).fillet_height(NOZZLE_SIZE * 2)
 
     blower = Hull(
         Volume(
@@ -1055,14 +1146,10 @@ class Tunnel(Part):
         ).fillet_height(NOZZLE_SIZE * 3),
     )
 
-    bolt_left = (
-        ~Bolt.M2(10)
-        .bottom_to_back()
-        .align(
-            center_x=tunnel.left - 3,
-            center_y=x_carriage.body.back,
-            center_z=x_carriage.bottom + 20,
-        )
+    bolt_left = ~Bolt.M2(10).bottom_to_back().align(
+        center_x=tunnel.left - 3,
+        center_y=x_carriage.body.back,
+        center_z=x_carriage.bottom + 20,
     )
     bolt_holder_left = (
         Volume(
@@ -1087,6 +1174,191 @@ class Tunnel(Part):
 tunnel = Tunnel()
 
 
+class ExtruderClampDirectDrive(Part):
+    _extruder_holder = x_carriage_direct_drive.extruder_holder
+
+    extruder = x_carriage_direct_drive.extruder
+
+    fan = x_carriage_direct_drive.fan
+    # sensor = (
+    #     ~InductionSensor.LJ12A3()
+    #     .align(
+    #         center_x=extruder.center_x - 35,
+    #         front=x_carriage.body.back - 3,
+    #         bottom=extruder.bottom + 4,
+    #     )
+    #     .debug()
+    # )
+
+    clamp = Volume(
+        left=_extruder_holder.left,
+        right=_extruder_holder.right,
+        front=_extruder_holder.back - 0.5,
+        back=fan.front + T,
+        bottom=_extruder_holder.bottom - 29,
+        top=_extruder_holder.top,
+    ).fillet_depth()
+
+    tunnel = ~Hull(
+        Volume(
+            center_x=clamp.center_x,
+            width=36,
+            front=clamp.back,
+            back=clamp.back - 1,
+            top=clamp.top - 7,
+            bottom=clamp.bottom + 5,
+        ).fillet_depth(7),
+        Volume(
+            center_x=extruder.center_x,
+            width=20,
+            front=clamp.front + 1,
+            back=clamp.front,
+            top=clamp.top - 13,
+            bottom=clamp.bottom - 1,
+        ).fillet_depth(4),
+    )
+
+    cable_guide = Volume(
+        left=clamp.right,
+        width=3,
+        front=clamp.front,
+        back=clamp.back,
+        bottom=clamp.bottom,
+        height=6,
+    ).fillet_depth(1, right=True).reverse_fillet_left(top=True).reverse_fillet_bottom(left=True) - Volume(
+        left=clamp.right,
+        width=4,
+        front=clamp.front + E,
+        back=clamp.back - E,
+        center_z=clamp.bottom + 3,
+        height=3,
+    ).fillet_depth(1, left=True)
+
+    # sensor_holder_up = (
+    #     Volume(
+    #         right=clamp.left - TT,
+    #         width=18,
+    #         depth=18,
+    #         center_y=sensor.center_y,
+    #         top=clamp.top - 2,
+    #         height=9,
+    #     )
+    #     .fillet_height(6, left=True)
+    #     .fillet_height(6, front=True, right=True)
+    # )
+
+    # sensor_holder_down = sensor_holder_up.z_mirror(center=clamp.center_z)
+    #
+    # sensor_arm_up = Volume(
+    #     right=clamp.left - TT,
+    #     width=3,
+    #     back=clamp.back,
+    #     front=sensor_holder_up.back,
+    #     top=sensor_holder_up.top,
+    #     bottom=sensor_holder_up.bottom,
+    # ).fillet_height(back=True, left=True).reverse_fillet_front(left=True) + Volume(
+    #     right=clamp.left,
+    #     width=1,
+    #     front=clamp.front,
+    #     back=clamp.back,
+    #     top=sensor_holder_up.top,
+    #     bottom=sensor_holder_up.bottom,
+    # )
+    #
+    # sensor_arm_down = sensor_arm_up.z_mirror(center=clamp.center_z)
+
+    def __stl__(self) -> Object:
+        return self.back_to_bottom()
+
+
+extruder_clamp_direct_drive = ExtruderClampDirectDrive()
+
+
+class TunnelDirectDrive(Part):
+    NOZZLE_SIZE = 0.4
+
+    extruder = x_carriage_direct_drive.extruder
+
+    tunnel = Volume(
+        left=x_carriage_direct_drive.blower.blower.left + T,
+        right=x_carriage_direct_drive.blower.blower.right - T,
+        front=x_carriage_direct_drive.body.back - T,
+        back=x_carriage_direct_drive.blower.blower.back + T,
+        top=x_carriage_direct_drive.extruder_holder.center_z,
+        bottom=x_carriage_direct_drive.bottom,
+    ).fillet_height(NOZZLE_SIZE * 3) - Volume(
+        left=x_carriage_direct_drive.blower.blower.left + NOZZLE_SIZE * 3.1 + T,
+        right=x_carriage_direct_drive.blower.blower.right - NOZZLE_SIZE * 3.1 - T,
+        front=x_carriage_direct_drive.body.back - NOZZLE_SIZE * 3.1 - T,
+        back=x_carriage_direct_drive.blower.blower.back + NOZZLE_SIZE * 3.1 + T,
+        top=x_carriage_direct_drive.extruder_holder.center_z + E,
+        bottom=x_carriage_direct_drive.bottom - E,
+    ).fillet_height(NOZZLE_SIZE * 2)
+
+    blower = Hull(
+        Volume(
+            center_x=extruder.center_x - 6,
+            width=5,
+            center_y=extruder.center_y,
+            depth=30,
+            bottom=extruder.bottom + 1,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+        Volume(
+            left=tunnel.left,
+            right=tunnel.right,
+            back=tunnel.back,
+            front=tunnel.front,
+            top=tunnel.bottom,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 2),
+    ) - Hull(
+        Volume(
+            center_x=extruder.center_x - 6,
+            width=3,
+            center_y=extruder.center_y,
+            depth=28,
+            bottom=extruder.bottom + 1 - E,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+        Volume(
+            left=tunnel.left + NOZZLE_SIZE * 3.1,
+            right=tunnel.right - NOZZLE_SIZE * 3.1,
+            back=tunnel.back + NOZZLE_SIZE * 3.1,
+            front=tunnel.front - NOZZLE_SIZE * 3.1,
+            top=tunnel.bottom + E,
+            height=E,
+        ).fillet_height(NOZZLE_SIZE * 3),
+    )
+
+    bolt_left = ~Bolt.M2(10).bottom_to_back().align(
+        center_x=tunnel.left - 3,
+        center_y=x_carriage_direct_drive.body.back,
+        center_z=x_carriage_direct_drive.bottom + 20,
+    )
+    bolt_holder_left = (
+        Volume(
+            center_x=bolt_left.center_x,
+            right=tunnel.left + 0.5,
+            front=x_carriage_direct_drive.body.back - T,
+            depth=3,
+            center_z=bolt_left.center_z + 2,
+            height=15,
+        )
+        .chamfer_depth(8, top=True, left=True)
+        .fillet_depth(bottom=True, left=True)
+    )
+
+    bolt_right = ~bolt_left.x_mirror(center=tunnel.center_x)
+    bolt_holder_right = bolt_holder_left.x_mirror(center=tunnel.center_x)
+
+    def __stl__(self) -> Object:
+        return self.upside_down()
+
+
+tunnel_direct_drive = TunnelDirectDrive()
+
+
 class CableChainCarriageAttachment(Part):
     bolts = x_carriage.cable_guide_bolts
     body = Volume(
@@ -1096,7 +1368,9 @@ class CableChainCarriageAttachment(Part):
         depth=3,
         bottom=x_carriage.x_bearing_top_right.top + 1,
         top=x_carriage.cable_guide_top.top,
-    ).fillet_depth(6)
+    ).fillet_depth(
+        6,
+    )
 
     chain_attach = (
         Tube(
@@ -1107,7 +1381,7 @@ class CableChainCarriageAttachment(Part):
             height=4,
         )
         .add_corner(angle=270)
-        .z_mirror(center=frame.y_extrusion_right_top.center_z, keep=True)
+        .z_symmetry(center=frame.y_extrusion_right_top.center_z)
     )
 
     shaft = (
@@ -1197,7 +1471,7 @@ class CableChainFrameAttachement(Part):
         ~Bolt.M5(16)
         .bottom_to_left()
         .align(left=body.left - 1, center_y=body.back + 8, center_z=body.center_z)
-        .y_mirror(body.center_y, keep=True)
+        .y_symmetry(body.center_y)
         .debug()
     )
     chain_bolts = (
@@ -1205,7 +1479,7 @@ class CableChainFrameAttachement(Part):
         .add_nut(-1)
         .bottom_to_left()
         .align(right=body.right + 1, center_z=body.center_z)
-        .y_mirror(center=-7.5 / 2, keep=True)
+        .y_symmetry(center=-7.5 / 2)
         .align(center_y=body.back + 24)
         .debug()
     )
@@ -1219,7 +1493,7 @@ class CableChainFrameAttachement(Part):
             center_y=chain_bolts.front + 8,
             center_z=body.center_z + 8,
         )
-        .z_mirror(center=body.center_z, keep=True)
+        .z_mirror(center=body.center_z)
         .debug()
     )
 
@@ -1278,24 +1552,16 @@ class XYStepperMount(Part):
         .fillet_height(r=5, back=True, right=True)
     )
 
-    front_upper_bolt = (
-        ~Bolt.M6(8)
-        .bottom_to_front()
-        .align(
-            center_x=z_extrusion.center_x,
-            front=base.front + E,
-            center_z=y_extrusion.bottom - 13,
-        )
+    front_upper_bolt = ~Bolt.M6(8).bottom_to_front().align(
+        center_x=z_extrusion.center_x,
+        front=base.front + E,
+        center_z=y_extrusion.bottom - 13,
     )
 
-    right_upper_bolt = (
-        ~Bolt.M6(8)
-        .bottom_to_right()
-        .align(
-            center_x=z_extrusion.right,
-            center_y=z_extrusion.center_y,
-            center_z=y_extrusion.bottom - 13,
-        )
+    right_upper_bolt = ~Bolt.M6(8).bottom_to_right().align(
+        center_x=z_extrusion.right,
+        center_y=z_extrusion.center_y,
+        center_z=y_extrusion.bottom - 13,
     )
     right_lower_bolt = ~right_upper_bolt.align(center_z=y_rod.center_z)
 
@@ -1327,15 +1593,10 @@ class XYStepperMount(Part):
         )
     )
 
-    clamp_bolt = (
-        ~Bolt.M3(length=16)
-        .add_nut(-1, angle=-15, side_clearance_size=10)
-        .bottom_to_left()
-        .align(
-            center_x=clamp_clearance.right,
-            center_y=walls.front - 7,
-            top=y_rod.bottom - 3,
-        )
+    clamp_bolt = ~Bolt.M3(length=16).add_nut(-1, angle=-15, side_clearance_size=10).bottom_to_left().align(
+        center_x=clamp_clearance.right,
+        center_y=walls.front - 7,
+        top=y_rod.bottom - 3,
     )
 
     inner_y_pulley = ~Pulley.placeholder(13, 10.3).align(
@@ -1419,11 +1680,7 @@ class XYStepperMountRight(XYStepperMount):
         front=XYStepperMount.base.front + E,
         bottom=XYStepperMount.base.top,
         top=XYStepperMount.inner_y_pulley.top + 0.3,
-    ).reverse_fillet_front(
-        left=True, right=True
-    ).reverse_fillet_back(
-        left=True, right=True
-    )
+    ).reverse_fillet_front(left=True, right=True).reverse_fillet_back(left=True, right=True)
 
     y_pulley_support = Volume(
         center_x=XYStepperMount.stepper.center_x,
@@ -1458,25 +1715,17 @@ class XYIdler(Part):
         .fillet_depth(right=True)
     )
 
-    back_top_bolt = (
-        ~Bolt.M6(12)
-        .bottom_to_back()
-        .align(
-            center_x=z_extrusion.center_x,
-            back=body.back - E,
-            center_z=x_extrusion.bottom - 13,
-        )
+    back_top_bolt = ~Bolt.M6(12).bottom_to_back().align(
+        center_x=z_extrusion.center_x,
+        back=body.back - E,
+        center_z=x_extrusion.bottom - 13,
     )
     back_bottom_bolt = ~back_top_bolt.z_mirror(center=y_rod.center_z)
 
-    right_top_bolt = (
-        ~Bolt.M6(12)
-        .bottom_to_right()
-        .align(
-            right=body.right + E,
-            center_y=z_extrusion.center_y,
-            center_z=x_extrusion.bottom - 13,
-        )
+    right_top_bolt = ~Bolt.M6(12).bottom_to_right().align(
+        right=body.right + E,
+        center_y=z_extrusion.center_y,
+        center_z=x_extrusion.bottom - 13,
     )
     right_bottom_bolt = ~right_top_bolt.z_mirror(y_rod.center_z)
 
@@ -1489,27 +1738,18 @@ class XYIdler(Part):
         height=34,
     ).fillet_depth(right=True)
 
-    inner_y_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(10, 270)
-        .add_belt_clearance(10, 270, True)
-        .add_belt_clearance(40, 180)
-        .align(
-            center_x=gantry.y_stepper.center_x + 10,
-            center_y=z_extrusion.back,
-            bottom=y_rod.center_z + Y_PULLEYS_Z_OFFSET,
-        )
+    inner_y_pulley = ~Pulley.placeholder(18, 10.3).add_clearance(10, 270).add_belt_clearance(
+        10, angle=270, left=True
+    ).add_belt_clearance(40, angle=180).align(
+        center_x=gantry.y_stepper.center_x + 10,
+        center_y=z_extrusion.back,
+        bottom=y_rod.center_z + Y_PULLEYS_Z_OFFSET,
     )
 
-    inner_y_pulley_bolt = (
-        ~Bolt.M3(20)
-        .add_nut(-2, side_clearance_size=20)
-        .top_to_bottom()
-        .align(
-            center_x=inner_y_pulley.center_x,
-            center_y=inner_y_pulley.center_y,
-            top=pulleys_holder.top + E,
-        )
+    inner_y_pulley_bolt = ~Bolt.M3(20).add_nut(-2, side_clearance_size=20).top_to_bottom().align(
+        center_x=inner_y_pulley.center_x,
+        center_y=inner_y_pulley.center_y,
+        top=pulleys_holder.top + E,
     )
 
     clamp = ~(
@@ -1523,20 +1763,15 @@ class XYIdler(Part):
         )
     )
 
-    clamp_bolt_top = (
-        ~Bolt.M3(16, head_clearance=10)
-        .add_nut(-2, side_clearance_size=20, angle=195)
-        .bottom_to_left()
-        .align(
-            center_x=y_rod.center_x,
-            center_y=middle_of(body.back, z_extrusion.back),
-            center_z=(back_top_bolt.center_z + y_rod.center_z) / 2 - 2,
-        )
+    clamp_bolt_top = ~Bolt.M3(16, head_clearance=10).add_nut(
+        -2, side_clearance_size=20, angle=195
+    ).bottom_to_left().align(
+        center_x=y_rod.center_x,
+        center_y=middle_of(body.back, z_extrusion.back),
+        center_z=(back_top_bolt.center_z + y_rod.center_z) / 2 - 2,
     )
 
-    clamp_bolt_bottom = ~clamp_bolt_top.align(
-        center_z=(back_bottom_bolt.center_z + y_rod.center_z) / 2 + 2
-    )
+    clamp_bolt_bottom = ~clamp_bolt_top.align(center_z=(back_bottom_bolt.center_z + y_rod.center_z) / 2 + 2)
 
     def __stl__(self) -> Object:
         return self.back_to_bottom()
@@ -1565,49 +1800,32 @@ xy_idler_clamp_right = xy_idler_clamp_left.x_mirror(center=frame.center_x)
 
 
 class XYIdlerLeft(XYIdler):
-    outer_y_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(70, 270, True)
-        .align(
-            center_x=XYIdler.y_rod.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER,
-            center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
-            bottom=XYIdler.y_rod.center_z + Y_PULLEYS_Z_OFFSET,
-        )
+    outer_y_pulley = ~Pulley.placeholder(18, height=10.3).add_clearance(20, 0).add_belt_clearance(
+        40, angle=180
+    ).add_belt_clearance(70, angle=270, left=True).align(
+        center_x=XYIdler.y_rod.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER,
+        center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
+        bottom=XYIdler.y_rod.center_z + Y_PULLEYS_Z_OFFSET,
     )
 
-    outer_y_pulley_bolt = (
-        ~Bolt.M3(20)
-        .add_nut(-2, side_clearance_size=20, angle=-90)
-        .top_to_bottom()
-        .align(
-            center_x=outer_y_pulley.center_x,
-            center_y=outer_y_pulley.center_y,
-            top=XYIdler.pulleys_holder.top + E,
-        )
+    outer_y_pulley_bolt = ~Bolt.M3(20).add_nut(-2, side_clearance_size=20, angle=-90).top_to_bottom().align(
+        center_x=outer_y_pulley.center_x,
+        center_y=outer_y_pulley.center_y,
+        top=XYIdler.pulleys_holder.top + E,
     )
 
-    x_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(10, 270)
-        .add_belt_clearance(10, 270, True)
-        .add_belt_clearance(40, 180)
-        .align(
-            center_x=outer_y_pulley.center_x + 10,
-            center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
-            top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET - 1,
-        )
+    x_pulley = ~Pulley.placeholder(18, height=10.3).add_clearance(10, 270).add_belt_clearance(
+        10, angle=270, left=True
+    ).add_belt_clearance(40, angle=180).align(
+        center_x=outer_y_pulley.center_x + 10,
+        center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
+        top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET - 1,
     )
 
-    x_pulley_bolt = (
-        ~Bolt.M3(16)
-        .add_nut(-1, inline_clearance_size=3)
-        .align(
-            center_x=x_pulley.center_x,
-            center_y=x_pulley.center_y,
-            bottom=XYIdler.pulleys_holder.bottom - E,
-        )
+    x_pulley_bolt = ~Bolt.M3(16).add_nut(-1, inline_clearance_size=3).align(
+        center_x=x_pulley.center_x,
+        center_y=x_pulley.center_y,
+        bottom=XYIdler.pulleys_holder.bottom - E,
     )
 
 
@@ -1615,49 +1833,32 @@ xy_idler_left = XYIdlerLeft()
 
 
 class XYIdlerRight(XYIdler):
-    outer_x_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(40, 270, True)
-        .align(
-            center_x=gantry.y_stepper.center_x,
-            center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
-            top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET,
-        )
+    outer_x_pulley = ~Pulley.placeholder(18, height=10.3).add_clearance(20, 0).add_belt_clearance(
+        40, angle=180
+    ).add_belt_clearance(40, angle=270, left=True).align(
+        center_x=gantry.y_stepper.center_x,
+        center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
+        top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET,
     )
 
-    inner_x_belt = (
-        ~Belt.GT2(42, 16)
-        .front_to_left()
-        .align(
-            center_x=XYIdler.inner_y_pulley.center_x - 5,
-            front=outer_x_pulley.back,
-            top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET - 1,
-        )
+    inner_x_belt = ~Belt.GT2(42, 16).front_to_left().align(
+        center_x=XYIdler.inner_y_pulley.center_x - 5,
+        front=outer_x_pulley.back,
+        top=XYIdler.y_rod.center_z + X_PULLEYS_Z_OFFSET - 1,
     )
 
-    outer_y_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_clearance(20, 0)
-        .add_belt_clearance(40, 180)
-        .add_belt_clearance(70, 270, True)
-        .align(
-            center_x=gantry.y_stepper.center_x,
-            center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
-            bottom=XYIdler.y_rod.center_z + Y_PULLEYS_Z_OFFSET,
-        )
+    outer_y_pulley = ~Pulley.placeholder(18, height=10.3).add_clearance(20, angle=0).add_belt_clearance(
+        40, angle=180
+    ).add_belt_clearance(70, angle=270, left=True).align(
+        center_x=gantry.y_stepper.center_x,
+        center_y=XYIdler.z_extrusion.center_y - BACK_BELT_Y_OFFSET,
+        bottom=XYIdler.y_rod.center_z + Y_PULLEYS_Z_OFFSET,
     )
 
-    outer_y_pulley_bolt = (
-        ~Bolt.M3(35)
-        .add_nut(29, inline_clearance_size=20)
-        .top_to_bottom()
-        .align(
-            center_x=outer_y_pulley.center_x,
-            center_y=outer_y_pulley.center_y,
-            top=XYIdler.pulleys_holder.top + E,
-        )
+    outer_y_pulley_bolt = ~Bolt.M3(35).add_nut(29, inline_clearance_size=20).top_to_bottom().align(
+        center_x=outer_y_pulley.center_x,
+        center_y=outer_y_pulley.center_y,
+        top=XYIdler.pulleys_holder.top + E,
     )
 
 
@@ -1681,19 +1882,13 @@ class YCarriage(Part):
         .debug()
     )
 
-    front_x_pulley = (
-        ~Pulley.placeholder(18, 10.3)
-        .add_bolt(
-            Bolt.M3(25).add_nut(-1, side_clearance_size=20),
-            z_offset=2,
-        )
-        .add_clearance(20, 270)
-        .add_clearance(20, 0)
-        .align(
-            center_x=y_bearing.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER + 10,
-            center_y=y_bearing.center_y + 10,
-            top=y_bearing.center_z + X_PULLEYS_Z_OFFSET,
-        )
+    front_x_pulley = ~Pulley.placeholder(18, 10.3).add_bolt(
+        Bolt.M3(25).add_nut(-1, side_clearance_size=20),
+        z_offset=2,
+    ).add_clearance(20, 270).add_clearance(20, 0).align(
+        center_x=y_bearing.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER + 10,
+        center_y=y_bearing.center_y + 10,
+        top=y_bearing.center_z + X_PULLEYS_Z_OFFSET,
     )
 
     back_x_pulley = ~front_x_pulley.y_mirror(y_bearing.center_y)
@@ -1716,15 +1911,12 @@ class YCarriage(Part):
         bottom=x_rod_bottom.bottom - 5,
     ).fillet_width(r=10, front=True)
 
-    y_clamp_bolt_top_front = (
-        ~Bolt.M3(16, head_clearance=10)
-        .add_nut(placement=-2, side_clearance_size=30, angle=180)
-        .bottom_to_left()
-        .align(
-            left=body.left - 8,
-            center_y=body.front - 4.5,
-            center_z=y_bearing.top + 2.4,
-        )
+    y_clamp_bolt_top_front = ~Bolt.M3(16, head_clearance=10).add_nut(
+        placement=-2, side_clearance_size=30, angle=180
+    ).bottom_to_left().align(
+        left=body.left - 8,
+        center_y=body.front - 4.5,
+        center_z=y_bearing.top + 2.4,
     )
 
     y_clamp_bolt_top_back = ~y_clamp_bolt_top_front.y_mirror(y_bearing.center_y)
@@ -1742,11 +1934,8 @@ class YCarriage(Part):
 
     clamp_clearance_up = ~clamp_clearance_bottom.z_mirror(y_bearing.center_z)
 
-    clamp_bolt_up = (
-        ~Bolt.M3(12)
-        .add_nut(-E, side_clearance_size=30, angle=90)
-        .top_to_bottom()
-        .align(center_x=body.center_x, center_y=body.back + 9, top=body.top)
+    clamp_bolt_up = ~Bolt.M3(12).add_nut(-E, side_clearance_size=30, angle=90).top_to_bottom().align(
+        center_x=body.center_x, center_y=body.back + 9, top=body.top
     )
 
     clamp_bolt_down = ~clamp_bolt_up.z_mirror(y_bearing.center_z)
@@ -1774,18 +1963,14 @@ class YCarriage(Part):
 
 
 class YCarriageLeft(YCarriage):
-    belt_fix_clearance_front = (
-        ~Volume(
-            left=YCarriage.y_belt_inner_clearance.left,
-            width=20,
-            back=YCarriage.body.front - 16,
-            front=YCarriage.body.front + E,
-            bottom=YCarriage.y_belt_inner_clearance.bottom,
-            top=YCarriage.y_belt_inner_clearance.top,
-        )
-        .fillet_depth(1, right=True)
-        .fillet_width(1, back=True)
-    )
+    belt_fix_clearance_front = ~Volume(
+        left=YCarriage.y_belt_inner_clearance.left,
+        width=20,
+        back=YCarriage.body.front - 16,
+        front=YCarriage.body.front + E,
+        bottom=YCarriage.y_belt_inner_clearance.bottom,
+        top=YCarriage.y_belt_inner_clearance.top,
+    ).fillet_depth(1, right=True).fillet_width(1, back=True)
 
 
 y_carriage_left = YCarriageLeft()
@@ -1861,21 +2046,14 @@ class YCarriageRight(YCarriage):
         bottom=YCarriage.y_belt_outer_clearance.bottom,
         top=YCarriage.y_belt_outer_clearance.top,
     ).fillet_depth(1, left=True)
-    y_fix_bolt = (
-        ~Bolt.M3(25)
-        .add_nut(-2, inline_clearance_size=20, angle=90)
-        .bottom_to_front()
-        .align(
-            center_x=YCarriage.y_belt_outer_clearance.center_x - 9,
-            center_y=YCarriage.body.center_y,
-            center_z=YCarriage.y_belt_outer_clearance.center_z,
-        )
+    y_fix_bolt = ~Bolt.M3(25).add_nut(-2, inline_clearance_size=20, angle=90).bottom_to_front().align(
+        center_x=YCarriage.y_belt_outer_clearance.center_x - 9,
+        center_y=YCarriage.body.center_y,
+        center_z=YCarriage.y_belt_outer_clearance.center_z,
     )
 
     x_belt_clearance = ~Volume(
-        center_x=YCarriage.y_bearing.center_x
-        + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER
-        - 5,
+        center_x=YCarriage.y_bearing.center_x + Y_ROD_CENTER_TO_STEPPER_SHAFT_CENTER - 5,
         width=8,
         back=YCarriage.body.back - 1,
         front=YCarriage.body.front + 1,
@@ -1887,11 +2065,7 @@ class YCarriageRight(YCarriage):
         return self.front_to_bottom()
 
 
-y_carriage_right = (
-    YCarriageRight()
-    .x_mirror(center=bed.center_x)
-    .y_mirror(center=y_carriage_left.center_y)
-)
+y_carriage_right = YCarriageRight().x_mirror(center=bed.center_x).y_mirror(center=y_carriage_left.center_y)
 
 
 class YBeltFixFront(Part):
@@ -2007,9 +2181,7 @@ class YEndstopAttachmentBack(Part):
     stepper_mount = ~xy_stepper_mount_right
 
     y_endstop = (
-        ~MechanicalEndstopOnPCB(
-            bolt=Bolt.M3(8).add_nut(-1, inline_clearance_size=10), z_offset=-3
-        )
+        ~MechanicalEndstopOnPCB(bolt=Bolt.M3(8).add_nut(-1, inline_clearance_size=10), z_offset=-3)
         .bottom_to_left()
         .bottom_to_front()
         .align(
@@ -2216,8 +2388,8 @@ class ExtruderStepperMount(Part):
             center_y=stepper_holder.back,
             center_z=stepper.center_z + 15.52,
         )
-        .x_mirror(center=stepper.center_x, keep=True)
-        .z_mirror(center=stepper.center_z, keep=True)
+        .x_symmetry(center=stepper.center_x)
+        .z_symmetry(center=stepper.center_z)
         .debug()
     )
 
@@ -2241,14 +2413,10 @@ class ExtruderStepperMount(Part):
         .align(left=attachment.right, back=stepper_holder.front)
     )
 
-    bolt_top_back = (
-        ~Bolt.M6(12)
-        .upside_down()
-        .align(
-            center_x=y_extrusion.center_x,
-            center_y=stepper_holder.center_y,
-            center_z=y_extrusion.top,
-        )
+    bolt_top_back = ~Bolt.M6(12).upside_down().align(
+        center_x=y_extrusion.center_x,
+        center_y=stepper_holder.center_y,
+        center_z=y_extrusion.top,
     )
     bolt_top_front = ~bolt_top_back.y_mirror(attachment.center_y)
 
@@ -2322,15 +2490,10 @@ class SpoolHolder(Part):
         .fillet_width(12, back=True, bottom=True)
     )
 
-    bolt_right = (
-        ~Bolt.M6(16)
-        .bottom_to_right()
-        .slide(y=20)
-        .align(
-            center_x=y_extrusion.right,
-            center_y=stopper_right.center_y + 10,
-            center_z=y_extrusion.center_z,
-        )
+    bolt_right = ~Bolt.M6(16).bottom_to_right().slide(y=20).align(
+        center_x=y_extrusion.right,
+        center_y=stopper_right.center_y + 10,
+        center_z=y_extrusion.center_z,
     )
 
     arm = (
@@ -2396,14 +2559,10 @@ class SpoolHolder(Part):
         top=bearing_right.top + 2,
     ).fillet_width(12, top=True)
 
-    bolt_top = (
-        ~Bolt.M6(12)
-        .upside_down()
-        .align(
-            center_x=y_extrusion.center_x,
-            center_y=fix.center_y,
-            center_z=y_extrusion.top,
-        )
+    bolt_top = ~Bolt.M6(12).upside_down().align(
+        center_x=y_extrusion.center_x,
+        center_y=fix.center_y,
+        center_z=y_extrusion.top,
     )
 
     def __stl__(self) -> Object:
@@ -2413,7 +2572,7 @@ class SpoolHolder(Part):
 spool_holder = SpoolHolder()
 
 
-class ZBedMount(MirroredPart, y=True, keep_y=True):
+class ZBedMount(SymmetricPart, y=True):
     extrusion = ~bed.y_extrusion_left
     z_rod = ~gantry.z_rod_left_front
     t8 = ~gantry.z_threaded_rod_left
@@ -2429,17 +2588,11 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         .debug()
     )
 
-    bolts = (
-        ~Bolt.M5(10, head_clearance=30)
-        .bottom_to_left()
-        .align(
-            left=extrusion.left - 10,
-            center_y=bearing.back - 7,
-            center_z=extrusion.center_z,
-        )
-        .slide(y=-10)
-        .y_mirror(center=z_rod.center_y, keep=True)
-    )
+    bolts = ~Bolt.M5(10, head_clearance=30).bottom_to_left().align(
+        left=extrusion.left - 10,
+        center_y=bearing.back - 7,
+        center_z=extrusion.center_z,
+    ).slide(y=-10).y_symmetry(center=z_rod.center_y)
 
     base = Surface.free(
         Circle(d=30).align(center_x=bearing.center_x, center_y=bearing.center_y),
@@ -2500,13 +2653,8 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         top=arm.bottom,
         height=7,
     ) & Union(
-        Tube(diameter=8 * i, center_x=0, center_y=0, bottom=0, height=7).tunnel(
-            8 * i - 4
-        )
-        for i in range(3, 15)
-    ).align(
-        center_x=t8.center_x, center_y=t8.center_y, top=arm.bottom
-    )
+        Tube(diameter=8 * i, center_x=0, center_y=0, bottom=0, height=7).tunnel(8 * i - 4) for i in range(3, 15)
+    ).align(center_x=t8.center_x, center_y=t8.center_y, top=arm.bottom)
 
     brass_nut_base = Tube(
         diameter=21.8,
@@ -2538,17 +2686,11 @@ class ZBedMount(MirroredPart, y=True, keep_y=True):
         )
     )
 
-    top_bolts = (
-        ~Bolt.M5(10)
-        .bottom_to_top()
-        .align(
-            center_x=extrusion.center_x,
-            center_y=bearing.center_y + 16,
-            center_z=extrusion.top + 2,
-        )
-        .slide(y=20)
-        .y_mirror(bearing.center_y, keep=True)
-    )
+    top_bolts = ~Bolt.M5(10).bottom_to_top().align(
+        center_x=extrusion.center_x,
+        center_y=bearing.center_y + 16,
+        center_z=extrusion.top + 2,
+    ).slide(y=20).y_symmetry(bearing.center_y)
 
     def __stl__(self) -> Object:
         return self.upside_down()
@@ -2562,15 +2704,10 @@ class ZBracketBottom(Part):
     extrusion = ~frame.y_extrusion_left_bottom
     rod = ~gantry.z_rod_left_back
 
-    front_bolt = (
-        ~Bolt.M5(10, head_clearance=10)
-        .bottom_to_right()
-        .slide(z=20)
-        .align(
-            right=extrusion.right + 8,
-            back=rod.front,
-            center_z=extrusion.center_z,
-        )
+    front_bolt = ~Bolt.M5(10, head_clearance=10).bottom_to_right().slide(z=20).align(
+        right=extrusion.right + 8,
+        back=rod.front,
+        center_z=extrusion.center_z,
     )
 
     bottom_bolt = ~Bolt.M6(10).align(
@@ -2608,29 +2745,22 @@ class ZBracketBottom(Part):
         bottom=rod_holder.bottom - E,
         top=rod_holder.top + E,
     )
-    rod_holder_bolt = (
-        ~Bolt.M3(16, head_clearance=10)
-        .add_nut(-0.1, angle=90, inline_clearance_size=20)
-        .bottom_to_back()
-        .align(
-            center_x=rod.left - 5,
-            center_y=rod_holder_clearance.center_y,
-            center_z=rod_holder.center_z,
-        )
+    rod_holder_bolt = ~Bolt.M3(16, head_clearance=10).add_nut(
+        -0.1, angle=90, inline_clearance_size=20
+    ).bottom_to_back().align(
+        center_x=rod.left - 5,
+        center_y=rod_holder_clearance.center_y,
+        center_z=rod_holder.center_z,
     )
 
 
 z_bracket_bottom_left_back = ZBracketBottom()
-z_bracket_bottom_left_front = z_bracket_bottom_left_back.y_mirror(
-    center=gantry.z_threaded_rod_left.center_y
-)
+z_bracket_bottom_left_front = z_bracket_bottom_left_back.y_mirror(center=gantry.z_threaded_rod_left.center_y)
 z_bracket_bottom_right_back = z_bracket_bottom_left_back.x_mirror(center=bed.center_x)
-z_bracket_bottom_right_front = z_bracket_bottom_right_back.y_mirror(
-    center=gantry.z_threaded_rod_right.center_y
-)
+z_bracket_bottom_right_front = z_bracket_bottom_right_back.y_mirror(center=gantry.z_threaded_rod_right.center_y)
 
 
-class ZBracketTop(Part):
+class ZBracketTopLeft(Part):
     extrusion = ~frame.y_extrusion_left_middle
     rod = ~gantry.z_rod_left_front
 
@@ -2655,15 +2785,12 @@ class ZBracketTop(Part):
         Circle(d=4).align(left=rod.left - 15, front=rod.front + 3),
     ).z_linear_extrude(top=body.top, distance=10)
 
-    rod_holder_bolt = (
-        ~Bolt.M3(20, head_clearance=20)
-        .add_nut(-4, angle=90, inline_clearance_size=20)
-        .bottom_to_front()
-        .align(
-            center_x=rod.left - 5,
-            center_y=rod.center_y - 2,
-            center_z=rod_holder.center_z,
-        )
+    rod_holder_bolt = ~Bolt.M3(20, head_clearance=20).add_nut(
+        -4, angle=90, inline_clearance_size=20
+    ).bottom_to_front().align(
+        center_x=rod.left - 5,
+        center_y=rod.center_y - 2,
+        center_z=rod_holder.center_z,
     )
     rod_holder_clearance = ~Volume(
         right=rod.left + 1,
@@ -2674,14 +2801,10 @@ class ZBracketTop(Part):
         height=rod_holder.height + 1,
     )
 
-    top_bolt = (
-        ~Bolt.M6(12, head_clearance=40)
-        .top_to_bottom()
-        .align(
-            center_x=extrusion.center_x,
-            center_y=body.center_y,
-            center_z=extrusion.top + 3,
-        )
+    top_bolt = ~Bolt.M6(12, head_clearance=40).top_to_bottom().align(
+        center_x=extrusion.center_x,
+        center_y=body.center_y,
+        center_z=extrusion.top + 3,
     )
 
     front_bolt = (
@@ -2711,12 +2834,74 @@ class ZBracketTop(Part):
         return self.upside_down()
 
 
-z_bracket_top_left_front = ZBracketTop()
-z_bracket_top_left_back = z_bracket_top_left_front.y_mirror(
-    gantry.z_threaded_rod_left.center_y
-)
+z_bracket_top_left_front = ZBracketTopLeft()
+z_bracket_top_left_back = z_bracket_top_left_front.y_mirror(gantry.z_threaded_rod_left.center_y)
 z_bracket_top_right_front = z_bracket_top_left_front.x_mirror(bed.center_x)
 z_bracket_top_right_back = z_bracket_top_left_back.x_mirror(bed.center_x)
+
+
+class ZBracketTop(SymmetricPart, y=True):
+    extrusion = ~frame.y_extrusion_left_middle
+    rod = ~gantry.z_rod_left_front.debug()
+
+    body = (
+        Volume(
+            left=extrusion.left + 3,
+            right=extrusion.right - 1,
+            back=0,
+            front=rod.front - 10,
+            bottom=extrusion.bottom + 4,
+            top=rod.top - E,
+        )
+        .fillet_height(4, left=True, front=True)
+        .fillet_width(4, bottom=True)
+    )
+
+    rod_holder = Surface.free(
+        Circle(d=16).align(center_x=extrusion.right - 1, front=rod.back),
+        Circle(d=6).align(right=rod.right + 3, back=rod.back - 5),
+        Circle(d=6).align(right=rod.right + 3, front=rod.front + 3),
+        Circle(d=4).align(left=rod.left - 15, front=rod.front + 3),
+        Circle(d=4).align(center_x=body.right, front=body.front),
+    ).z_linear_extrude(top=body.top, distance=10)
+
+    rod_holder_bolt = ~Bolt.M3(20, head_clearance=20).add_nut(
+        -4, angle=90, inline_clearance_size=20
+    ).bottom_to_front().align(
+        center_x=rod.left - 5,
+        center_y=rod.center_y - 2,
+        center_z=rod_holder.center_z,
+    )
+    rod_holder_clearance = ~Volume(
+        right=rod.left + 1,
+        left=extrusion.left,
+        center_y=rod.center_y,
+        depth=2,
+        center_z=rod_holder.center_z,
+        height=rod_holder.height + 1,
+    )
+
+    top_bolt = ~Bolt.M6(12, head_clearance=40).top_to_bottom().align(
+        center_x=extrusion.center_x,
+        center_y=body.front - 10,
+        center_z=extrusion.top + 3,
+    )
+
+    side_bolt = (
+        ~Bolt.M6(12)
+        .bottom_to_left()
+        .align(
+            center_x=extrusion.left,
+            center_y=0,
+            center_z=extrusion.center_z,
+        )
+        .slide(z=-20)
+        .debug()
+    )
+
+
+z_bracket_top = ZBracketTop()
+z_bracket_top.render_to_file()
 
 
 class ZStepperMount(Part):
@@ -2733,38 +2918,25 @@ class ZStepperMount(Part):
         .debug()
     )
 
-    side_bolt_front = (
-        ~Bolt.M5(10)
-        .bottom_to_right()
-        .slide(y=20)
-        .align(
-            right=extrusion.right + 7,
-            center_y=stepper.front + 15,
-            center_z=extrusion.center_z,
-        )
+    side_bolt_front = ~Bolt.M5(10).bottom_to_right().slide(y=20).align(
+        right=extrusion.right + 7,
+        center_y=stepper.front + 15,
+        center_z=extrusion.center_z,
     )
 
     side_bolt_back = ~side_bolt_front.y_mirror(stepper.center_y)
 
-    top_bolt_front = (
-        ~Bolt.M5(10)
-        .top_to_bottom()
-        .align(
-            center_x=extrusion.center_x,
-            center_y=side_bolt_front.center_y - 3,
-            center_z=extrusion.top + 2,
-        )
+    top_bolt_front = ~Bolt.M5(10).top_to_bottom().align(
+        center_x=extrusion.center_x,
+        center_y=side_bolt_front.center_y - 3,
+        center_z=extrusion.top + 2,
     )
 
     top_bolt_back = ~top_bolt_front.y_mirror(stepper.center_y)
-    top_bold_center = (
-        ~Bolt.M5(10)
-        .top_to_bottom()
-        .align(
-            center_x=extrusion.center_x,
-            center_y=stepper.center_y,
-            center_z=extrusion.top + 2,
-        )
+    top_bold_center = ~Bolt.M5(10).top_to_bottom().align(
+        center_x=extrusion.center_x,
+        center_y=stepper.center_y,
+        center_z=extrusion.top + 2,
     )
 
     body = (
@@ -2854,17 +3026,11 @@ class ZBottomEndStop(Part):
         bottom=endstop_attachment.bottom,
         top=frame.y_extrusion_right_bottom.top - 2,
     ).reverse_fillet_left(top=True)
-    bolt = (
-        ~Bolt.M5(10)
-        .bottom_to_left()
-        .align(
-            center_x=frame.y_extrusion_right_bottom.left,
-            center_y=arm.back - 10,
-            center_z=frame.y_extrusion_right_bottom.center_z,
-        )
-        .debug()
-        .slide(z=20)
-    )
+    bolt = ~Bolt.M5(10).bottom_to_left().align(
+        center_x=frame.y_extrusion_right_bottom.left,
+        center_y=arm.back - 10,
+        center_z=frame.y_extrusion_right_bottom.center_z,
+    ).debug().slide(z=20)
     frame_attachment = Volume(
         right=frame.y_extrusion_right_bottom.left - T,
         width=6,
@@ -2915,24 +3081,16 @@ class BoardMountSide(Part):
                     bottom=self.board.bottom + 10,
                 ).fillet_width()
             )
-            self.z_bolt_top = (
-                ~Bolt.M6(10)
-                .bottom_to_front()
-                .align(
-                    center_x=self.z_extrusion.center_x,
-                    center_y=self.z_extrusion.front,
-                    center_z=self.mount.top + 10,
-                )
+            self.z_bolt_top = ~Bolt.M6(10).bottom_to_front().align(
+                center_x=self.z_extrusion.center_x,
+                center_y=self.z_extrusion.front,
+                center_z=self.mount.top + 10,
             )
 
-            self.z_bolt_bottom = (
-                ~Bolt.M6(10)
-                .bottom_to_front()
-                .align(
-                    center_x=self.z_extrusion.center_x,
-                    center_y=self.z_extrusion.front,
-                    center_z=self.mount.bottom - 10,
-                )
+            self.z_bolt_bottom = ~Bolt.M6(10).bottom_to_front().align(
+                center_x=self.z_extrusion.center_x,
+                center_y=self.z_extrusion.front,
+                center_z=self.mount.bottom - 10,
             )
 
             self.z_attach = Volume(
@@ -2973,24 +3131,16 @@ class BoardMountSide(Part):
                 ).fillet_width()
             )
 
-            self.z_bolt_top = (
-                ~Bolt.M6(10)
-                .bottom_to_back()
-                .align(
-                    center_x=self.z_extrusion.center_x,
-                    center_y=self.z_extrusion.back,
-                    center_z=self.mount.top + bolt_spacing,
-                )
+            self.z_bolt_top = ~Bolt.M6(10).bottom_to_back().align(
+                center_x=self.z_extrusion.center_x,
+                center_y=self.z_extrusion.back,
+                center_z=self.mount.top + bolt_spacing,
             )
 
-            self.z_bolt_bottom = (
-                ~Bolt.M6(10)
-                .bottom_to_back()
-                .align(
-                    center_x=self.z_extrusion.center_x,
-                    center_y=self.z_extrusion.back,
-                    center_z=self.mount.bottom - bolt_spacing,
-                )
+            self.z_bolt_bottom = ~Bolt.M6(10).bottom_to_back().align(
+                center_x=self.z_extrusion.center_x,
+                center_y=self.z_extrusion.back,
+                center_z=self.mount.bottom - bolt_spacing,
             )
 
             self.z_attach = Volume(
@@ -3046,14 +3196,10 @@ class BoardMountCorner(Part):
             ).fillet_width()
         )
 
-        self.z_bolt = (
-            ~Bolt.M6(10)
-            .bottom_to_front()
-            .align(
-                center_x=self.z_extrusion.center_x,
-                center_y=self.z_extrusion.front,
-                center_z=self.mount.top + 10,
-            )
+        self.z_bolt = ~Bolt.M6(10).bottom_to_front().align(
+            center_x=self.z_extrusion.center_x,
+            center_y=self.z_extrusion.front,
+            center_z=self.mount.top + 10,
         )
         self.z_attach = (
             Volume(
@@ -3068,14 +3214,10 @@ class BoardMountCorner(Part):
             .fillet_width(back=True, bottom=True)
         )
 
-        self.y_bolt = (
-            ~Bolt.M6(10)
-            .upside_down()
-            .align(
-                center_x=self.y_extrusion.center_x,
-                center_y=self.mount.front + 10,
-                center_z=self.y_extrusion.top,
-            )
+        self.y_bolt = ~Bolt.M6(10).upside_down().align(
+            center_x=self.y_extrusion.center_x,
+            center_y=self.mount.front + 10,
+            center_z=self.y_extrusion.top,
         )
         self.y_attach = (
             Volume(
@@ -3147,9 +3289,7 @@ mainboard_mount = (
 
 class RaspberryMount(BoardMountSide):
     def init(self) -> None:  # type: ignore[override]
-        mainboard = Board.raspberry_pi_3b(
-            Bolt.M3(26).add_nut(-E, inline_clearance_size=10).upside_down()
-        )
+        mainboard = Board.raspberry_pi_3b(Bolt.M3(26).add_nut(-E, inline_clearance_size=10).upside_down())
         return super().init(mainboard)
 
 
@@ -3238,11 +3378,7 @@ power_plug_mount = PowerPlugMount()
 
 
 class CableClip(Part):
-    body = (
-        Volume(width=12, depth=5, back=-1.5, height=6)
-        .fillet_height(1, back=True)
-        .fillet_height(4, front=True)
-    )
+    body = Volume(width=12, depth=5, back=-1.5, height=6).fillet_height(1, back=True).fillet_height(4, front=True)
 
     center_clearance = ~Volume(
         center_x=body.center_x,
@@ -3266,6 +3402,71 @@ class CableClip(Part):
 
 cable_clip = CableClip()
 
+
+class MotorCableGuide(Part):
+    body = (
+        Volume(
+            left=frame.y_extrusion_right_middle.right,
+            width=15,
+            front=frame.z_extrusion_right_front.front + 15,
+            back=mainboard_mount.back,
+            top=frame.y_extrusion_right_middle.top - 2,
+            bottom=frame.y_extrusion_right_middle.bottom + 2,
+        )
+        .fillet_width(back=True, r=8)
+        .fillet_height(front=True, right=True)
+    )
+    front_part = Volume(
+        left=frame.z_extrusion_right_front.left + 2,
+        right=body.left,
+        back=frame.z_extrusion_right_front.front,
+        front=body.front,
+        top=body.top,
+        bottom=body.bottom,
+    ).fillet_depth(left=True, r=8)
+
+    bolt_back = ~Bolt.M5(30).bottom_to_right().align(
+        right=body.right + E,
+        back=body.back + 4,
+        center_z=frame.y_extrusion_right_middle.center_z,
+    )
+    bolt_front = ~Bolt.M5(30).bottom_to_front().align(
+        center_x=frame.z_extrusion_right_front.center_x,
+        front=front_part.front + E,
+        center_z=front_part.center_z,
+    )
+    cables = ~Volume(
+        left=frame.z_extrusion_right_front.left + 6,
+        right=body.right - 4,
+        back=bolt_back.front + 4,
+        front=body.front - 5,
+        top=body.top + E,
+        bottom=body.bottom + 4,
+    ).fillet_height()
+    cutout = ~(
+        Union(
+            Volume(
+                left=frame.y_extrusion_right_middle.right - E,
+                width=4,
+                center_y=frame.z_extrusion_right_front.back - 110 + 20 * x,
+                depth=10,
+                bottom=frame.y_extrusion_right_middle.bottom - 5,
+                top=frame.y_extrusion_right_middle.top + E,
+            ).fillet_height(right=True)
+            for x in range(5)
+        )
+        + Volume(
+            center_x=frame.z_extrusion_right_front.center_x,
+            width=10,
+            back=frame.z_extrusion_right_front.front - E,
+            depth=4,
+            bottom=body.bottom - E,
+            top=body.top + E,
+        ).fillet_height(front=True)
+    )
+
+
+motor_cable_guide = MotorCableGuide()
 
 frame_spacer = Volume(
     center_x=frame.y_extrusion_right_top.center_x,
@@ -3296,6 +3497,16 @@ if __name__ == "__main__":
     ).render_to_file("x_carriage_assembled")
 
     (
+        x_carriage_direct_drive
+        + x_axis_pulleys
+        + cable_clamp_back
+        + extruder_clamp_direct_drive
+        + cable_chain_carriage_attachment
+        + cable_clamp_top
+        + tunnel_direct_drive
+    ).render_to_file("x_carriage_direct_drive_assembled")
+
+    (
         y_carriage_right
         + xy_stepper_mount_right
         + xy_idler_right
@@ -3307,13 +3518,9 @@ if __name__ == "__main__":
         + cable_clamp_frame
     ).render_to_file("right_side")
 
-    (
-        y_carriage_left
-        + xy_stepper_mount_left
-        + xy_idler_left
-        + xy_idler_clamp_left
-        + y_belt_fix_left
-    ).render_to_file("left_side")
+    (y_carriage_left + xy_stepper_mount_left + xy_idler_left + xy_idler_clamp_left + y_belt_fix_left).render_to_file(
+        "left_side"
+    )
 
     (
         (bed + glass_plate + gantry + frame).background()
@@ -3360,6 +3567,7 @@ if __name__ == "__main__":
             + z_stepper_mount_right
             + z_top_endstop
             + z_bottom_endstop
+            + motor_cable_guide
         ).color("#505050")
         + (
             x_carriage
@@ -3400,6 +3608,7 @@ if __name__ == "__main__":
     z_bottom_endstop.render_to_file()
     z_bracket_top_right_front.render_to_file("z_bracket_top_right_front")
     z_bracket_top_right_back.render_to_file("z_bracket_top_right_back")
+    motor_cable_guide.render_to_file()
 
     if "--stl" in sys.argv:
         for part in (

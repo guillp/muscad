@@ -1,57 +1,123 @@
 from __future__ import annotations
 
-import typing
-from typing import Optional
+import contextlib
 
-from muscad import Cylinder, E, Hole, Misc, Object, Part, Volume, calc
+from muscad import Cylinder, E, Hole, Misc, Object, Part, calc
 
 
 class Tube(Part):
     def init(  # type: ignore[override]
         self,
-        *args: typing.Union[Misc, Hole, Object],
-        diameter: Optional[float] = None,
-        top_diameter: Optional[float] = None,
-        radius: Optional[float] = None,
-        left: Optional[float] = None,
-        center_x: Optional[float] = None,
-        right: Optional[float] = None,
-        back: Optional[float] = None,
-        center_y: Optional[float] = None,
-        front: Optional[float] = None,
-        bottom: Optional[float] = None,
-        center_z: Optional[float] = None,
-        top: Optional[float] = None,
-        height: Optional[float] = None,
-        **kwargs: typing.Union[Misc, Hole, Object],
+        diameter: float | None = None,
+        *args: Misc | Hole | Object,
+        radius: float | None = None,
+        top_diameter: float | None = None,
+        top_radius: float | None = None,
+        left: float | None = None,
+        center_x: float | None = None,
+        right: float | None = None,
+        width: float | None = None,
+        back: float | None = None,
+        center_y: float | None = None,
+        front: float | None = None,
+        depth: float | None = None,
+        bottom: float | None = None,
+        center_z: float | None = None,
+        top: float | None = None,
+        height: float | None = None,
+        segments: int | None = None,
+        **kwargs: Misc | Hole | Object,
     ) -> None:
-        if diameter is None and radius is not None:
-            diameter = radius * 2
-        try:
-            # first try to get the cylinder diameter from the x coordinates
-            left, center_x, right, diameter = calc(left, center_x, right, diameter)
-        except ValueError:
-            pass
+        match diameter, radius:
+            case None, None:
+                # no explicit diameter or radius, try to deduce it from the other params
+                with contextlib.suppress(ValueError):
+                    left, center_x, right, width = calc(left, center_x, right, width)
+                with contextlib.suppress(ValueError):
+                    back, center_y, front, depth = calc(back, center_y, front)
+                match width, depth:
+                    case None, None:
+                        msg = (
+                            "No sufficient parameter to calculate the barrel diameter."
+                            " Please provide either a diameter `d`, a radius `r`,"
+                            "or at least 2 two parameters on axis X or Y."
+                        )
+                        raise ValueError(msg)
+                    case float() | int(), None:
+                        diameter = width
+                    case None, float() | int():
+                        diameter = depth
+                    case float() | int(), float() | int() if width != depth:
+                        msg = (
+                            f"width ({width}mm) is different from depth ({depth}mm)."
+                            " I don't know which one to use as diameter."
+                        )
+                        raise ValueError(msg)
+            case float() | int(), None if diameter is not None:
+                pass
+            case None, float() if radius is not None:
+                diameter = radius * 2
+            case (
+                float()
+                | int(),
+                float()
+                | int(),
+            ) if radius is not None and diameter is not None and radius * 2 != diameter:
+                msg = (
+                    "diameter `d` and radius `r` must be consistent." "Please fix, or provide either one or the other."
+                )
+                raise ValueError(msg)
 
-        # fallback to the y coordinates
-        back, center_y, front, diameter = calc(back, center_y, front, diameter)
+        assert diameter is not None
 
+        match top_radius, top_diameter:
+            case None, float() | int():
+                pass
+            case float() | int(), None if top_radius is not None:
+                top_diameter = top_radius * 2
+            case (
+                float()
+                | int(),
+                float()
+                | int(),
+            ) if top_diameter is not None and top_radius is not None and top_diameter != top_radius * 2:
+                msg = (
+                    f"inconsistent top diameter `d2` ({top_diameter}mm) and top radius ({top_radius}mm)."
+                    "Please fix, or provide either one or the other."
+                )
+                raise ValueError(msg)
+
+        match width, diameter:
+            case None, float() | int():
+                width = diameter
+            case float() | int(), float() | int() if width != diameter:
+                msg = f"diameter `d` ({diameter}mm) is different from width ({width}mm)."
+                raise ValueError(msg)
+
+        match depth, diameter:
+            case None, float() | int():
+                depth = diameter
+            case float() | int(), None:
+                assert False
+            case float() | int(), float() | int() if depth != diameter:
+                msg = f"diameter `d` ({diameter}mm) is different from depth ({depth}mm)."
+                raise ValueError(msg)
+
+        left, center_x, right, width = calc(left, center_x, right, width)
+        back, center_y, front, depth = calc(back, center_y, front, depth)
         bottom, center_z, top, height = calc(bottom, center_z, top, height)
-        self.cylinder = Cylinder(d=diameter, d2=top_diameter, h=height).align(
-            center_x=center_x, center_y=center_y, bottom=bottom
+        self.cylinder = Cylinder(d=diameter, d2=top_diameter, h=height, segments=segments).align(
+            center_x=center_x, center_y=center_y, center_z=center_z
         )
         super().init(*args, **kwargs)
 
-    def tunnel(
-        self, diameter: Optional[float] = None, radius: Optional[float] = None
-    ) -> Tube:
+    def tunnel(self, diameter: float | None = None, radius: float | None = None) -> Tube:
         """Hollows the center of this tube, making it a tunnel."""
-        if diameter is None and radius is None:
-            raise ValueError("at least one of diameter or radius must be specified")
-        if diameter is None and radius is not None:
-            diameter = radius * 2
         if diameter is None:
-            raise ValueError("this is just to make mypy happy")
+            if radius is None:
+                msg = "at least one of diameter or radius must be specified"
+                raise ValueError(msg)
+            diameter = radius * 2
         self.tunnel_hole = ~Cylinder(d=diameter, h=self.height + 2).align(
             center_x=self.center_x,
             center_y=self.center_y,
@@ -68,6 +134,8 @@ class Tube(Part):
         top_distance: float = 0,
     ) -> Tube:
         """Turns a quarter of this tube into a cube."""
+        from muscad import Volume
+
         self.add_misc(
             Volume(
                 left=self.center_x,
@@ -82,6 +150,8 @@ class Tube(Part):
 
     def cut_corner(self, angle: float = 0) -> Tube:
         """Removes a quarter of this tube."""
+        from muscad import Volume
+
         self.add_hole(
             Volume(
                 left=self.center_x,
@@ -96,6 +166,8 @@ class Tube(Part):
 
     def add_side(self, angle: float = 0, distance: float = 0) -> Tube:
         """Turns a quarter of this tube into a cube."""
+        from muscad import Volume
+
         self.add_misc(
             Volume(
                 left=self.center_x,

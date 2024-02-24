@@ -1,7 +1,9 @@
 """This modules contains 2D & 3D Primitives classes that match OpenSCAD primitives."""
-import os
+from __future__ import annotations
+
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from pathlib import Path
+from typing import Any, Iterable, Sequence
 
 from muscad.base import Object, Primitive
 from muscad.point import Point2D, Point3D
@@ -52,7 +54,7 @@ class Cube(Primitive):
     def top(self) -> float:
         return self.height / 2
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "size": Point3D(self._width, self._depth, self._height),
             "center": True,
@@ -64,8 +66,8 @@ class Cylinder(Primitive):
         self,
         h: float,
         d: float,
-        d2: Optional[float] = None,
-        segments: Optional[int] = None,
+        d2: float | None = None,
+        segments: int | None = None,
     ):
         super().__init__()
         self._height = h
@@ -75,7 +77,7 @@ class Cylinder(Primitive):
             segments = int(d * 3.14 / 0.4)
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         if self.top_diameter is None:
             return {
                 "h": self._height,
@@ -142,7 +144,7 @@ class Sphere(Primitive):
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
@@ -194,6 +196,13 @@ class Polyhedron(Primitive):
         self.faces = [list(face) for face in faces]
         self.convexity = convexity
 
+        self._left = min(p.x for p in self.points)
+        self._right = max(p.x for p in self.points)
+        self._back = min(p.y for p in self.points)
+        self._front = max(p.y for p in self.points)
+        self._bottom = min(p.z for p in self.points)
+        self._top = max(p.z for p in self.points)
+
     @staticmethod
     def unpack_points(points: Iterable[Point3D | Sequence[float]]) -> Iterable[Point3D]:
         for point in points:
@@ -203,12 +212,13 @@ class Polyhedron(Primitive):
                 x, y, z = point
                 yield Point3D(x, y, z)
             else:
+                msg = "invalid point, must be a 3 floats tuple or a Point3D instance"
                 raise ValueError(
-                    "invalid point, must be a 3 floats tuple or a Point3D instance",
+                    msg,
                     point,
                 )
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "points": self.points,
             "faces": self.faces,
@@ -239,7 +249,7 @@ class Circle(Primitive2D):
             segments = int(d * 3.14 / 0.4)
         self._segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"d": self._diameter, "$fn": self._segments}
 
     @property
@@ -265,7 +275,7 @@ class Square(Primitive2D):
         self._width = width
         self._depth = depth
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {"size": Point2D(self._width, self._depth), "center": True}
 
     @property
@@ -319,7 +329,7 @@ class Text(Primitive2D):
         self.script = script
         self.segments = segments
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "text": self.text,
             "size": self.size,
@@ -337,58 +347,65 @@ class Text(Primitive2D):
     def left(self) -> float:
         if self.halign in (None, "left"):
             return 0
-        raise NotImplementedError(
-            "use halign='left' (default) to be able to align a Text to left"
-        )
+        msg = "use halign='left' (default) to be able to align a Text to left"
+        raise NotImplementedError(msg)
 
     @property
     def right(self) -> float:
         if self.halign == "right":
             return 0
-        raise NotImplementedError(
-            "use halign='right' to be able to align a Text to right"
-        )
+        msg = "use halign='right' to be able to align a Text to right"
+        raise NotImplementedError(msg)
+
+    @property
+    def center_x(self) -> float:
+        if self.halign == "center":
+            return 0
+        msg = "use halign='center' to be able to align a Text to center_x"
+        raise NotImplementedError(msg)
 
     @property
     def back(self) -> float:
         if self.valign in (None, "baseline", "bottom"):
             return 0
-        raise NotImplementedError(
-            "use valign='baseline' or 'bottom' to be able to align a Text to back"
-        )
+        msg = "use valign='baseline' or 'bottom' to be able to align a Text to back"
+        raise NotImplementedError(msg)
 
     @property
     def front(self) -> float:
         if self.valign == "top":
             return 0
-        raise NotImplementedError(
-            "use valign='top' to be able to align a Text to front"
-        )
+        msg = "use valign='top' to be able to align a Text to front"
+        raise NotImplementedError(msg)
+
+    @property
+    def center_y(self) -> float:
+        if self.valign == "center":
+            return 0
+        msg = "use valign='center' to be able to align a Text to center_y"
+        raise NotImplementedError(msg)
 
 
 class Polygon(Primitive2D):
     def __init__(
         self,
-        *points: Point2D | Tuple[float, float],
+        *points: Point2D | tuple[float, float],
         path: Iterable[int] | None = None,
         hole_paths: Iterable[Iterable[int]] | None = None,
-        convexity: int | None = None
+        convexity: int | None = None,
     ) -> None:
         super().__init__()
         self.points = list(self.unpack_points(points))
-        if hole_paths:
-            if not path:
-                path = list(range(len(points)))
-        self.paths: Optional[List[List[int]]] = [list(path)] if path else None
+        if hole_paths and not path:
+            path = list(range(len(points)))
+        self.paths: list[list[int]] | None = [list(path)] if path else None
         if hole_paths and self.paths:
             for hole_path in hole_paths:
                 self.paths.append(list(hole_path))
         self.convexity = convexity
 
     @staticmethod
-    def unpack_points(
-        points: Iterable[Point2D | Tuple[float, float]]
-    ) -> Iterable[Point2D]:
+    def unpack_points(points: Iterable[Point2D | tuple[float, float]]) -> Iterable[Point2D]:
         for point in points:
             if isinstance(point, Point2D):
                 yield point
@@ -396,12 +413,13 @@ class Polygon(Primitive2D):
                 x, y = point
                 yield Point2D(x, y)
             else:
+                msg = ("invalid point, must be a 2 floats tuple or a Point2D instance",)
                 raise ValueError(
-                    "invalid point, must be a 2 floats tuple or a Point2D instance",
+                    msg,
                     point,
                 )
 
-    def _arguments(self) -> Dict[str | None, Any]:
+    def _arguments(self) -> dict[str | None, Any]:
         return {
             "points": self.points,
             "paths": self.paths,
@@ -426,11 +444,9 @@ class Polygon(Primitive2D):
 
 
 class Import(Primitive):
-    def __init__(
-        self, file: str, convexity: int | None = None, layer: str | None = None
-    ) -> None:
-        if not os.path.isabs(file):
-            file = os.path.join(os.path.dirname(sys.argv[0]), file)
+    def __init__(self, file: str, convexity: int | None = None, layer: str | None = None) -> None:
+        if not Path(file).is_absolute():
+            file = str(Path(sys.argv[0]).parent / file)
         super().__init__(file=file, convexity=convexity, layer=layer)
 
 

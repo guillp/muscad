@@ -10,9 +10,7 @@ class Shape:
         outer_diameter: float,
         inner_diameter: float,
     ) -> Object:
-        return Cylinder(d=outer_diameter, h=height) - Cylinder(
-            d=inner_diameter, h=height + EE
-        )
+        return Cylinder(d=outer_diameter, h=height) - Cylinder(d=inner_diameter, h=height + EE)
 
     @classmethod
     def cone(cls, height: float, diameter: float) -> Object:
@@ -23,12 +21,10 @@ class Shape:
         return Cylinder(h=height, d=y_diameter).scale(y=x_diameter / y_diameter)
 
     @classmethod
-    def oval_tube(
-        cls, height: float, x_diameter: float, y_diameter: float, wall: float
-    ) -> Object:
-        return Cylinder(h=height, d=x_diameter).scale(
-            y=y_diameter / x_diameter
-        ) - Cylinder(h=height + EE, d=x_diameter).scale(
+    def oval_tube(cls, height: float, x_diameter: float, y_diameter: float, wall: float) -> Object:
+        return Cylinder(h=height, d=x_diameter).scale(y=y_diameter / x_diameter) - Cylinder(
+            h=height + EE, d=x_diameter
+        ).scale(
             x=(x_diameter - wall * 2) / x_diameter,
             y=(y_diameter - wall * 2) / x_diameter,
         )

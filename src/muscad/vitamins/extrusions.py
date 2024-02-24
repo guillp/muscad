@@ -23,9 +23,7 @@ class Extrusion(Part):
 
 class Extrusion3030Insert(Part):
     def init(self, length: float = 50) -> None:  # type: ignore[override]
-        self.body = Volume(width=8 - TT, depth=length, height=6).fillet_depth(
-            0.5, bottom=True
-        )
+        self.body = Volume(width=8 - TT, depth=length, height=6).fillet_depth(0.5, bottom=True)
         self.wings = Surface.free(
             Circle(d=1.5, segments=20).align(center_x=6, back=-0.5),
             Circle(d=1.5, segments=20).align(center_x=-6, back=-0.5),

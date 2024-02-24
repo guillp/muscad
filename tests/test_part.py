@@ -1,5 +1,5 @@
 """Tests for the Part class."""
-from muscad import Cube, MirroredPart, Part
+from muscad import Cube, Part, SymmetricPart
 from tests.conftest import compare_str
 
 
@@ -7,6 +7,7 @@ def test_part() -> None:
     """Basic tests for a Part.
 
     Checks that a Part contain a single child has the same bounding box as this child.
+
     """
     cube = Cube(8, 10, 12)
     part = Part()
@@ -22,13 +23,13 @@ def test_part() -> None:
     assert compare_str(part, "cube(size=[8, 10, 12], center=true);")
 
 
-def test_mirrored_part() -> None:
-    """Tests for MirroredPart."""
+def test_symmetric_part() -> None:
+    """Tests for SymmetricPart."""
 
-    class TestMirroredPart(MirroredPart, x=True, keep_x=True):
+    class TestSymmetricPart(SymmetricPart, x=True):
         cube = Cube(8, 10, 12).align(left=0, back=0, bottom=0)
 
-    part = TestMirroredPart()
+    part = TestSymmetricPart()
 
     assert part.left == -8
     assert part.right == 8

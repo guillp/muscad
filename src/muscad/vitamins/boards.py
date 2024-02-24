@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing_extensions import Self
 
 from muscad import TT, Cylinder, E, Object, Part, Union
@@ -27,15 +29,9 @@ class Board(Part):
         self.bolts = Union().misc()
 
     def add_bolt(self, bolt: Object, x: float, y: float) -> Self:
-        if x < 0:
-            x = self.board.right + x
-        else:
-            x = self.board.left + x
+        x = self.board.right + x if x < 0 else self.board.left + x
+        y = self.board.front + y if y < 0 else self.board.back + y
 
-        if y < 0:
-            y = self.board.front + y
-        else:
-            y = self.board.back + y
         self.bolts.add_child(bolt.align(center_x=x, center_y=y))
         return self
 
@@ -136,7 +132,7 @@ class Board(Part):
                 top=lcd.lower_board.bottom + E,
             )
             .fillet_height(r=1)
-            .x_mirror(lcd.lower_board.center_x, keep=True)
+            .x_symmetry(lcd.lower_board.center_x)
             .misc()
         )
         return lcd

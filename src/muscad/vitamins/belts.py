@@ -45,9 +45,7 @@ class Belt(Part):
         T: float = 0.3,
     ) -> None:
         nb_tooth = int(length / pitch)
-        self.tooth = Union(
-            profile.leftward(i * pitch) for i in range(nb_tooth)
-        ).z_linear_extrude(width, center_z=0)
+        self.tooth = Union(profile.leftward(i * pitch) for i in range(nb_tooth)).z_linear_extrude(width, center_z=0)
         self.tolerance = Volume(
             left=self.tooth.left,
             right=self.tooth.right,

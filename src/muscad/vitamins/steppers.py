@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Iterable
 
 from typing_extensions import Self
@@ -24,12 +26,14 @@ class StepperMotor(Part):
         depth: float = 3,
         holes: Iterable[int] = (0, 1, 2, 3),
     ) -> Self:
-        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items) :param bolt: the
-        bolt to add (must be head up) :param spacing: edge distance between 2 bolt centers :param
-        depth: depth of the fixing holes inside the stepper :param holes: index of the bolts to add.
+        """Add up to 4 bolts in the stepper fixing holes (as miscellaneous items).
 
-        Modify it if you only want 2 or 3 bolts.
+        :param bolt: the bolt to add (must be head up)
+        :param spacing: edge distance between 2 bolt centers
+        :param depth: depth of the fixing holes inside the stepper
+        :param holes: index of the bolts to add.  Modify it if you only want 2 or 3 bolts.
         :return: the stepper object, with bolts added
+
         """
         radius = ((spacing**2) * 2) ** 0.5 / 2
         self.bolts = (
@@ -45,12 +49,9 @@ class StepperMotor(Part):
         :param d: diameter of the bulge
         :param h: height of the bulge
         :return: the stepper object, with bulge added
+
         """
-        self.central_bulge = (
-            Cylinder(d=d, h=h + 1)
-            .align(center_x=0, center_y=0, top=self.top + h)
-            .misc()
-        )
+        self.central_bulge = Cylinder(d=d, h=h + 1).align(center_x=0, center_y=0, top=self.top + h).misc()
         return self
 
     def add_gearbox(
@@ -62,8 +63,12 @@ class StepperMotor(Part):
         holes: Iterable[int] = (0, 1, 2, 3),
         depth: float = 5,
     ) -> Self:
-        """Adds the gearbox on the shaft side of the stepper :param d: diameter of the gearbox
-        :param h: height of the gearbox :return: the stepper object, with gearbox added.
+        """Adds the gearbox on the shaft side of the stepper.
+
+        :param d: diameter of the gearbox
+        :param h: height of the gearbox
+        :return: the stepper object, with gearbox added.
+
         """
         self.gearbox = Cylinder(d=d, h=h + E).align(
             center_x=self.body.center_x,
@@ -87,12 +92,9 @@ class StepperMotor(Part):
         :param d: diameter of the shaft
         :param length: lenght of the shaft
         :return: the stepper object, with shaft added
+
         """
-        self.shaft = (
-            Cylinder(d=d, h=length + 2)
-            .align(center_x=0, center_y=0, bottom=self.top - E)
-            .misc()
-        )
+        self.shaft = Cylinder(d=d, h=length + 2).align(center_x=0, center_y=0, bottom=self.top - E).misc()
         return self
 
     @classmethod
@@ -116,6 +118,7 @@ class StepperMotor(Part):
         :param holes: holes index to screw bolts in
         :param T: tolerance
         :return: a StepperMotor
+
         """
         width = 42.3
         spacing = 31.04

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from muscad import EE, Cube, E, Object, Part, calc
 from muscad.utils.fillet import Chamfer, Fillet
 
@@ -10,28 +8,22 @@ class Volume(Part):
     def init(  # type: ignore[override]
         self,
         *,
-        left: Optional[float] = None,
-        center_x: Optional[float] = None,
-        right: Optional[float] = None,
-        width: Optional[float] = None,
-        back: Optional[float] = None,
-        center_y: Optional[float] = None,
-        front: Optional[float] = None,
-        depth: Optional[float] = None,
-        bottom: Optional[float] = None,
-        center_z: Optional[float] = None,
-        top: Optional[float] = None,
-        height: Optional[float] = None,
+        left: float | None = None,
+        center_x: float | None = None,
+        right: float | None = None,
+        width: float | None = None,
+        back: float | None = None,
+        center_y: float | None = None,
+        front: float | None = None,
+        depth: float | None = None,
+        bottom: float | None = None,
+        center_z: float | None = None,
+        top: float | None = None,
+        height: float | None = None,
     ) -> None:
-        self._left, self._center_x, self._right, self._width = calc(
-            left, center_x, right, width
-        )
-        self._back, self._center_y, self._front, self._depth = calc(
-            back, center_y, front, depth
-        )
-        self._bottom, self._center_z, self._top, self._height = calc(
-            bottom, center_z, top, height
-        )
+        self._left, self._center_x, self._right, self._width = calc(left, center_x, right, width)
+        self._back, self._center_y, self._front, self._depth = calc(back, center_y, front, depth)
+        self._bottom, self._center_z, self._top, self._height = calc(bottom, center_z, top, height)
         self.volume = Cube(self.width, self.depth, self.height).align(
             center_x=self.center_x,
             center_y=self.center_y,
@@ -464,7 +456,7 @@ class Volume(Part):
             self.front_left_edge = (
                 part.z_linear_extrude(self.height)
                 .align(
-                    right=self.left - E,
+                    right=self.left + E,
                     front=self.front,
                     center_z=self.center_z,
                 )
@@ -516,7 +508,7 @@ class Volume(Part):
                 part.y_linear_extrude(self.depth)
                 .left_to_right()
                 .align(
-                    right=self.left - E,
+                    right=self.left + E,
                     center_y=self.center_y,
                     top=self.top,
                 )
