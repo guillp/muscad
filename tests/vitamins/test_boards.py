@@ -1,7 +1,7 @@
 from muscad.vitamins.boards import Board
 from muscad.vitamins.bolts import Bolt
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_raspberry_pi_3b() -> None:

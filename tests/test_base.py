@@ -1,8 +1,9 @@
 """Tests for all MuSCAD primitives."""
+
 import pytest
 
 from muscad import Circle, Cube, E, Echo, Object, Sphere, Square, Text, Union, calc
-from tests.conftest import compare_str
+from tests.utils import compare_str
 
 
 def test_calc() -> None:
@@ -84,24 +85,12 @@ def test_calc() -> None:
 def test_cube() -> None:
     """Test for Cube."""
     cube: Object = Cube(50, 50, 50)
-    cube -= Text("top", halign="center", valign="center").z_linear_extrude(
-        1, top=cube.top + E
-    )
-    cube -= Text("bottom", halign="center", valign="center").z_linear_extrude(
-        1, bottom=cube.bottom - E, downwards=True
-    )
-    cube -= Text("right", halign="center", valign="center").x_linear_extrude(
-        1, right=cube.right + E
-    )
-    cube -= Text("left", halign="center", valign="center").x_linear_extrude(
-        1, left=cube.left - E, leftwards=True
-    )
-    cube -= Text("front", halign="center", valign="center").y_linear_extrude(
-        1, front=cube.front + E
-    )
-    cube -= Text("back", halign="center", valign="center").y_linear_extrude(
-        1, back=cube.back - E, backwards=True
-    )
+    cube -= Text("top", halign="center", valign="center").z_linear_extrude(1, top=cube.top + E)
+    cube -= Text("bottom", halign="center", valign="center").z_linear_extrude(1, bottom=cube.bottom - E, downwards=True)
+    cube -= Text("right", halign="center", valign="center").x_linear_extrude(1, right=cube.right + E)
+    cube -= Text("left", halign="center", valign="center").x_linear_extrude(1, left=cube.left - E, leftwards=True)
+    cube -= Text("front", halign="center", valign="center").y_linear_extrude(1, front=cube.front + E)
+    cube -= Text("back", halign="center", valign="center").y_linear_extrude(1, back=cube.back - E, backwards=True)
 
     assert compare_str(
         cube,
@@ -200,6 +189,7 @@ def test_mirror() -> None:
     assert z_mirrored_circle.top == 0
     assert z_mirrored_circle.left == -5
     assert z_mirrored_circle.right == 5
+
 
 def test_symmetry() -> None:
     """Test for Object.?_symmetry()"""

@@ -1,4 +1,5 @@
 """Tests for the Volume class."""
+
 from muscad import E, Object, Text, Volume
 
 
@@ -195,23 +196,335 @@ def test_reverse_fillet() -> None:
         .reverse_fillet_bottom()
         .reverse_fillet_top()
     )
-    cube -= Text("top", halign="center", valign="center").z_linear_extrude(
-        1, top=cube.top + E
-    )
-    cube -= Text("bottom", halign="center", valign="center").z_linear_extrude(
-        1, bottom=cube.bottom - E, downwards=True
-    )
-    cube -= Text("right", halign="center", valign="center").x_linear_extrude(
-        1, right=cube.right + E
-    )
-    cube -= Text("left", halign="center", valign="center").x_linear_extrude(
-        1, left=cube.left - E, leftwards=True
-    )
-    cube -= Text("front", halign="center", valign="center").y_linear_extrude(
-        1, front=cube.front + E
-    )
-    cube -= Text("back", halign="center", valign="center").y_linear_extrude(
-        1, back=cube.back - E, backwards=True
-    )
+    cube -= Text("top", halign="center", valign="center").z_linear_extrude(1, top=cube.top + E)
+    cube -= Text("bottom", halign="center", valign="center").z_linear_extrude(1, bottom=cube.bottom - E, downwards=True)
+    cube -= Text("right", halign="center", valign="center").x_linear_extrude(1, right=cube.right + E)
+    cube -= Text("left", halign="center", valign="center").x_linear_extrude(1, left=cube.left - E, leftwards=True)
+    cube -= Text("front", halign="center", valign="center").y_linear_extrude(1, front=cube.front + E)
+    cube -= Text("back", halign="center", valign="center").y_linear_extrude(1, back=cube.back - E, backwards=True)
 
-    cube.render_to_file(openscad=False)
+    assert (
+        cube.render()
+        == """\
+difference() {
+  union() {
+    // volume
+    cube(size=[50.0, 50.0, 50.0], center=true);
+    // left_top_edge
+    translate(v=[-23.0, 0, 26.98])
+    rotate(a=[180, 0, 0])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // left_bottom_chamfer
+    translate(v=[-23.0, -25.0, -26.98])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // left_back_chamfer
+    translate(v=[-23.0, -26.98, 0])
+    rotate(a=[0, 0, 90])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // left_front_chamfer
+    translate(v=[-23.0, 26.98, 0])
+    rotate(a=[0, 0, 180])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // back_right_edge
+    translate(v=[26.98, -23.0, 0])
+    rotate(a=[0, 0, 180])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // back_left_edge
+    translate(v=[-26.98, -23.0, 0])
+    rotate(a=[0, 0, 270])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // right_top_edge
+    translate(v=[23.0, 0, 26.98])
+    rotate(a=[180, 0, 180])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // right_bottom_edge
+    translate(v=[23.0, 0, -26.98])
+    rotate(a=[0, 0, 180])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // right_back_edge
+    translate(v=[23.0, -26.98, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // right_front_edge
+    translate(v=[23.0, 26.98, 0])
+    rotate(a=[0, 0, 270])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // back_top_edge
+    translate(v=[0, -23.0, 26.98])
+    rotate(a=[180, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // back_bottom_edge
+    translate(v=[0, -23.0, -26.98])
+    rotate(a=[90, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // front_top_edge
+    translate(v=[0, 23.0, 26.98])
+    rotate(a=[270, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // front_bottom_edge
+    translate(v=[-25.0, 23.0, -26.98])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // front_right_edge
+    translate(v=[26.98, 23.0, 0])
+    rotate(a=[0, 0, 90])
+    translate(v=[0, 0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // front_left_edge
+    translate(v=[-26.98, 23.0, -25.0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // bottom_front_edge
+    translate(v=[0, 26.98, -23.0])
+    rotate(a=[180, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // bottom_back_egde
+    translate(v=[0, -26.98, -23.0])
+    rotate(a=[270, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // bottom_right_edge
+    translate(v=[26.98, 0, -23.0])
+    rotate(a=[180, 0, 0])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // bottom_left_edge
+    translate(v=[-27.02, 0, -23.0])
+    rotate(a=[180, 0, 180])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // top_front_edge
+    translate(v=[0, 26.98, 23.0])
+    rotate(a=[90, 0, 0])
+    translate(v=[-25.0, 0, 0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // top_back_edge
+    translate(v=[-25.0, -26.98, 23.0])
+    rotate(a=[90, 0, 90])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // top_right_edge
+    translate(v=[26.98, -25.0, 23.0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+    // top_left_edge
+    translate(v=[-26.98, 0, 23.0])
+    rotate(a=[0, 0, 180])
+    translate(v=[0, -25.0, 0])
+    rotate(a=[270, 180, 0])
+    linear_extrude(height=50.0, center=false, convexity=10, twist=0, scale=1.0)
+    difference() {
+      // box
+      translate(v=[1.0, 1.0, 0])
+      square(size=[2, 2], center=true);
+      // fillet
+      circle(d=4, $fn=31);
+    }
+  }
+  translate(v=[0, 0, 24.02])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="top", size=10, halign="center", valign="center");
+  translate(v=[0, 0, -24.02])
+  rotate(a=[180, 0, 0])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="bottom", size=10, halign="center", valign="center");
+  translate(v=[24.02, 0, 0])
+  rotate(a=[90, 0, 90])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="right", size=10, halign="center", valign="center");
+  translate(v=[-24.02, 0, 0])
+  rotate(a=[90, 0, 270])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="left", size=10, halign="center", valign="center");
+  translate(v=[0, 24.02, 0])
+  rotate(a=[270, 180, 0])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="front", size=10, halign="center", valign="center");
+  translate(v=[0, -24.02, 0])
+  rotate(a=[90, 0, 0])
+  linear_extrude(height=1, center=false, convexity=10, twist=0, scale=1.0)
+  text(text="back", size=10, halign="center", valign="center");
+}"""
+    )

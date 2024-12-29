@@ -1,6 +1,6 @@
 from muscad.vitamins.pulleys import Pulley
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_pulley() -> None:

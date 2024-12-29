@@ -738,23 +738,37 @@ class XCarriageDirectDrive(Part):
         -1, inline_clearance_size=10
     ).bottom_to_front().align(center_x=body.center_x, back=body.back, center_z=body.center_z)
 
+    nema = (
+        ~StepperMotor.nema17(height=25, shaft_height=25, shaft_diameter=7)
+        .top_to_front()
+        .align(center_x=body.center_x + 7, front=body.back - 20, bottom=body.center_z + 7)
+        .debug()
+    )
+    hobbed_pulley = (
+        ~Tube(diameter=8, height=13)
+        .bottom_to_front()
+        .align(center_x=nema.center_x, back=nema.front, center_z=nema.center_z)
+        .debug()
+    )
+    roller = (
+        ~Tube(diameter=22 + TTT, height=7 + TT)
+        .tunnel(diameter=8 - TT)
+        .bottom_to_front()
+        .align(left=hobbed_pulley.right, center_y=hobbed_pulley.center_y, center_z=hobbed_pulley.center_z)
+        .debug()
+    )
+
     extruder = (
         ~E3Dv6Extruder()
         .z_rotate(-90)
         .align(
-            center_x=body.center_x,
+            center_x=hobbed_pulley.right,
             center_y=body.back - 13,
             top=body.center_z + 10,
         )
         .debug()
     )
 
-    nema = (
-        ~StepperMotor.nema17()
-        .top_to_front()
-        .align(front=extruder.center_y - 8, bottom=extruder.top - 3, center_x=extruder.center_x + 7)
-        .debug()
-    )
     blower = (
         ~Blower.blower50x50x15(bolt=Bolt.M3(20).add_nut(-E, inline_clearance_size=20))
         .x_rotate(-90)

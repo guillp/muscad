@@ -8,7 +8,7 @@ from muscad.vitamins.endstops import (
     OptoSwitch,
 )
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_optoswitch() -> None:
@@ -153,17 +153,14 @@ def test_mechanical_switch_endstop() -> None:
 
 
 def test_induction_sensor() -> None:
-    compare_str(
-        InductionSensor.LJ12A3(),
-        """// sensor
-cylinder(h=60, d=12.4, $fn=97, center=true);""",
-    )
+    assert InductionSensor.LJ12A3().render() == """\
+// sensor
+cylinder(h=60, d=12.4, $fn=97, center=true);"""
 
 
 def test_mechanical_endstop_on_pcb() -> None:
-    compare_str(
-        MechanicalEndstopOnPCB(Bolt.M3(10)),
-        """union() {
+    assert MechanicalEndstopOnPCB(Bolt.M3(10)).render() == """\
+union() {
   // pcb
   // volume
   cube(size=[40.0, 16.0, 1.6], center=true);
@@ -325,5 +322,4 @@ def test_mechanical_endstop_on_pcb() -> None:
       cylinder(h=2.8, d=5.9, $fn=46, center=true);
     }
   }
-}""",
-    )
+}"""

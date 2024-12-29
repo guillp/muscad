@@ -1,4 +1,5 @@
 """This contains commonly used belts profiles."""
+
 from __future__ import annotations
 
 from muscad import E, Part, Polygon, Union

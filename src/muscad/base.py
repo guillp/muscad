@@ -3,7 +3,6 @@ from __future__ import annotations
 import math
 import os
 import subprocess
-import typing
 from functools import wraps
 from pathlib import Path
 from typing import (
@@ -12,6 +11,8 @@ from typing import (
     Iterable,
     Literal,
     Protocol,
+    Self,
+    TypeVar,
 )
 
 from muscad.helpers import camel_to_snake, normalize_angle
@@ -59,7 +60,7 @@ def add_comment(code: str, comment: str | None = None) -> str:
     return f"{comment}{code}"
 
 
-def render_comment(f: Callable[[O_contra], str]) -> Callable[[O_contra], str]:
+def render_comment(f: Callable[[O], str]) -> Callable[[O], str]:
     """A helper decorator to add comments to rendered code."""
 
     @wraps(f)
@@ -70,7 +71,7 @@ def render_comment(f: Callable[[O_contra], str]) -> Callable[[O_contra], str]:
     return wrapper
 
 
-O_contra = typing.TypeVar("O_contra", contravariant=True)
+O = TypeVar("O", contravariant=True)
 
 
 class Object(MuSCAD):
@@ -882,11 +883,11 @@ class Object(MuSCAD):
 
     @property
     def left(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def right(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def center_x(self) -> float:
@@ -894,11 +895,11 @@ class Object(MuSCAD):
 
     @property
     def back(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def front(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def center_y(self) -> float:
@@ -906,11 +907,11 @@ class Object(MuSCAD):
 
     @property
     def bottom(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def top(self) -> float:
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError(f"not available for {type(self)}")  # pragma: no cover
 
     @property
     def center_z(self) -> float:
@@ -958,17 +959,13 @@ class Object(MuSCAD):
         return self.translate(x=x, y=y, z=z)
 
     def divide(
-        self,
-        x: float | None = None,
-        y: float | None = None,
-        z: float | None = None,
-        T: float = 0,
+        self, x: float | None = None, y: float | None = None, z: float | None = None, T: float = 0, check: bool = True
     ) -> tuple[Object, Object]:
         """Cut this Object into 2 object, on either a x, or y or z plane."""
         from muscad import Volume
 
         if x is not None:
-            if not self.left < x < self.right:
+            if check and not self.left < x < self.right:
                 msg = (
                     "x must be the x coordinate of a pane that divides the object in 2,"
                     f" between {self.left} and {self.right}"
@@ -995,7 +992,7 @@ class Object(MuSCAD):
                 ),
             )
         elif y is not None:
-            if not self.back < y < self.front:
+            if check and not self.back < y < self.front:
                 msg = (
                     "y must be the y coordinate of a pane that divides the object in 2,"
                     f" between {self.back} and {self.front}"
@@ -1022,7 +1019,7 @@ class Object(MuSCAD):
                 ),
             )
         elif z is not None:
-            if not self.bottom < z < self.top:
+            if check and not self.bottom < z < self.top:
                 msg = (
                     "z must be the z coordinate of a pane that divides the object in 2,"
                     f" between {self.bottom} and {self.top}"
@@ -1498,10 +1495,10 @@ class Transformation(Primitive):
             yield self.copy()(child)
 
 
-from .primitives import Cube
+from muscad.primitives import Cube
 
 # import basic transformations to make sure all helpers work
-from .transformations import (
+from muscad.transformations import (
     Color,
     Hull,
     LinearExtrusion,
@@ -1610,8 +1607,7 @@ class Calc(Protocol):
         center: float | None = None,
         to: float | None = None,
         distance: float | None = None,
-    ) -> tuple[float, float, float, float]:
-        ...  # pragma: no cover
+    ) -> tuple[float, float, float, float]: ...  # pragma: no cover
 
 
 def validate_calc(

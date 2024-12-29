@@ -1,6 +1,7 @@
 """Tests for the Surface helper class."""
+
 from muscad import Circle, Square, Surface, Union
-from tests.conftest import compare_str
+from tests.utils import compare_str
 
 
 def test_heart_z() -> None:
@@ -51,7 +52,8 @@ def test_spade_z() -> None:
                 Square(1, 15).align(left=0, back=0),
             )
         )
-        .x_symmetry()       .z_linear_extrude(bottom=-1, top=4)
+        .x_symmetry()
+        .z_linear_extrude(bottom=-1, top=4)
     )
 
     assert compare_str(
@@ -293,7 +295,7 @@ def test_triangle_in_circle() -> None:
     triangle = Surface.triangle_in_circle(10)
     assert compare_str(
         triangle,
-        "polygon(points=[[-8.6603, -5.0], [0, 10], [8.6603, -5.0]], paths=[[0, 1, 2]]);",  # noqa: B950
+        "polygon(points=[[-8.6603, -5.0], [0, 10], [8.6603, -5.0]], paths=[[0, 1, 2]]);",
     )
 
 
@@ -302,11 +304,11 @@ def test_regular_polygon() -> None:
     octogon = Surface.regular_polygon(8, 10)
     assert compare_str(
         octogon,
-        "polygon(points=[[10.0, 0], [7.0711, 7.0711], [0.0, 10.0], [-7.0711, 7.0711], [-10.0, 0.0], [-7.0711, -7.0711], [-0.0, -10.0], [7.0711, -7.0711]]);",  # noqa: B950
+        "polygon(points=[[10.0, 0], [7.0711, 7.0711], [0.0, 10.0], [-7.0711, 7.0711], [-10.0, 0.0], [-7.0711, -7.0711], [-0.0, -10.0], [7.0711, -7.0711]]);",
     )
 
     pentagon = Surface.regular_polygon(5, 10)
     assert compare_str(
         pentagon,
-        "polygon(points=[[10.0, 0], [3.0902, 9.5106], [-8.0902, 5.8779], [-8.0902, -5.8779], [3.0902, -9.5106]]);",  # noqa: B950
+        "polygon(points=[[10.0, 0], [3.0902, 9.5106], [-8.0902, 5.8779], [-8.0902, -5.8779], [3.0902, -9.5106]]);",
     )

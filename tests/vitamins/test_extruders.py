@@ -1,6 +1,6 @@
 from muscad.vitamins.extruders import E3Dv6Extruder
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_e3dv6() -> None:

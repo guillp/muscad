@@ -1,6 +1,7 @@
 """Tests for muscad.vitamins.cable_chain."""
+
 from muscad.vitamins.cable_chain import CableChain
-from tests.conftest import compare_str
+from tests.utils import compare_str
 
 
 def test_cable_chain() -> None:

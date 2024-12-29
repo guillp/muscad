@@ -1,4 +1,5 @@
 """A port of https://www.thingiverse.com/thing:16627 in MuSCAD."""
+
 from typing_extensions import Self
 
 from muscad import EE, Cube, Cylinder, Object, Part, Polygon, Union

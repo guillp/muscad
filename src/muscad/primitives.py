@@ -1,4 +1,5 @@
 """This modules contains 2D & 3D Primitives classes that match OpenSCAD primitives."""
+
 from __future__ import annotations
 
 import sys

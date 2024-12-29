@@ -18,9 +18,7 @@ from muscad import (
 
 def test_translation() -> None:
     t = Translation(x=1, y=2, z=3)(Cube(2, 2, 2))
-    assert (
-        t.render() == """translate(v=[1, 2, 3])\ncube(size=[2, 2, 2], center=true);"""
-    )
+    assert t.render() == """translate(v=[1, 2, 3])\ncube(size=[2, 2, 2], center=true);"""
     assert t.left == 0
     assert t.right == 2
     assert t.center_x == 1
@@ -34,9 +32,7 @@ def test_translation() -> None:
 
 def test_rotation() -> None:
     r = Rotation(x=90, y=180, z=-90)(Cube(2, 5, 7))
-    assert (
-        r.render() == """rotate(a=[90, 180, 270])\ncube(size=[2, 5, 7], center=true);"""
-    )
+    assert r.render() == """rotate(a=[90, 180, 270])\ncube(size=[2, 5, 7], center=true);"""
     assert r.left == -3.5
     assert r.right == 3.5
     assert r.center_x == 0
@@ -78,10 +74,7 @@ def test_color() -> None:
 
 def test_offset() -> None:
     o = Offset(r=1)(Cube(2, 5, 7))
-    assert (
-        o.render()
-        == """offset(r=1, chamfer=false)\ncube(size=[2, 5, 7], center=true);"""
-    )
+    assert o.render() == """offset(r=1, chamfer=false)\ncube(size=[2, 5, 7], center=true);"""
 
 
 def test_minkowski() -> None:
@@ -114,8 +107,7 @@ minkowski()
 def test_hull() -> None:
     h = Hull(Cube(2, 5, 7), Cylinder(h=4, d=4))
     assert (
-        h.render()
-        == "hull()\n{\n  cube(size=[2, 5, 7], center=true);\n  cylinder(h=4, d=4, $fn=31, center=true);\n}"
+        h.render() == "hull()\n{\n  cube(size=[2, 5, 7], center=true);\n  cylinder(h=4, d=4, $fn=31, center=true);\n}"
     )
     assert h.left == -2
     assert h.right == 2

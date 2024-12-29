@@ -1,6 +1,6 @@
 from muscad.vitamins.belts import Belt
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_gt2() -> None:

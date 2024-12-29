@@ -1,6 +1,6 @@
 from muscad.vitamins.fans import Blower, Fan
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_blower() -> None:
@@ -70,9 +70,8 @@ def test_blower() -> None:
 
 
 def test_fan() -> None:
-    compare_str(
-        Fan.fan40x40x20().add_tunnel(40, 60),
-        """union() {
+    assert Fan.fan40x40x20().add_tunnel(40, 60).render() == """\
+union() {
   // body
   difference() {
     // volume
@@ -175,5 +174,4 @@ def test_fan() -> None:
   }
   // tunnel
   cylinder(h=60, d=40, $fn=314, center=true);
-}""",
-    )
+}"""

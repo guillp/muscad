@@ -1,4 +1,5 @@
 """A port of https://www.thingiverse.com/thing:3575 in MuSCAD."""
+
 from __future__ import annotations
 
 from typing import Iterable, Literal

@@ -1,4 +1,5 @@
 """Tests for Extrusions."""
+
 from muscad import Object
 from muscad.vitamins.extrusions import Extrusion
 

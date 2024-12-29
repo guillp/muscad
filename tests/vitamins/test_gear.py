@@ -1,6 +1,7 @@
 """Tests for `muscad.vitamins.gears`."""
+
 from muscad.vitamins.gears import BevelGear, Gear
-from tests.conftest import compare_file
+from tests.utils import compare_file
 
 
 def test_gear() -> None:

@@ -1,6 +1,6 @@
 from muscad.vitamins.brackets import CastBracket
 
-from ..conftest import compare_str
+from ..utils import compare_str
 
 
 def test_castbracket3030() -> None:

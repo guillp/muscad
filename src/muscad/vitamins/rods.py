@@ -1,4 +1,5 @@
 """This contains parts for all kind of threaded or smooth rods and associated nuts."""
+
 from typing import Iterable
 
 from typing_extensions import Self

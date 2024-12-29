@@ -1,6 +1,7 @@
 """Tests for muscad.vitamins.bearings."""
+
 from muscad.vitamins.bearings import BushingLinearBearing
-from tests.conftest import compare_str
+from tests.utils import compare_str
 
 
 def test_bushing() -> None:
